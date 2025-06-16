@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { LogOut, User, LayoutDashboard, BarChart3, Moon, Sun, Sparkles } from 'lucide-react';
+import { LogOut, User, LayoutDashboard, BarChart3, Moon, Sun, Search } from 'lucide-react';
 
 interface DashboardHeaderProps {
   onUserClick?: () => void;
@@ -28,86 +28,81 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-white via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900 shadow-xl border-b-2 border-blue-200 dark:border-purple-700 backdrop-blur-md">
-      <div className="w-full px-4 lg:px-6">
-        <div className="flex justify-between items-center py-3 lg:py-4">
-          <div className="flex items-center space-x-3 min-w-0">
-            {/* Enhanced Logo */}
-            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-all duration-300">
-              <Sparkles className="w-5 h-5 lg:w-6 lg:h-6 text-white animate-pulse" />
+    <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
+      <div className="max-w-7xl mx-auto px-4 lg:px-6">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+              <LayoutDashboard className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent truncate">
-              FlexBoard
-            </h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-slate-100">FlexBoard</h1>
           </div>
           
-          <div className="flex items-center space-x-2 lg:space-x-3 flex-shrink-0">
+          {/* Search Bar - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-md mx-8">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+          
+          {/* Actions */}
+          <div className="flex items-center space-x-2">
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
-              className={`group relative overflow-hidden p-2 lg:p-3 rounded-xl transition-all duration-300 transform hover:scale-110 ${
-                isDarkMode 
-                  ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg shadow-yellow-200' 
-                  : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200'
-              }`}
+              className="p-2 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
               title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative">
-                {isDarkMode ? (
-                  <Sun className="w-4 h-4 lg:w-5 lg:h-5 group-hover:rotate-180 transition-transform duration-500" />
-                ) : (
-                  <Moon className="w-4 h-4 lg:w-5 lg:h-5 group-hover:rotate-12 transition-transform duration-300" />
-                )}
-              </div>
+              {isDarkMode ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
             </button>
 
-            {/* Analytics Icon */}
+            {/* Analytics */}
             <button
               onClick={onAnalyticsClick}
-              className={`group relative overflow-hidden p-2 lg:p-3 rounded-xl transition-all duration-300 transform hover:scale-110 ${
+              className={`p-2 rounded-lg transition-colors ${
                 isAnalyticsActive 
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200' 
-                  : 'bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800 dark:to-purple-800 text-blue-700 dark:text-blue-300 hover:from-blue-200 hover:to-purple-200 dark:hover:from-blue-700 dark:hover:to-purple-700'
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800'
               }`}
               title="Analytics"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative">
-                <BarChart3 className={`w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-300 ${isAnalyticsActive ? 'animate-pulse' : 'group-hover:rotate-12'}`} />
-              </div>
+              <BarChart3 className="w-5 h-5" />
             </button>
             
-            {/* User Icon */}
+            {/* Profile */}
             <button
               onClick={onUserClick}
-              className={`group relative overflow-hidden p-2 lg:p-3 rounded-xl transition-all duration-300 transform hover:scale-110 ${
+              className={`p-2 rounded-lg transition-colors ${
                 isProfileActive 
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200' 
-                  : 'bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800 dark:to-purple-800 text-blue-700 dark:text-blue-300 hover:from-blue-200 hover:to-purple-200 dark:hover:from-blue-700 dark:hover:to-purple-700'
+                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800'
               }`}
               title={isProfileActive ? 'Back to Dashboard' : 'Profile'}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative">
-                {isProfileActive ? (
-                  <LayoutDashboard className="w-4 h-4 lg:w-5 lg:h-5 group-hover:rotate-180 transition-transform duration-500" />
-                ) : (
-                  <User className="w-4 h-4 lg:w-5 lg:h-5 group-hover:rotate-12 transition-transform duration-300" />
-                )}
-              </div>
+              {isProfileActive ? (
+                <LayoutDashboard className="w-5 h-5" />
+              ) : (
+                <User className="w-5 h-5" />
+              )}
             </button>
             
-            {/* Sign Out Button */}
+            {/* Sign Out */}
             <button
               onClick={handleSignOut}
-              className="group relative overflow-hidden flex items-center space-x-1 lg:space-x-2 px-3 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+              className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative flex items-center space-x-1 lg:space-x-2">
-                <LogOut className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0 group-hover:rotate-12 transition-transform duration-300" />
-                <span className="hidden sm:block font-medium">Sign out</span>
-              </div>
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:block">Sign out</span>
             </button>
           </div>
         </div>

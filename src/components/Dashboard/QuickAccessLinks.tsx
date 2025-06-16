@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Plus, X, ExternalLink, Star, Zap, Globe } from 'lucide-react';
+import { Link, Plus, X, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -86,50 +86,35 @@ const QuickAccessLinks: React.FC = () => {
     }
   };
 
-  const getDomainFromUrl = (url: string) => {
-    try {
-      const domain = new URL(url).hostname;
-      return domain.replace('www.', '');
-    } catch {
-      return url;
-    }
-  };
-
   return (
-    <div className="bg-gradient-to-br from-white via-orange-50 to-red-50 dark:from-gray-900 dark:via-orange-900 dark:to-red-900 rounded-2xl shadow-xl p-4 lg:p-6 border-2 border-orange-200 dark:border-orange-700 backdrop-blur-sm transform hover:scale-[1.02] transition-all duration-300">
-      {/* Enhanced Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="card animate-fadeIn">
+      {/* Header */}
+      <div className="card-header">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
-            <Link className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+            <Link className="w-4 h-4 text-white" />
           </div>
-          <h2 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-            Quick Links
-          </h2>
-          <Star className="w-5 h-5 text-orange-500 animate-pulse" />
+          <h2 className="card-title">Quick Links</h2>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="group relative overflow-hidden flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-bold"
+          className="btn-primary"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div className="relative flex items-center space-x-2">
-            <Plus className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
-            <span>Add Link</span>
-          </div>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Link
         </button>
       </div>
 
-      {/* Enhanced Add Form */}
+      {/* Add Form */}
       {showAddForm && (
-        <div className="mb-6 p-6 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900 dark:to-red-900 rounded-2xl border-2 border-orange-200 dark:border-orange-700 animate-slideDown">
+        <div className="mb-6 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
           <form onSubmit={addLink} className="space-y-4">
             <input
               type="text"
               value={newLink.title}
               onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
-              placeholder="🔗 Enter link title..."
-              className="w-full px-4 py-3 border-2 border-orange-200 dark:border-orange-600 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-200 dark:focus:ring-orange-700 focus:border-orange-500 dark:focus:border-orange-400 text-sm lg:text-base bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 transition-all duration-300"
+              placeholder="Link title..."
+              className="input"
               required
             />
             
@@ -137,23 +122,19 @@ const QuickAccessLinks: React.FC = () => {
               type="url"
               value={newLink.url}
               onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
-              placeholder="🌐 https://example.com"
-              className="w-full px-4 py-3 border-2 border-orange-200 dark:border-orange-600 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-200 dark:focus:ring-orange-700 focus:border-orange-500 dark:focus:border-orange-400 text-sm lg:text-base bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 transition-all duration-300"
+              placeholder="https://example.com"
+              className="input"
               required
             />
             
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-              <button
-                type="submit"
-                className="group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 font-bold"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative">🚀 Add Link</div>
+            <div className="flex space-x-2">
+              <button type="submit" className="btn-primary">
+                Add Link
               </button>
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="px-6 py-3 text-gray-600 dark:text-gray-300 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300 font-bold"
+                className="btn-secondary"
               >
                 Cancel
               </button>
@@ -162,51 +143,32 @@ const QuickAccessLinks: React.FC = () => {
         </div>
       )}
 
-      {/* Enhanced Links List */}
-      <div className="space-y-3">
+      {/* Links List */}
+      <div className="space-y-2">
         {links.length === 0 ? (
-          <div className="text-center py-12 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900 dark:to-red-900 rounded-2xl border-2 border-dashed border-orange-300 dark:border-orange-600">
-            <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-              <Link className="w-10 h-10 text-white" />
-            </div>
-            <p className="text-xl font-bold text-gray-600 dark:text-gray-300 mb-2">No quick links yet</p>
-            <p className="text-gray-500 dark:text-gray-400">Add some links above for quick access! ⚡</p>
+          <div className="text-center py-8 text-gray-500 dark:text-slate-400">
+            <Link className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-slate-600" />
+            <p>No quick links yet. Add some above!</p>
           </div>
         ) : (
-          links.map((link, index) => (
+          links.map((link) => (
             <div
               key={link.id}
-              className="group relative overflow-hidden flex items-center justify-between p-4 border-2 border-orange-200 dark:border-orange-700 rounded-2xl hover:border-orange-300 dark:hover:border-orange-600 transition-all duration-300 bg-gradient-to-r from-white to-orange-50 dark:from-gray-800 dark:to-orange-900 shadow-lg hover:shadow-2xl transform hover:scale-[1.02] animate-slideIn"
-              style={{ animationDelay: `${index * 100}ms` }}
+              className="flex items-center justify-between p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors"
             >
               <a
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-4 flex-1 text-gray-900 dark:text-gray-100 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-300 min-w-0 group"
+                className="flex items-center space-x-3 flex-1 text-gray-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors min-w-0"
               >
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Globe className="w-6 h-6 text-white" />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-lg truncate group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-300">
-                    {link.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    {getDomainFromUrl(link.url)}
-                  </p>
-                </div>
-                
-                <div className="flex-shrink-0 flex items-center space-x-2">
-                  <ExternalLink className="w-5 h-5 text-orange-500 group-hover:rotate-12 transition-transform duration-300" />
-                  <Zap className="w-4 h-4 text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </div>
+                <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{link.title}</span>
               </a>
               
               <button
                 onClick={() => deleteLink(link.id)}
-                className="flex-shrink-0 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900 rounded-xl transition-all duration-300 transform hover:scale-110 ml-2"
+                className="p-1 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>

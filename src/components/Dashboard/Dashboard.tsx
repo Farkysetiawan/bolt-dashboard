@@ -9,7 +9,7 @@ import PromptBank from './PromptBank';
 import UserProfile from './UserProfile';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import { 
-  Clock, 
+  CheckSquare, 
   BookOpen, 
   Play, 
   GraduationCap, 
@@ -17,7 +17,8 @@ import {
   Lightbulb,
   LayoutDashboard,
   Menu,
-  X
+  X,
+  BarChart3
 } from 'lucide-react';
 
 type CategoryType = 'all' | 'todos' | 'journal' | 'content' | 'learning' | 'links' | 'prompts' | 'profile' | 'analytics';
@@ -26,51 +27,43 @@ interface Category {
   id: CategoryType;
   name: string;
   icon: React.ReactNode;
-  color: string;
 }
 
 const categories: Category[] = [
   {
     id: 'all',
     name: 'Dashboard',
-    icon: <LayoutDashboard className="w-4 h-4 lg:w-5 lg:h-5" />,
-    color: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+    icon: <LayoutDashboard className="w-5 h-5" />
   },
   {
     id: 'todos',
-    name: 'Todos',
-    icon: <Clock className="w-4 h-4 lg:w-5 lg:h-5" />,
-    color: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
+    name: 'Tasks',
+    icon: <CheckSquare className="w-5 h-5" />
   },
   {
     id: 'journal',
     name: 'Journal',
-    icon: <BookOpen className="w-4 h-4 lg:w-5 lg:h-5" />,
-    color: 'text-purple-600 hover:text-purple-700 hover:bg-purple-50'
+    icon: <BookOpen className="w-5 h-5" />
   },
   {
     id: 'content',
     name: 'Content',
-    icon: <Play className="w-4 h-4 lg:w-5 lg:h-5" />,
-    color: 'text-green-600 hover:text-green-700 hover:bg-green-50'
+    icon: <Play className="w-5 h-5" />
   },
   {
     id: 'learning',
     name: 'Goals',
-    icon: <GraduationCap className="w-4 h-4 lg:w-5 lg:h-5" />,
-    color: 'text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50'
+    icon: <GraduationCap className="w-5 h-5" />
   },
   {
     id: 'links',
     name: 'Links',
-    icon: <Link className="w-4 h-4 lg:w-5 lg:h-5" />,
-    color: 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'
+    icon: <Link className="w-5 h-5" />
   },
   {
     id: 'prompts',
     name: 'Prompts',
-    icon: <Lightbulb className="w-4 h-4 lg:w-5 lg:h-5" />,
-    color: 'text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50'
+    icon: <Lightbulb className="w-5 h-5" />
   }
 ];
 
@@ -99,9 +92,9 @@ const Dashboard: React.FC = () => {
       case 'all':
       default:
         return (
-          <div className="space-y-4 lg:space-y-6">
-            {/* Mobile: Stack all components vertically with proper spacing */}
-            <div className="block lg:hidden space-y-4">
+          <div className="space-y-6">
+            {/* Mobile: Stack all components */}
+            <div className="block lg:hidden space-y-6">
               <TodoList />
               <DailyJournal />
               <ContentTracker />
@@ -136,26 +129,24 @@ const Dashboard: React.FC = () => {
     setMobileMenuOpen(false);
   };
 
-  // Handle user icon click - toggle between profile and dashboard
   const handleUserIconClick = () => {
     if (activeCategory === 'profile') {
-      setActiveCategory('all'); // Back to dashboard
+      setActiveCategory('all');
     } else {
-      setActiveCategory('profile'); // Go to profile
+      setActiveCategory('profile');
     }
   };
 
-  // Handle analytics icon click - toggle between analytics and dashboard
   const handleAnalyticsIconClick = () => {
     if (activeCategory === 'analytics') {
-      setActiveCategory('all'); // Back to dashboard
+      setActiveCategory('all');
     } else {
-      setActiveCategory('analytics'); // Go to analytics
+      setActiveCategory('analytics');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <DashboardHeader 
         onUserClick={handleUserIconClick}
         onAnalyticsClick={handleAnalyticsIconClick}
@@ -165,46 +156,44 @@ const Dashboard: React.FC = () => {
       
       {/* Mobile Navigation */}
       <div className="lg:hidden">
-        {/* Mobile Header with Menu Button */}
-        <div className="sticky top-14 z-30 bg-white border-b border-gray-200 px-4 py-3">
+        {/* Mobile Header */}
+        <div className="sticky top-16 z-30 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 px-4 py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-base font-semibold text-gray-900">
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
               {activeCategory === 'profile' ? 'Profile' : 
                activeCategory === 'analytics' ? 'Analytics' :
                categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
             </h1>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
             >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu Overlay */}
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <>
             <div 
               className="fixed inset-0 bg-black bg-opacity-50 z-40"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="fixed top-28 left-4 right-4 bg-white rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+            <div className="fixed top-28 left-4 right-4 bg-white dark:bg-slate-800 rounded-xl shadow-lg z-50 border border-gray-200 dark:border-slate-700">
               <div className="p-2">
                 {categories.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category.id)}
-                    className={`
-                      w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-left transition-colors
-                      ${activeCategory === category.id
-                        ? 'bg-blue-100 text-blue-700 font-medium'
-                        : category.color
-                      }
-                    `}
+                    className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-left transition-colors ${
+                      activeCategory === category.id
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                        : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
+                    }`}
                   >
-                    <span className="flex-shrink-0">{category.icon}</span>
-                    <span className="truncate">{category.name}</span>
+                    <span className="text-gray-500 dark:text-slate-400">{category.icon}</span>
+                    <span className="font-medium">{category.name}</span>
                   </button>
                 ))}
               </div>
@@ -215,24 +204,24 @@ const Dashboard: React.FC = () => {
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
-        <div className="w-64 bg-white shadow-sm border-r border-gray-200 fixed top-16 left-0 h-screen overflow-y-auto">
-          <div className="p-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Categories</h2>
+        <div className="w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 fixed top-16 left-0 h-screen overflow-y-auto">
+          <div className="p-6">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100 uppercase tracking-wide mb-4">
+              Navigation
+            </h2>
             <nav className="space-y-1">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
-                  className={`
-                    w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-left transition-colors
-                    ${activeCategory === category.id
-                      ? 'bg-blue-100 text-blue-700 font-medium'
-                      : category.color
-                    }
-                  `}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                    activeCategory === category.id
+                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                      : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'
+                  }`}
                 >
-                  <span className="flex-shrink-0">{category.icon}</span>
-                  <span className="truncate">{category.name}</span>
+                  <span className="text-gray-500 dark:text-slate-400">{category.icon}</span>
+                  <span className="font-medium">{category.name}</span>
                 </button>
               ))}
             </nav>
@@ -242,15 +231,15 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content */}
       <main className="lg:ml-64">
-        <div className="w-full px-4 py-4 lg:px-6 lg:py-6 max-w-full">
+        <div className="max-w-7xl mx-auto px-4 py-6 lg:px-6 lg:py-8">
           {/* Desktop Page Title */}
-          <div className="hidden lg:block mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">
+          <div className="hidden lg:block mb-8">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
               {activeCategory === 'profile' ? 'Profile' : 
                activeCategory === 'analytics' ? 'Analytics' :
                categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 dark:text-slate-400 mt-1">
               {activeCategory === 'all' 
                 ? 'Overview of all your productivity tools'
                 : activeCategory === 'profile'
