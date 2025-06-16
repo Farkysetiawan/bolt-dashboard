@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, UserPlus, Loader2 } from 'lucide-react';
+import { LogIn, UserPlus, Loader2, AlertCircle } from 'lucide-react';
 
 const AuthForm: React.FC = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -13,6 +13,22 @@ const AuthForm: React.FC = () => {
   const { signUp, signIn } = useAuth();
   const navigate = useNavigate();
 
+  const getErrorMessage = (error: any) => {
+    if (error?.message?.includes('Invalid login credentials')) {
+      return 'Invalid email or password. Please check your credentials and try again.';
+    }
+    if (error?.message?.includes('Email not confirmed')) {
+      return 'Please check your email and click the confirmation link before signing in.';
+    }
+    if (error?.message?.includes('User already registered')) {
+      return 'An account with this email already exists. Try signing in instead.';
+    }
+    if (error?.message?.includes('Password should be at least')) {
+      return 'Password must be at least 6 characters long.';
+    }
+    return error?.message || 'An unexpected error occurred. Please try again.';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -21,12 +37,14 @@ const AuthForm: React.FC = () => {
     try {
       if (isSignUp) {
         await signUp(email, password);
+        // Show success message for sign up
+        setError('');
       } else {
         await signIn(email, password);
       }
       navigate('/');
     } catch (err: any) {
-      setError(err.message);
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -46,8 +64,9 @@ const AuthForm: React.FC = () => {
         
         <form className="mt-8 space-y-6 bg-white p-6 lg:p-8 rounded-xl shadow-lg" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-              {error}
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm flex items-start space-x-2">
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <span>{error}</span>
             </div>
           )}
           
@@ -83,7 +102,13 @@ const AuthForm: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                 placeholder="Enter your password"
+                minLength={6}
               />
+              {isSignUp && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Password must be at least 6 characters long
+                </p>
+              )}
             </div>
           </div>
 
@@ -105,12 +130,23 @@ const AuthForm: React.FC = () => {
           <div className="text-center">
             <button
               type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError(''); // Clear error when switching modes
+              }}
               className="text-sm text-blue-600 hover:text-blue-500 transition-colors"
             >
               {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
             </button>
           </div>
+
+          {!isSignUp && (
+            <div className="text-center">
+              <p className="text-xs text-gray-500 mt-4">
+                Having trouble signing in? Make sure you've confirmed your email address if you recently signed up.
+              </p>
+            </div>
+          )}
         </form>
       </div>
     </div>
