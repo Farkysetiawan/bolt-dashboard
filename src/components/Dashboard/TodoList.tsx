@@ -561,30 +561,57 @@ const TodoList: React.FC = () => {
   return (
     <>
       <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6">
-        <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center justify-between mb-4 lg:mb-6">
-          <h2 className="text-lg lg:text-xl font-semibold text-gray-900 flex items-center">
-            <Clock className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-blue-600" />
-            To Do List
-          </h2>
-          <div className="flex items-center space-x-2">
+        {/* Header - Mobile: Stack vertically, Desktop: Horizontal */}
+        <div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 mb-4 lg:mb-6">
+          {/* Title and Buttons Container - Mobile: Horizontal, Desktop: Split */}
+          <div className="flex items-center justify-between lg:justify-start lg:flex-1">
+            <h2 className="text-lg lg:text-xl font-semibold text-gray-900 flex items-center">
+              <Clock className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-blue-600" />
+              To Do List
+            </h2>
+            
+            {/* Mobile: Buttons next to title */}
+            <div className="flex items-center space-x-2 lg:hidden">
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center space-x-1 px-2 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add</span>
+              </button>
+              <button
+                onClick={() => setShowStats(!showStats)}
+                className={`flex items-center space-x-1 px-2 py-1.5 text-xs rounded-lg transition-colors ${
+                  showStats 
+                    ? 'bg-purple-600 text-white' 
+                    : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                }`}
+              >
+                <Trophy className="w-3 h-3" />
+                <span>Stats</span>
+              </button>
+            </div>
+          </div>
+          
+          {/* Desktop: Buttons on the right */}
+          <div className="hidden lg:flex items-center space-x-2">
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors h-10"
+              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span className="text-sm">Add Task</span>
             </button>
             <button
               onClick={() => setShowStats(!showStats)}
-              className={`flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors h-10 ${
+              className={`flex items-center space-x-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                 showStats 
                   ? 'bg-purple-600 text-white' 
                   : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
               }`}
             >
-              <Trophy className="w-3 h-3 lg:w-4 lg:h-4" />
-              <span className="hidden sm:inline">Points & Stats</span>
-              <span className="sm:hidden">Stats</span>
+              <Trophy className="w-4 h-4" />
+              <span>Points & Stats</span>
             </button>
           </div>
         </div>
