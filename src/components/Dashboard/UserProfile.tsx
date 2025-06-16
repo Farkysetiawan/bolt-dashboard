@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Calendar, Save, Edit2, X } from 'lucide-react';
+import { User, Mail, Calendar, Save, Edit2, X, Download } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -22,6 +22,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<'general' | 'billing' | 'password'>('general');
   const [editForm, setEditForm] = useState({
     full_name: '',
     bio: '',
@@ -53,7 +54,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
           avatar_url: data.avatar_url || ''
         });
       } else {
-        // Use upsert to handle both creation and updates
         const defaultProfile = {
           id: user?.id,
           email: user?.email || '',
@@ -105,10 +105,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
       setProfile(data);
       setIsEditing(false);
       
-      // Trigger header refresh by dispatching a custom event
       window.dispatchEvent(new CustomEvent('profileUpdated'));
       
-      // Also call the callback if provided
       if (onProfileUpdate) {
         onProfileUpdate();
       }
@@ -128,21 +126,38 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
     setIsEditing(false);
   };
 
+  // Mock data for demonstration
+  const mockData = [
+    { id: 1, name: 'Profile Export', date: '2024-01-15', size: '2.4 MB', status: 'completed' },
+    { id: 2, name: 'Task History', date: '2024-01-10', size: '1.8 MB', status: 'completed' },
+    { id: 3, name: 'Analytics Report', date: '2024-01-05', size: '3.2 MB', status: 'processing' },
+    { id: 4, name: 'Journal Backup', date: '2024-01-01', size: '5.1 MB', status: 'failed' }
+  ];
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completed': return 'badge badge-success';
+      case 'processing': return 'badge badge-warning';
+      case 'failed': return 'badge bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default: return 'badge badge-gray';
+    }
+  };
+
   if (loading) {
     return (
-      <div className="w-full">
-        <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6">
+      <div className="space-y-6">
+        <div className="card animate-fadeIn">
           <div className="animate-pulse">
             <div className="flex items-center space-x-4 mb-6">
-              <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-full"></div>
+              <div className="w-16 h-16 bg-gray-200 dark:bg-slate-700 rounded-full"></div>
               <div className="space-y-2">
-                <div className="h-6 bg-gray-200 rounded w-48"></div>
-                <div className="h-4 bg-gray-200 rounded w-32"></div>
+                <div className="h-6 bg-gray-200 dark:bg-slate-700 rounded w-48"></div>
+                <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-32"></div>
               </div>
             </div>
             <div className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded"></div>
+              <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4"></div>
             </div>
           </div>
         </div>
@@ -151,183 +166,424 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
   }
 
   return (
-    <div className="w-full space-y-4 lg:space-y-6">
-      {/* Profile Header */}
-      <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 lg:mb-6 space-y-2 sm:space-y-0">
-          <h2 className="text-lg lg:text-xl font-semibold text-gray-900 flex items-center">
-            <User className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-blue-600" />
-            Profile
-          </h2>
-          {!isEditing && (
+    <div className="space-y-6">
+      {/* Breadcrumbs */}
+      <nav className="text-sm text-gray-600 dark:text-slate-400">
+        <span>Settings</span>
+        <span className="mx-2">/</span>
+        <span className="text-gray-900 dark:text-slate-100 font-medium">Profile</span>
+      </nav>
+
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200 dark:border-slate-700">
+        <nav className="flex space-x-8">
+          {[
+            { id: 'general', label: 'General' },
+            { id: 'billing', label: 'Billing' },
+            { id: 'password', label: 'Password' }
+          ].map((tab) => (
             <button
-              onClick={() => setIsEditing(true)}
-              className="flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-1.5 lg:py-2 text-xs lg:text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === tab.id
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-300 dark:hover:border-slate-600'
+              }`}
             >
-              <Edit2 className="w-3 h-3 lg:w-4 lg:h-4" />
-              <span>Edit Profile</span>
+              {tab.label}
             </button>
-          )}
-        </div>
-
-        {isEditing ? (
-          <form onSubmit={handleSave} className="space-y-4 lg:space-y-6">
-            {/* Avatar Section */}
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
-                {editForm.avatar_url ? (
-                  <img
-                    src={editForm.avatar_url}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                    }}
-                  />
-                ) : null}
-                <User className={`w-6 h-6 lg:w-8 lg:h-8 text-gray-400 ${editForm.avatar_url ? 'hidden' : ''}`} />
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Avatar URL
-                </label>
-                <input
-                  type="url"
-                  value={editForm.avatar_url}
-                  onChange={(e) => setEditForm({ ...editForm, avatar_url: e.target.value })}
-                  placeholder="https://example.com/avatar.jpg"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm lg:text-base"
-                />
-              </div>
-            </div>
-
-            {/* Full Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={editForm.full_name}
-                onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
-                placeholder="Enter your full name"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm lg:text-base"
-              />
-            </div>
-
-            {/* Bio */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bio
-              </label>
-              <textarea
-                value={editForm.bio}
-                onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                placeholder="Tell us about yourself..."
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm lg:text-base"
-              />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm lg:text-base"
-              >
-                <Save className="w-4 h-4" />
-                <span>{saving ? 'Saving...' : 'Save Changes'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="flex items-center justify-center space-x-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm lg:text-base"
-              >
-                <X className="w-4 h-4" />
-                <span>Cancel</span>
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className="space-y-4 lg:space-y-6">
-            {/* Avatar and Basic Info */}
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
-                {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                    }}
-                  />
-                ) : null}
-                <User className={`w-6 h-6 lg:w-8 lg:h-8 text-gray-400 ${profile?.avatar_url ? 'hidden' : ''}`} />
-              </div>
-              <div>
-                <h3 className="text-lg lg:text-xl font-semibold text-gray-900">
-                  {profile?.full_name || 'No name set'}
-                </h3>
-                <p className="text-gray-600 flex items-center mt-1 text-sm lg:text-base">
-                  <Mail className="w-3 h-3 lg:w-4 lg:h-4 mr-2" />
-                  {profile?.email}
-                </p>
-                {profile?.created_at && (
-                  <p className="text-xs lg:text-sm text-gray-500 flex items-center mt-1">
-                    <Calendar className="w-3 h-3 lg:w-4 lg:h-4 mr-2" />
-                    Member since {new Date(profile.created_at).toLocaleDateString()}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Bio */}
-            {profile?.bio && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">About</h4>
-                <p className="text-gray-600 leading-relaxed text-sm lg:text-base">{profile.bio}</p>
-              </div>
-            )}
-
-            {!profile?.bio && !profile?.full_name && (
-              <div className="text-center py-8">
-                <User className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 mb-4">Your profile is incomplete</p>
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="text-blue-600 hover:text-blue-700 font-medium text-sm lg:text-base"
-                >
-                  Complete your profile
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+          ))}
+        </nav>
       </div>
 
+      {/* General Tab */}
+      {activeTab === 'general' && (
+        <div className="card animate-fadeIn">
+          <div className="card-header">
+            <h2 className="card-title">Profile Information</h2>
+            {!isEditing && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="btn-secondary"
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit Profile
+              </button>
+            )}
+          </div>
+
+          {isEditing ? (
+            <form onSubmit={handleSave} className="space-y-6">
+              {/* Avatar Section */}
+              <div className="flex items-center space-x-6">
+                <div className="w-20 h-20 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center overflow-hidden">
+                  {editForm.avatar_url ? (
+                    <img
+                      src={editForm.avatar_url}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <User className={`w-8 h-8 text-gray-400 ${editForm.avatar_url ? 'hidden' : ''}`} />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                    Avatar URL
+                  </label>
+                  <input
+                    type="url"
+                    value={editForm.avatar_url}
+                    onChange={(e) => setEditForm({ ...editForm, avatar_url: e.target.value })}
+                    placeholder="https://example.com/avatar.jpg"
+                    className="input"
+                  />
+                </div>
+              </div>
+
+              {/* Form Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.full_name}
+                    onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                    placeholder="Enter your full name"
+                    className="input"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={profile?.email || ''}
+                    disabled
+                    className="input opacity-50 cursor-not-allowed"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                    Email cannot be changed
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  Bio
+                </label>
+                <textarea
+                  value={editForm.bio}
+                  onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                  placeholder="Tell us about yourself..."
+                  rows={4}
+                  className="textarea"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="btn-secondary"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-6">
+              {/* Profile Display */}
+              <div className="flex items-center space-x-6">
+                <div className="w-20 h-20 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center overflow-hidden">
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <User className={`w-8 h-8 text-gray-400 ${profile?.avatar_url ? 'hidden' : ''}`} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
+                    {profile?.full_name || 'No name set'}
+                  </h3>
+                  <p className="text-gray-600 dark:text-slate-400 flex items-center mt-1">
+                    <Mail className="w-4 h-4 mr-2" />
+                    {profile?.email}
+                  </p>
+                  {profile?.created_at && (
+                    <p className="text-sm text-gray-500 dark:text-slate-400 flex items-center mt-1">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Member since {new Date(profile.created_at).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Bio */}
+              {profile?.bio && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">About</h4>
+                  <p className="text-gray-600 dark:text-slate-400 leading-relaxed">{profile.bio}</p>
+                </div>
+              )}
+
+              {!profile?.bio && !profile?.full_name && (
+                <div className="text-center py-8">
+                  <User className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-4" />
+                  <p className="text-gray-500 dark:text-slate-400 mb-4">Your profile is incomplete</p>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="btn-primary"
+                  >
+                    Complete your profile
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Billing Tab */}
+      {activeTab === 'billing' && (
+        <div className="space-y-6">
+          {/* Current Plan */}
+          <div className="card animate-fadeIn">
+            <div className="card-header">
+              <h2 className="card-title">Current Plan</h2>
+              <button className="btn-primary">Upgrade Plan</button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                <h3 className="font-semibold text-blue-900 dark:text-blue-100">Free Plan</h3>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">$0<span className="text-sm font-normal">/month</span></p>
+                <ul className="text-sm text-blue-700 dark:text-blue-300 mt-3 space-y-1">
+                  <li>• Basic task management</li>
+                  <li>• Up to 100 tasks</li>
+                  <li>• Basic analytics</li>
+                </ul>
+              </div>
+              
+              <div className="p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                <h3 className="font-semibold text-gray-900 dark:text-slate-100">Pro Plan</h3>
+                <p className="text-2xl font-bold text-gray-600 dark:text-slate-400 mt-2">$9<span className="text-sm font-normal">/month</span></p>
+                <ul className="text-sm text-gray-600 dark:text-slate-400 mt-3 space-y-1">
+                  <li>• Unlimited tasks</li>
+                  <li>• Advanced analytics</li>
+                  <li>• Priority support</li>
+                </ul>
+              </div>
+              
+              <div className="p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                <h3 className="font-semibold text-gray-900 dark:text-slate-100">Team Plan</h3>
+                <p className="text-2xl font-bold text-gray-600 dark:text-slate-400 mt-2">$19<span className="text-sm font-normal">/month</span></p>
+                <ul className="text-sm text-gray-600 dark:text-slate-400 mt-3 space-y-1">
+                  <li>• Everything in Pro</li>
+                  <li>• Team collaboration</li>
+                  <li>• Admin controls</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Billing History */}
+          <div className="card animate-fadeIn">
+            <div className="card-header">
+              <h2 className="card-title">Billing History</h2>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-slate-700">
+                    <th className="text-left py-3 px-0 text-sm font-medium text-gray-700 dark:text-slate-300">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Description</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Amount</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Status</th>
+                    <th className="text-right py-3 px-0 text-sm font-medium text-gray-700 dark:text-slate-300">Invoice</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-gray-100 dark:border-slate-800">
+                    <td className="py-3 px-0 text-sm text-gray-900 dark:text-slate-100">Jan 15, 2024</td>
+                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-slate-400">Pro Plan - Monthly</td>
+                    <td className="py-3 px-4 text-sm text-gray-900 dark:text-slate-100 font-medium">$9.00</td>
+                    <td className="py-3 px-4">
+                      <span className="badge badge-success">Paid</span>
+                    </td>
+                    <td className="py-3 px-0 text-right">
+                      <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">
+                        Download
+                      </button>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-100 dark:border-slate-800">
+                    <td className="py-3 px-0 text-sm text-gray-900 dark:text-slate-100">Dec 15, 2023</td>
+                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-slate-400">Pro Plan - Monthly</td>
+                    <td className="py-3 px-4 text-sm text-gray-900 dark:text-slate-100 font-medium">$9.00</td>
+                    <td className="py-3 px-4">
+                      <span className="badge badge-success">Paid</span>
+                    </td>
+                    <td className="py-3 px-0 text-right">
+                      <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">
+                        Download
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Tab */}
+      {activeTab === 'password' && (
+        <div className="space-y-6">
+          {/* Change Password */}
+          <div className="card animate-fadeIn">
+            <div className="card-header">
+              <h2 className="card-title">Change Password</h2>
+            </div>
+            
+            <form className="space-y-4 max-w-md">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  className="input"
+                  placeholder="Enter current password"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  className="input"
+                  placeholder="Enter new password"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  className="input"
+                  placeholder="Confirm new password"
+                />
+              </div>
+              
+              <button type="submit" className="btn-primary">
+                Update Password
+              </button>
+            </form>
+          </div>
+
+          {/* Data Export */}
+          <div className="card animate-fadeIn">
+            <div className="card-header">
+              <h2 className="card-title">Data Export</h2>
+              <button className="btn-secondary">
+                <Download className="w-4 h-4 mr-2" />
+                Export Data
+              </button>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-slate-700">
+                    <th className="text-left py-3 px-0 text-sm font-medium text-gray-700 dark:text-slate-300">Export</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Size</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Status</th>
+                    <th className="text-right py-3 px-0 text-sm font-medium text-gray-700 dark:text-slate-300">Download</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockData.map((item) => (
+                    <tr key={item.id} className="border-b border-gray-100 dark:border-slate-800">
+                      <td className="py-3 px-0 text-sm text-gray-900 dark:text-slate-100 font-medium">{item.name}</td>
+                      <td className="py-3 px-4 text-sm text-gray-600 dark:text-slate-400">{item.date}</td>
+                      <td className="py-3 px-4 text-sm text-gray-600 dark:text-slate-400">{item.size}</td>
+                      <td className="py-3 px-4">
+                        <span className={getStatusBadge(item.status)}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-0 text-right">
+                        {item.status === 'completed' ? (
+                          <button className="p-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                            <Download className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <span className="text-gray-400 dark:text-slate-500 text-sm">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Account Statistics */}
-      <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6">
-        <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Account Statistics</h3>
-        <div className="grid grid-cols-2 gap-3 lg:gap-4">
-          <div className="text-center p-3 lg:p-4 bg-blue-50 rounded-lg">
-            <div className="text-lg lg:text-2xl font-bold text-blue-600">0</div>
-            <div className="text-xs lg:text-sm text-gray-600">Total Tasks</div>
+      <div className="card animate-fadeIn">
+        <div className="card-header">
+          <h2 className="card-title">Account Statistics</h2>
+        </div>
+        
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">0</div>
+            <div className="text-sm text-gray-600 dark:text-slate-400">Total Tasks</div>
           </div>
-          <div className="text-center p-3 lg:p-4 bg-green-50 rounded-lg">
-            <div className="text-lg lg:text-2xl font-bold text-green-600">0</div>
-            <div className="text-xs lg:text-sm text-gray-600">Completed Goals</div>
+          <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">0</div>
+            <div className="text-sm text-gray-600 dark:text-slate-400">Completed Goals</div>
           </div>
-          <div className="text-center p-3 lg:p-4 bg-purple-50 rounded-lg">
-            <div className="text-lg lg:text-2xl font-bold text-purple-600">0</div>
-            <div className="text-xs lg:text-sm text-gray-600">Journal Entries</div>
+          <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">0</div>
+            <div className="text-sm text-gray-600 dark:text-slate-400">Journal Entries</div>
           </div>
-          <div className="text-center p-3 lg:p-4 bg-orange-50 rounded-lg">
-            <div className="text-lg lg:text-2xl font-bold text-orange-600">0</div>
-            <div className="text-xs lg:text-sm text-gray-600">Quick Links</div>
+          <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">0</div>
+            <div className="text-sm text-gray-600 dark:text-slate-400">Quick Links</div>
           </div>
         </div>
       </div>
