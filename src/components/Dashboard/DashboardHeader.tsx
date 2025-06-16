@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { LogOut, User, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { useDarkMode } from '../../hooks/useDarkMode';
+import { LogOut, User, LayoutDashboard, BarChart3, Moon, Sun, Sparkles } from 'lucide-react';
 
 interface DashboardHeaderProps {
   onUserClick?: () => void;
@@ -16,6 +17,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   isAnalyticsActive = false 
 }) => {
   const { signOut } = useAuth();
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   const handleSignOut = async () => {
     try {
@@ -26,51 +28,86 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-white via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900 shadow-xl border-b-2 border-blue-200 dark:border-purple-700 backdrop-blur-md">
       <div className="w-full px-4 lg:px-6">
         <div className="flex justify-between items-center py-3 lg:py-4">
-          <div className="flex items-center space-x-2 lg:space-x-4 min-w-0">
-            <h1 className="text-lg lg:text-2xl font-bold text-gray-900 truncate">FlexBoard</h1>
+          <div className="flex items-center space-x-3 min-w-0">
+            {/* Enhanced Logo */}
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-all duration-300">
+              <Sparkles className="w-5 h-5 lg:w-6 lg:h-6 text-white animate-pulse" />
+            </div>
+            <h1 className="text-xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent truncate">
+              FlexBoard
+            </h1>
           </div>
           
           <div className="flex items-center space-x-2 lg:space-x-3 flex-shrink-0">
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleDarkMode}
+              className={`group relative overflow-hidden p-2 lg:p-3 rounded-xl transition-all duration-300 transform hover:scale-110 ${
+                isDarkMode 
+                  ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg shadow-yellow-200' 
+                  : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200'
+              }`}
+              title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative">
+                {isDarkMode ? (
+                  <Sun className="w-4 h-4 lg:w-5 lg:h-5 group-hover:rotate-180 transition-transform duration-500" />
+                ) : (
+                  <Moon className="w-4 h-4 lg:w-5 lg:h-5 group-hover:rotate-12 transition-transform duration-300" />
+                )}
+              </div>
+            </button>
+
             {/* Analytics Icon */}
             <button
               onClick={onAnalyticsClick}
-              className={`p-1.5 lg:p-2 rounded-lg transition-colors ${
+              className={`group relative overflow-hidden p-2 lg:p-3 rounded-xl transition-all duration-300 transform hover:scale-110 ${
                 isAnalyticsActive 
-                  ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200' 
+                  : 'bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800 dark:to-purple-800 text-blue-700 dark:text-blue-300 hover:from-blue-200 hover:to-purple-200 dark:hover:from-blue-700 dark:hover:to-purple-700'
               }`}
               title="Analytics"
             >
-              <BarChart3 className="w-4 h-4 lg:w-5 lg:h-5" />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative">
+                <BarChart3 className={`w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-300 ${isAnalyticsActive ? 'animate-pulse' : 'group-hover:rotate-12'}`} />
+              </div>
             </button>
             
-            {/* User Icon - Toggle between Profile and Dashboard */}
+            {/* User Icon */}
             <button
               onClick={onUserClick}
-              className={`p-1.5 lg:p-2 rounded-lg transition-colors ${
+              className={`group relative overflow-hidden p-2 lg:p-3 rounded-xl transition-all duration-300 transform hover:scale-110 ${
                 isProfileActive 
-                  ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-200' 
+                  : 'bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800 dark:to-purple-800 text-blue-700 dark:text-blue-300 hover:from-blue-200 hover:to-purple-200 dark:hover:from-blue-700 dark:hover:to-purple-700'
               }`}
               title={isProfileActive ? 'Back to Dashboard' : 'Profile'}
             >
-              {isProfileActive ? (
-                <LayoutDashboard className="w-4 h-4 lg:w-5 lg:h-5" />
-              ) : (
-                <User className="w-4 h-4 lg:w-5 lg:h-5" />
-              )}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative">
+                {isProfileActive ? (
+                  <LayoutDashboard className="w-4 h-4 lg:w-5 lg:h-5 group-hover:rotate-180 transition-transform duration-500" />
+                ) : (
+                  <User className="w-4 h-4 lg:w-5 lg:h-5 group-hover:rotate-12 transition-transform duration-300" />
+                )}
+              </div>
             </button>
             
             {/* Sign Out Button */}
             <button
               onClick={handleSignOut}
-              className="flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-1.5 lg:py-2 text-xs lg:text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              className="group relative overflow-hidden flex items-center space-x-1 lg:space-x-2 px-3 lg:px-4 py-2 lg:py-3 text-xs lg:text-sm bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
             >
-              <LogOut className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" />
-              <span className="hidden sm:block">Sign out</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative flex items-center space-x-1 lg:space-x-2">
+                <LogOut className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0 group-hover:rotate-12 transition-transform duration-300" />
+                <span className="hidden sm:block font-medium">Sign out</span>
+              </div>
             </button>
           </div>
         </div>
