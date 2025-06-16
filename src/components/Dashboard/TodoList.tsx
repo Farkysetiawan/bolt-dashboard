@@ -535,11 +535,19 @@ const TodoList: React.FC = () => {
     }
   }, [user, showStats, todos]);
 
-  // Categorize todos
-  const todosByStatus = {
-    todo: todos.filter(todo => !todo.completed),
-    inProgress: todos.filter(todo => !todo.completed && todo.is_timer_active),
-    done: todos.filter(todo => todo.completed)
+  const getTaskStatus = (todo: Todo) => {
+    if (todo.completed) return 'Completed';
+    if (todo.is_timer_active) return 'On Progress';
+    return 'Pending';
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Completed': return 'bg-green-100 text-green-700';
+      case 'On Progress': return 'bg-blue-100 text-blue-700';
+      case 'Pending': return 'bg-gray-100 text-gray-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
   };
 
   if (loading) {
@@ -563,9 +571,16 @@ const TodoList: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 lg:mb-6 space-y-2 sm:space-y-0">
           <h2 className="text-lg lg:text-xl font-semibold text-gray-900 flex items-center">
             <Clock className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-blue-600" />
-            Smart Todo List
+            To Do List
           </h2>
           <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-sm">Add Task</span>
+            </button>
             <button
               onClick={() => setShowStats(!showStats)}
               className={`flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-1.5 lg:py-2 text-xs lg:text-sm rounded-lg transition-colors ${
@@ -578,9 +593,6 @@ const TodoList: React.FC = () => {
               <span className="hidden sm:inline">Points & Stats</span>
               <span className="sm:hidden">Stats</span>
             </button>
-            <span className="text-xs lg:text-sm text-gray-500">
-              {todos.filter(t => !t.completed).length} pending
-            </span>
           </div>
         </div>
 
@@ -705,24 +717,14 @@ const TodoList: React.FC = () => {
               </button>
             </div>
             
-            <div className="flex items-center space-x-2">
-              {!isToday(selectedDate) && (
-                <button
-                  onClick={goToToday}
-                  className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-                >
-                  Today
-                </button>
-              )}
-              
+            {!isToday(selectedDate) && (
               <button
-                onClick={() => setShowAddModal(true)}
-                className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={goToToday}
+                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
               >
-                <Plus className="w-4 h-4" />
-                <span className="text-sm">Add Task</span>
+                Today
               </button>
-            </div>
+            )}
           </div>
 
           {/* Week Calendar */}
@@ -769,231 +771,142 @@ const TodoList: React.FC = () => {
           </div>
         </div>
 
-        {/* Todo Table Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-          {/* To Do Column */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-              <Clock className="w-4 h-4 mr-2 text-gray-500" />
-              To Do ({todosByStatus.todo.length})
-            </h3>
-            <div className="space-y-2">
-              {todosByStatus.todo.length === 0 ? (
-                <p className="text-xs text-gray-500 text-center py-4">No pending tasks</p>
-              ) : (
-                todosByStatus.todo.map((todo) => (
-                  <div
-                    key={todo.id}
-                    className="bg-white p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-start space-x-2 flex-1 min-w-0">
-                        <button
-                          onClick={() => toggleTodo(todo.id, todo.completed)}
-                          className="flex-shrink-0 w-4 h-4 rounded border-2 border-gray-300 hover:border-blue-500 transition-colors mt-0.5"
-                        />
-                        <span className="text-sm text-gray-900 break-words">{todo.title}</span>
-                      </div>
-                      <div className="flex items-center space-x-1 flex-shrink-0">
-                        <button
-                          onClick={() => openEditModal(todo)}
-                          className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
-                          title="Edit task"
-                        >
-                          <Edit2 className="w-3 h-3" />
-                        </button>
-                        <button
-                          onClick={() => deleteTodo(todo.id)}
-                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
+        {/* Single List Layout */}
+        <div className="space-y-3">
+          {todos.length === 0 ? (
+            <div className="text-center py-8">
+              <Clock className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 mb-2">
+                No tasks for {isToday(selectedDate) ? 'today' : format(selectedDate, 'MMM d')}
+              </p>
+              <p className="text-sm text-gray-400">Add one above to get started!</p>
+            </div>
+          ) : (
+            todos.map((todo) => (
+              <div
+                key={todo.id}
+                className={`p-4 rounded-lg border transition-colors ${
+                  todo.completed
+                    ? 'bg-gray-50 border-gray-200'
+                    : 'bg-white border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start space-x-3 flex-1 min-w-0">
+                    <button
+                      onClick={() => toggleTodo(todo.id, todo.completed)}
+                      className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors mt-0.5 ${
+                        todo.completed
+                          ? 'bg-green-500 border-green-500 text-white'
+                          : 'border-gray-300 hover:border-green-500'
+                      }`}
+                    >
+                      {todo.completed && <Check className="w-3 h-3" />}
+                    </button>
                     
-                    {todo.priority_score && (
-                      <div className="mb-2">
-                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                          todo.priority_score >= 8 
-                            ? 'bg-red-100 text-red-700' 
-                            : todo.priority_score >= 6 
-                            ? 'bg-orange-100 text-orange-700'
-                            : todo.priority_score >= 4
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-green-100 text-green-700'
-                        }`}>
-                          {todo.priority_score >= 8 ? 'Critical' : 
-                           todo.priority_score >= 6 ? 'High' :
-                           todo.priority_score >= 4 ? 'Medium' : 'Low'} ({todo.priority_score.toFixed(1)})
-                        </span>
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-medium text-base ${
+                        todo.completed
+                          ? 'text-gray-500 line-through'
+                          : 'text-gray-900'
+                      }`}>
+                        {todo.title}
+                      </h3>
+                      
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        {/* Estimasi Waktu */}
                         {todo.duration_minutes && (
-                          <span>Est: {formatMinutes(todo.duration_minutes)}</span>
+                          <span className="text-sm text-gray-600">
+                            <strong>Estimasi Waktu:</strong> {formatMinutes(todo.duration_minutes)}
+                          </span>
                         )}
-                        {todo.actual_minutes > 0 && (
-                          <span>Spent: {formatMinutes(todo.actual_minutes)}</span>
+                        
+                        {/* Progress Status */}
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${getStatusColor(getTaskStatus(todo))}`}>
+                          {getTaskStatus(todo)}
+                        </span>
+                        
+                        {/* Priority Badge */}
+                        {todo.priority_score && (
+                          <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                            todo.priority_score >= 8 
+                              ? 'bg-red-100 text-red-700' 
+                              : todo.priority_score >= 6 
+                              ? 'bg-orange-100 text-orange-700'
+                              : todo.priority_score >= 4
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}>
+                            {todo.priority_score >= 8 ? 'Critical' : 
+                             todo.priority_score >= 6 ? 'High' :
+                             todo.priority_score >= 4 ? 'Medium' : 'Low'} ({todo.priority_score.toFixed(1)})
+                          </span>
                         )}
                       </div>
                       
-                      <div className="flex items-center space-x-1">
-                        <button
-                          onClick={() => startTimer(todo.id)}
-                          className="p-1 text-green-500 hover:text-green-700 transition-colors"
-                          title="Start timer"
-                        >
-                          <Play className="w-3 h-3" />
-                        </button>
-                      </div>
+                      {/* Timer Display */}
+                      {activeTimer === todo.id && (
+                        <div className="mt-2">
+                          <span className="text-blue-600 font-medium">
+                            ⏱️ {formatTime(timerSeconds)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
 
-          {/* In Progress Column */}
-          <div className="bg-blue-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-blue-700 mb-3 flex items-center">
-              <Play className="w-4 h-4 mr-2 text-blue-500" />
-              In Progress ({todosByStatus.inProgress.length})
-            </h3>
-            <div className="space-y-2">
-              {todosByStatus.inProgress.length === 0 ? (
-                <p className="text-xs text-blue-600 text-center py-4">No active tasks</p>
-              ) : (
-                todosByStatus.inProgress.map((todo) => (
-                  <div
-                    key={todo.id}
-                    className="bg-white p-3 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-start space-x-2 flex-1 min-w-0">
-                        <button
-                          onClick={() => toggleTodo(todo.id, todo.completed)}
-                          className="flex-shrink-0 w-4 h-4 rounded border-2 border-gray-300 hover:border-green-500 transition-colors mt-0.5"
-                        />
-                        <span className="text-sm text-gray-900 break-words">{todo.title}</span>
-                      </div>
-                      <div className="flex items-center space-x-1 flex-shrink-0">
-                        <button
-                          onClick={() => openEditModal(todo)}
-                          className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
-                          title="Edit task"
-                        >
-                          <Edit2 className="w-3 h-3" />
-                        </button>
-                        <button
-                          onClick={() => deleteTodo(todo.id)}
-                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {activeTimer === todo.id && (
-                      <div className="mb-2">
-                        <span className="text-blue-600 font-medium text-sm">
-                          ⏱️ {formatTime(timerSeconds)}
-                        </span>
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        {todo.duration_minutes && (
-                          <span>Est: {formatMinutes(todo.duration_minutes)}</span>
-                        )}
-                        {todo.actual_minutes > 0 && (
-                          <span>Spent: {formatMinutes(todo.actual_minutes)}</span>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center space-x-1">
+                  {/* Action Buttons */}
+                  <div className="flex items-center space-x-1 flex-shrink-0">
+                    {!todo.completed && (
+                      <>
                         {activeTimer === todo.id ? (
                           <>
                             <button
                               onClick={() => pauseTimer(todo.id)}
-                              className="p-1 text-orange-500 hover:text-orange-700 transition-colors"
+                              className="p-1.5 text-orange-500 hover:text-orange-700 transition-colors"
                               title="Pause timer"
                             >
-                              <Pause className="w-3 h-3" />
+                              <Pause className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => finishTask(todo.id)}
-                              className="p-1 text-green-500 hover:text-green-700 transition-colors"
+                              className="p-1.5 text-green-500 hover:text-green-700 transition-colors"
                               title="Finish task"
                             >
-                              <Square className="w-3 h-3" />
+                              <Square className="w-4 h-4" />
                             </button>
                           </>
                         ) : (
                           <button
                             onClick={() => startTimer(todo.id)}
-                            className="p-1 text-green-500 hover:text-green-700 transition-colors"
+                            className="p-1.5 text-green-500 hover:text-green-700 transition-colors"
                             title="Start timer"
                           >
-                            <Play className="w-3 h-3" />
+                            <Play className="w-4 h-4" />
                           </button>
                         )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Done Column */}
-          <div className="bg-green-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-green-700 mb-3 flex items-center">
-              <Check className="w-4 h-4 mr-2 text-green-500" />
-              Done ({todosByStatus.done.length})
-            </h3>
-            <div className="space-y-2">
-              {todosByStatus.done.length === 0 ? (
-                <p className="text-xs text-green-600 text-center py-4">No completed tasks</p>
-              ) : (
-                todosByStatus.done.map((todo) => (
-                  <div
-                    key={todo.id}
-                    className="bg-white p-3 rounded-lg border border-green-200 hover:border-green-300 transition-colors opacity-75"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-start space-x-2 flex-1 min-w-0">
-                        <button
-                          onClick={() => toggleTodo(todo.id, todo.completed)}
-                          className="flex-shrink-0 w-4 h-4 rounded bg-green-500 border-2 border-green-500 text-white flex items-center justify-center mt-0.5"
-                        >
-                          <Check className="w-2 h-2" />
-                        </button>
-                        <span className="text-sm text-gray-500 line-through break-words">{todo.title}</span>
-                      </div>
-                      <button
-                        onClick={() => deleteTodo(todo.id)}
-                        className="p-1 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
+                      </>
+                    )}
                     
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      {todo.duration_minutes && (
-                        <span>Est: {formatMinutes(todo.duration_minutes)}</span>
-                      )}
-                      {todo.actual_minutes > 0 && (
-                        <span>Spent: {formatMinutes(todo.actual_minutes)}</span>
-                      )}
-                    </div>
+                    <button
+                      onClick={() => openEditModal(todo)}
+                      className="p-1.5 text-blue-500 hover:text-blue-700 transition-colors"
+                      title="Edit task"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    
+                    <button
+                      onClick={() => deleteTodo(todo.id)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
