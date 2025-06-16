@@ -113,28 +113,21 @@ const TodoList: React.FC = () => {
   const calculatePriorityScore = (form: PriorityForm): number => {
     const { urgency, importance, effort, impact } = form;
     
-    // SIMPLE Priority Calculation Model - NO BONUSES
-    // 4 factors with equal weight: 25% each
+    // FIXED Priority Calculation Model
+    // Weighted formula: (Urgency * 0.3) + (Importance * 0.3) + (Impact * 0.3) + (Effort * 0.1)
+    // This gives more weight to urgency, importance, and impact
     
-    // 1. Urgency Score (1-10) - 25%
-    const urgencyScore = urgency * 0.25;
+    const urgencyScore = urgency * 0.3;
+    const importanceScore = importance * 0.3;
+    const impactScore = impact * 0.3;
+    const effortScore = effort * 0.1; // Lower weight for effort
     
-    // 2. Importance Score (1-10) - 25%
-    const importanceScore = importance * 0.25;
-    
-    // 3. Impact Score (1-10) - 25%
-    const impactScore = impact * 0.25;
-    
-    // 4. Effort Score (1-10, NOT inverted) - 25%
-    const effortScore = effort * 0.25;
-    
-    // 5. Simple sum of all weighted scores - NO BONUSES
     const finalScore = urgencyScore + importanceScore + impactScore + effortScore;
     
-    // Final normalization and rounding
+    // Ensure score is between 0.1 and 10.0
     const normalizedScore = Math.min(Math.max(finalScore, 0.1), 10.0);
     
-    // Round to 1 decimal place for consistency
+    // Round to 1 decimal place
     return Math.round(normalizedScore * 10) / 10;
   };
 
@@ -568,7 +561,7 @@ const TodoList: React.FC = () => {
   return (
     <>
       <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 lg:mb-6 space-y-2 sm:space-y-0">
+        <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center justify-between mb-4 lg:mb-6">
           <h2 className="text-lg lg:text-xl font-semibold text-gray-900 flex items-center">
             <Clock className="w-4 h-4 lg:w-5 lg:h-5 mr-2 text-blue-600" />
             To Do List
@@ -576,14 +569,14 @@ const TodoList: React.FC = () => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors h-10"
             >
               <Plus className="w-4 h-4" />
               <span className="text-sm">Add Task</span>
             </button>
             <button
               onClick={() => setShowStats(!showStats)}
-              className={`flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-1.5 lg:py-2 text-xs lg:text-sm rounded-lg transition-colors ${
+              className={`flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-2 text-xs lg:text-sm rounded-lg transition-colors h-10 ${
                 showStats 
                   ? 'bg-purple-600 text-white' 
                   : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
