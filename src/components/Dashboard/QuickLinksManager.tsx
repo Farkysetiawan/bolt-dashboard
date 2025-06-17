@@ -435,7 +435,7 @@ const QuickLinksManager: React.FC = () => {
                   URL
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none z-10">
                     https://
                   </span>
                   <input
@@ -443,7 +443,7 @@ const QuickLinksManager: React.FC = () => {
                     value={formData.url}
                     onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                     placeholder="example.com"
-                    className={`input pl-16 ${errors.url ? 'border-red-300 focus:ring-red-500' : ''}`}
+                    className={`input pl-20 ${errors.url ? 'border-red-300 focus:ring-red-500' : ''}`}
                   />
                 </div>
                 {errors.url && (
