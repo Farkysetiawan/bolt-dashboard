@@ -26,21 +26,21 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
-      <div className="max-w-7xl mx-auto px-4 lg:px-6">
-        <div className="flex justify-between items-center h-14">
+    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 animate-slideDown">
+      <div className="max-w-7xl mx-auto px-3 lg:px-4">
+        <div className="flex justify-between items-center h-12">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center">
-              <LayoutDashboard className="w-3.5 h-3.5 text-white" />
+          <div className="flex items-center space-x-2 animate-slideIn">
+            <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center hover-scale">
+              <LayoutDashboard className="w-3 h-3 text-white" />
             </div>
-            <h1 className="text-lg font-semibold text-gray-900">FlexBoard</h1>
+            <h1 className="text-base font-semibold text-gray-900">FlexBoard</h1>
           </div>
           
           {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-sm mx-6">
+          <div className="hidden md:flex flex-1 max-w-xs mx-4 animate-fadeIn">
             <div className="relative w-full">
-              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
               <input
                 type="text"
                 placeholder="Search..."
@@ -50,13 +50,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </div>
           
           {/* Actions */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 animate-slideIn">
             {/* Analytics */}
             <button
               onClick={onAnalyticsClick}
-              className={`p-2 rounded-md transition-colors duration-150 ${
+              className={`btn-icon transition-all duration-200 ${
                 isAnalyticsActive 
-                  ? 'bg-blue-50 text-blue-700' 
+                  ? 'bg-blue-50 text-blue-700 hover-glow' 
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
               }`}
               title="Analytics"
@@ -67,9 +67,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             {/* Profile */}
             <button
               onClick={onUserClick}
-              className={`p-2 rounded-md transition-colors duration-150 ${
+              className={`btn-icon transition-all duration-200 ${
                 isProfileActive 
-                  ? 'bg-blue-50 text-blue-700' 
+                  ? 'bg-blue-50 text-blue-700 hover-glow' 
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
               }`}
               title={isProfileActive ? 'Back to Dashboard' : 'Profile'}
@@ -84,9 +84,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             {/* Sign Out */}
             <button
               onClick={handleSignOut}
-              className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-150"
+              className="flex items-center space-x-1.5 px-2.5 py-1.5 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 hover-lift"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="w-3 h-3" />
               <span className="hidden sm:block">Sign out</span>
             </button>
           </div>

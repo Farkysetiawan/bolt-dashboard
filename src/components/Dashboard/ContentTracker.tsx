@@ -123,25 +123,24 @@ const ContentTracker: React.FC = () => {
     <div className="card animate-fadeIn">
       {/* Header */}
       <div className="card-header">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-            <Play className="w-4 h-4 text-white" />
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center hover-scale">
+            <Play className="w-3 h-3 text-white" />
           </div>
           <h2 className="card-title">Content Tracker</h2>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="btn-primary"
+          className="btn-icon-primary"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Content
+          <Plus className="w-4 h-4" />
         </button>
       </div>
 
       {/* Add Form */}
       {showAddForm && (
-        <div className="mb-6 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
-          <form onSubmit={addItem} className="space-y-4">
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-slideDown">
+          <form onSubmit={addItem} className="space-y-3">
             <input
               type="text"
               value={newItem.title}
@@ -151,7 +150,7 @@ const ContentTracker: React.FC = () => {
               required
             />
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <select
                 value={newItem.type}
                 onChange={(e) => setNewItem({ ...newItem, type: e.target.value as ContentItem['type'] })}
@@ -191,39 +190,40 @@ const ContentTracker: React.FC = () => {
       )}
 
       {/* Content List */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {items.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-slate-400">
-            <Play className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-slate-600" />
-            <p>No content tracked yet. Add some above!</p>
+          <div className="text-center py-6 text-gray-500 animate-fadeIn">
+            <Play className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+            <p className="text-xs">No content tracked yet. Add some above!</p>
           </div>
         ) : (
-          items.map((item) => (
+          items.map((item, index) => (
             <div
               key={item.id}
-              className="p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors"
+              className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 hover-lift stagger-item"
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-3 min-w-0 flex-1">
-                  <span className="text-lg">{getTypeIcon(item.type)}</span>
-                  <h3 className="font-medium text-gray-900 dark:text-slate-100 truncate">{item.title}</h3>
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+                  <span className="text-base">{getTypeIcon(item.type)}</span>
+                  <h3 className="font-medium text-gray-900 truncate text-xs">{item.title}</h3>
                 </div>
                 
-                <div className="flex items-center space-x-2 flex-shrink-0">
+                <div className="flex items-center space-x-1.5 flex-shrink-0">
                   <span className={getStatusBadge(item.status)}>
                     {item.status}
                   </span>
                   <button
                     onClick={() => deleteItem(item.id)}
-                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                    className="p-1 text-gray-400 hover:text-red-500 transition-colors hover-scale"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3 h-3" />
                   </button>
                 </div>
               </div>
               
               {/* Progress Bar */}
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
                 <div className="flex-1 progress-bar">
                   <div
                     className="progress-fill"
@@ -236,9 +236,9 @@ const ContentTracker: React.FC = () => {
                   max="100"
                   value={item.progress}
                   onChange={(e) => updateProgress(item.id, parseInt(e.target.value) || 0)}
-                  className="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100"
+                  className="w-12 px-1.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
                 />
-                <span className="text-sm text-gray-500 dark:text-slate-400">%</span>
+                <span className="text-xs text-gray-500">%</span>
               </div>
             </div>
           ))

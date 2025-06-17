@@ -62,7 +62,7 @@ const QuickLinksHorizontal: React.FC = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const scrollAmount = 200; // Scroll by 200px
+    const scrollAmount = 150; // Reduced scroll amount for mobile
     const newScrollLeft = direction === 'left' 
       ? container.scrollLeft - scrollAmount
       : container.scrollLeft + scrollAmount;
@@ -115,7 +115,7 @@ const QuickLinksHorizontal: React.FC = () => {
     return (
       <div className="flex space-x-2 overflow-x-auto pb-2">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="w-16 h-16 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
+          <div key={i} className="w-12 h-12 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
         ))}
       </div>
     );
@@ -123,11 +123,11 @@ const QuickLinksHorizontal: React.FC = () => {
 
   if (links.length === 0) {
     return (
-      <div className="text-center py-4">
-        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-          <Link className="w-6 h-6 text-gray-400" />
+      <div className="text-center py-3 animate-fadeIn">
+        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+          <Link className="w-5 h-5 text-gray-400" />
         </div>
-        <p className="text-sm text-gray-500">No quick links yet</p>
+        <p className="text-xs text-gray-500">No quick links yet</p>
       </div>
     );
   }
@@ -138,10 +138,10 @@ const QuickLinksHorizontal: React.FC = () => {
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-all duration-150"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-6 h-6 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-all duration-200 hover-scale"
           aria-label="Scroll left"
         >
-          <ChevronLeft className="w-4 h-4 text-gray-600" />
+          <ChevronLeft className="w-3 h-3 text-gray-600" />
         </button>
       )}
 
@@ -149,24 +149,24 @@ const QuickLinksHorizontal: React.FC = () => {
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-all duration-150"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-6 h-6 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-all duration-200 hover-scale"
           aria-label="Scroll right"
         >
-          <ChevronRight className="w-4 h-4 text-gray-600" />
+          <ChevronRight className="w-3 h-3 text-gray-600" />
         </button>
       )}
 
       {/* Scrollable container */}
       <div 
         ref={scrollContainerRef}
-        className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide"
+        className="flex space-x-2.5 overflow-x-auto pb-2 scrollbar-hide"
         onScroll={checkScrollability}
         style={{ 
           scrollSnapType: 'x mandatory',
           WebkitOverflowScrolling: 'touch' // Smooth scrolling on iOS
         }}
       >
-        {links.map((link) => {
+        {links.map((link, index) => {
           const hasCustomLogo = isValidImageUrl(link.icon || '');
           const domain = getDomainFromUrl(link.url);
           const finalUrl = link.open_in_app ? getAppUrl(link.url, domain) : link.url;
@@ -177,16 +177,19 @@ const QuickLinksHorizontal: React.FC = () => {
               href={finalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col items-center flex-shrink-0 relative"
+              className="group flex flex-col items-center flex-shrink-0 relative stagger-item hover-lift"
               title={link.title || getDomainFromUrl(link.url)}
-              style={{ scrollSnapAlign: 'start' }}
+              style={{ 
+                scrollSnapAlign: 'start',
+                animationDelay: `${index * 0.1}s`
+              }}
             >
-              <div className="w-16 h-16 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:border-gray-300 hover:shadow-sm transition-all duration-150 mb-2 relative">
+              <div className="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:border-gray-300 hover:shadow-sm transition-all duration-200 mb-1.5 relative hover-scale">
                 {hasCustomLogo ? (
                   <img
                     src={link.icon}
                     alt={link.title || 'Logo'}
-                    className="w-12 h-12 object-cover rounded"
+                    className="w-10 h-10 object-cover rounded"
                     onError={(e) => {
                       // Fallback to default icon if image fails to load
                       e.currentTarget.style.display = 'none';
@@ -194,18 +197,18 @@ const QuickLinksHorizontal: React.FC = () => {
                     }}
                   />
                 ) : null}
-                <ExternalLink className={`w-6 h-6 text-gray-600 group-hover:text-blue-600 transition-colors duration-150 ${hasCustomLogo ? 'hidden' : ''}`} />
+                <ExternalLink className={`w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors duration-200 ${hasCustomLogo ? 'hidden' : ''}`} />
                 
                 {/* App/Browser indicator */}
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-white border border-gray-200 rounded-full flex items-center justify-center">
+                <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-white border border-gray-200 rounded-full flex items-center justify-center">
                   {link.open_in_app ? (
-                    <Smartphone className="w-2.5 h-2.5 text-blue-600" />
+                    <Smartphone className="w-2 h-2 text-blue-600" />
                   ) : (
-                    <Globe className="w-2.5 h-2.5 text-gray-600" />
+                    <Globe className="w-2 h-2 text-gray-600" />
                   )}
                 </div>
               </div>
-              <span className="text-xs text-gray-600 group-hover:text-gray-900 text-center truncate max-w-[64px] leading-tight">
+              <span className="text-xs text-gray-600 group-hover:text-gray-900 text-center truncate max-w-[48px] leading-tight">
                 {link.title || getDomainFromUrl(link.url)}
               </span>
             </a>
@@ -219,7 +222,8 @@ const QuickLinksHorizontal: React.FC = () => {
           {Array.from({ length: Math.ceil(links.length / 4) }).map((_, index) => (
             <div
               key={index}
-              className="w-1.5 h-1.5 rounded-full bg-gray-300"
+              className="w-1 h-1 rounded-full bg-gray-300 animate-pulse"
+              style={{ animationDelay: `${index * 0.2}s` }}
             />
           ))}
         </div>

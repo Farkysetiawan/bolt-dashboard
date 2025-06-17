@@ -95,9 +95,9 @@ const PromptBank: React.FC = () => {
   const getCategoryBadge = (category: string) => {
     switch (category) {
       case 'work': return 'badge badge-info';
-      case 'creative': return 'badge bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'creative': return 'badge bg-purple-100 text-purple-800';
       case 'learning': return 'badge badge-success';
-      case 'personal': return 'badge bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200';
+      case 'personal': return 'badge bg-pink-100 text-pink-800';
       default: return 'badge badge-gray';
     }
   };
@@ -106,25 +106,24 @@ const PromptBank: React.FC = () => {
     <div className="card animate-fadeIn">
       {/* Header */}
       <div className="card-header">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-            <Lightbulb className="w-4 h-4 text-white" />
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center hover-scale">
+            <Lightbulb className="w-3 h-3 text-white" />
           </div>
           <h2 className="card-title">Prompt Bank</h2>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="btn-primary"
+          className="btn-icon-primary"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Prompt
+          <Plus className="w-4 h-4" />
         </button>
       </div>
 
       {/* Add Form */}
       {showAddForm && (
-        <div className="mb-6 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
-          <form onSubmit={addPrompt} className="space-y-4">
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-slideDown">
+          <form onSubmit={addPrompt} className="space-y-3">
             <input
               type="text"
               value={newPrompt.title}
@@ -172,47 +171,48 @@ const PromptBank: React.FC = () => {
       )}
 
       {/* Prompts List */}
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-2.5 max-h-80 overflow-y-auto">
         {prompts.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-slate-400">
-            <Lightbulb className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-slate-600" />
-            <p>No prompts yet. Add some above!</p>
+          <div className="text-center py-6 text-gray-500 animate-fadeIn">
+            <Lightbulb className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+            <p className="text-xs">No prompts yet. Add some above!</p>
           </div>
         ) : (
-          prompts.map((prompt) => (
+          prompts.map((prompt, index) => (
             <div
               key={prompt.id}
-              className="p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors"
+              className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 hover-lift stagger-item"
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center space-x-2 min-w-0 flex-1">
-                  <h3 className="font-medium text-gray-900 dark:text-slate-100 truncate">{prompt.title}</h3>
+              <div className="flex items-start justify-between mb-1.5">
+                <div className="flex items-center space-x-1.5 min-w-0 flex-1">
+                  <h3 className="font-medium text-gray-900 truncate text-xs">{prompt.title}</h3>
                   <span className={getCategoryBadge(prompt.category)}>
                     {prompt.category}
                   </span>
                 </div>
                 
-                <div className="flex items-center space-x-1 flex-shrink-0">
+                <div className="flex items-center space-x-0.5 flex-shrink-0">
                   <button
                     onClick={() => copyToClipboard(prompt.content, prompt.id)}
-                    className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200 hover-scale"
                     title="Copy to clipboard"
                   >
-                    <Copy className="w-4 h-4" />
+                    <Copy className="w-3 h-3" />
                   </button>
                   <button
                     onClick={() => deletePrompt(prompt.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 hover-scale"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3 h-3" />
                   </button>
                 </div>
               </div>
               
-              <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">{prompt.content}</p>
+              <p className="text-xs text-gray-600 leading-relaxed">{prompt.content}</p>
               
               {copiedId === prompt.id && (
-                <p className="text-xs text-green-600 dark:text-green-400 mt-2">Copied to clipboard!</p>
+                <p className="text-xs text-green-600 mt-1.5 animate-fadeIn">Copied to clipboard!</p>
               )}
             </div>
           ))

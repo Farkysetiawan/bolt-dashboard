@@ -93,32 +93,34 @@ const Dashboard: React.FC = () => {
       case 'all':
       default:
         return (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {/* Quick Links at the top */}
-            <QuickAccessLinks />
+            <div className="animate-fadeIn">
+              <QuickAccessLinks />
+            </div>
             
             {/* Mobile: Stack all components */}
-            <div className="block lg:hidden space-y-5">
-              <TodoList />
-              <DailyJournal />
-              <ContentTracker />
-              <LearningTracker />
-              <PromptBank />
+            <div className="block lg:hidden space-y-4">
+              <div className="stagger-item"><TodoList /></div>
+              <div className="stagger-item"><DailyJournal /></div>
+              <div className="stagger-item"><ContentTracker /></div>
+              <div className="stagger-item"><LearningTracker /></div>
+              <div className="stagger-item"><PromptBank /></div>
             </div>
             
             {/* Desktop: Grid layout */}
-            <div className="hidden lg:grid lg:grid-cols-3 gap-5">
+            <div className="hidden lg:grid lg:grid-cols-3 gap-4">
               {/* Left Column */}
-              <div className="lg:col-span-2 space-y-5">
-                <TodoList />
-                <ContentTracker />
-                <LearningTracker />
+              <div className="lg:col-span-2 space-y-4">
+                <div className="stagger-item"><TodoList /></div>
+                <div className="stagger-item"><ContentTracker /></div>
+                <div className="stagger-item"><LearningTracker /></div>
               </div>
               
               {/* Right Column */}
-              <div className="space-y-5">
-                <DailyJournal />
-                <PromptBank />
+              <div className="space-y-4">
+                <div className="stagger-item"><DailyJournal /></div>
+                <div className="stagger-item"><PromptBank /></div>
               </div>
             </div>
           </div>
@@ -157,20 +159,20 @@ const Dashboard: React.FC = () => {
       />
       
       {/* Add top padding to account for fixed header */}
-      <div className="pt-14">
+      <div className="pt-12">
         {/* Mobile Navigation */}
         <div className="lg:hidden">
           {/* Mobile Header */}
-          <div className="sticky top-14 z-30 bg-white border-b border-gray-200 px-4 py-3">
+          <div className="sticky top-12 z-30 bg-white border-b border-gray-200 px-3 py-2 animate-slideDown">
             <div className="flex items-center justify-between">
-              <h1 className="text-base font-semibold text-gray-900">
+              <h1 className="text-sm font-semibold text-gray-900">
                 {activeCategory === 'profile' ? 'Profile' : 
                  activeCategory === 'analytics' ? 'Analytics' :
                  categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
               </h1>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-150"
+                className="btn-icon-secondary micro-bounce"
               >
                 {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
@@ -181,18 +183,19 @@ const Dashboard: React.FC = () => {
           {mobileMenuOpen && (
             <>
               <div 
-                className="fixed inset-0 bg-black bg-opacity-25 z-40"
+                className="fixed inset-0 bg-black bg-opacity-25 z-40 animate-fadeIn"
                 onClick={() => setMobileMenuOpen(false)}
               />
-              <div className="fixed top-24 left-3 right-3 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
+              <div className="fixed top-20 left-2 right-2 bg-white rounded-xl shadow-lg z-50 border border-gray-200 animate-scaleIn">
                 <div className="p-1">
-                  {categories.map((category) => (
+                  {categories.map((category, index) => (
                     <button
                       key={category.id}
                       onClick={() => handleCategorySelect(category.id)}
-                      className={`sidebar-nav-item w-full ${
+                      className={`sidebar-nav-item w-full stagger-item ${
                         activeCategory === category.id ? 'active' : ''
                       }`}
+                      style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <span className="text-gray-400">{category.icon}</span>
                       <span>{category.name}</span>
@@ -206,19 +209,20 @@ const Dashboard: React.FC = () => {
 
         {/* Desktop Sidebar */}
         <div className="hidden lg:block">
-          <div className="fixed top-14 left-0 w-56 h-screen bg-white border-r border-gray-200 overflow-y-auto">
-            <div className="p-5">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+          <div className="fixed top-12 left-0 w-52 h-screen bg-white border-r border-gray-200 overflow-y-auto animate-slideIn">
+            <div className="p-4">
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
                 Navigation
               </h2>
               <nav className="sidebar-nav">
-                {categories.map((category) => (
+                {categories.map((category, index) => (
                   <button
                     key={category.id}
                     onClick={() => setActiveCategory(category.id)}
-                    className={`sidebar-nav-item w-full ${
+                    className={`sidebar-nav-item w-full stagger-item ${
                       activeCategory === category.id ? 'active' : ''
                     }`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <span className="text-gray-400">{category.icon}</span>
                     <span>{category.name}</span>
@@ -230,10 +234,10 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <main className="lg:ml-56">
-          <div className="max-w-7xl mx-auto px-4 py-5 lg:px-6 lg:py-6">
+        <main className="lg:ml-52">
+          <div className="max-w-7xl mx-auto px-3 py-4 lg:px-4 lg:py-5">
             {/* Desktop Page Header */}
-            <div className="page-header hidden lg:block">
+            <div className="page-header hidden lg:block animate-fadeIn">
               <h1 className="page-title">
                 {activeCategory === 'profile' ? 'Profile' : 
                  activeCategory === 'analytics' ? 'Analytics' :

@@ -70,22 +70,22 @@ const DailyJournal: React.FC = () => {
     <div className="card animate-fadeIn">
       {/* Header */}
       <div className="card-header">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-            <BookOpen className="w-4 h-4 text-white" />
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center hover-scale">
+            <BookOpen className="w-3 h-3 text-white" />
           </div>
           <h2 className="card-title">Daily Journal</h2>
         </div>
         {lastSaved && (
-          <span className="text-xs text-gray-500 dark:text-slate-400">
+          <span className="text-xs text-gray-500 animate-fadeIn">
             Saved {format(lastSaved, 'HH:mm')}
           </span>
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Date */}
-        <div className="text-sm text-gray-600 dark:text-slate-400">
+        <div className="text-xs text-gray-600">
           {format(new Date(), 'EEEE, MMMM d, yyyy')}
         </div>
         
@@ -94,16 +94,16 @@ const DailyJournal: React.FC = () => {
           value={entry}
           onChange={(e) => setEntry(e.target.value)}
           placeholder="How was your day? What are you thinking about?"
-          className="textarea h-32"
+          className="textarea h-24 resize-none"
         />
         
         {/* Save Button */}
         <button
           onClick={saveEntry}
           disabled={saving || !entry.trim()}
-          className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed micro-bounce"
         >
-          <Save className="w-4 h-4 mr-2" />
+          <Save className="w-3 h-3 mr-1.5" />
           {saving ? 'Saving...' : 'Save Entry'}
         </button>
       </div>
