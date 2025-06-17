@@ -338,7 +338,7 @@
   }
 }
 
-/* CRITICAL FIX: Sidebar styles with guaranteed text visibility */
+/* ULTIMATE FIX: Sidebar styles with guaranteed text visibility */
 .sidebar {
   @apply bg-white border-r border-gray-200;
 }
@@ -347,43 +347,82 @@
   @apply space-y-1;
 }
 
-/* FIXED: Sidebar navigation item with explicit text colors */
+/* ULTIMATE SOLUTION: Sidebar navigation with forced text visibility */
 .sidebar-nav-item {
-  @apply flex items-center space-x-2 px-2.5 py-2 text-xs font-medium rounded-lg transition-all duration-200 hover-lift;
-  /* CRITICAL: Set explicit text color that won't be overridden */
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.5rem 0.625rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.2s ease-out !important;
+  cursor: pointer !important;
+  /* CRITICAL: Force text color that cannot be overridden */
   color: #6b7280 !important; /* gray-500 */
+  text-decoration: none !important;
 }
 
-/* FIXED: Hover state with explicit color */
+/* ULTIMATE: Hover state */
 .sidebar-nav-item:hover:not(.active) {
-  @apply bg-gray-50;
+  background-color: #f9fafb !important; /* gray-50 */
   color: #374151 !important; /* gray-700 */
+  transform: translateY(-1px) !important;
 }
 
-/* FIXED: Active state with explicit colors and !important */
+/* ULTIMATE: Active state with maximum specificity */
 .sidebar-nav-item.active {
-  @apply bg-blue-50 animate-scaleIn;
-  color: #1d4ed8 !important; /* blue-700 */
   background-color: #eff6ff !important; /* blue-50 */
+  color: #1d4ed8 !important; /* blue-700 */
+  animation: scaleIn 0.2s ease-out !important;
 }
 
-/* CRITICAL: Force all child elements to inherit the text color */
-.sidebar-nav-item span {
+/* ULTIMATE: Force all text elements to be visible */
+.sidebar-nav-item span,
+.sidebar-nav-item > span,
+.sidebar-nav-item .text,
+.sidebar-nav-item > .text {
   color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
 }
 
-/* CRITICAL: Force icon colors to match text */
-.sidebar-nav-item svg {
+/* ULTIMATE: Force all icon elements to be visible */
+.sidebar-nav-item svg,
+.sidebar-nav-item > svg,
+.sidebar-nav-item .icon,
+.sidebar-nav-item > .icon {
   color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline !important;
+  width: 1rem !important;
+  height: 1rem !important;
 }
 
-/* CRITICAL: Ensure active state text is always visible */
-.sidebar-nav-item.active span {
+/* ULTIMATE: Active state text and icons */
+.sidebar-nav-item.active span,
+.sidebar-nav-item.active > span,
+.sidebar-nav-item.active .text,
+.sidebar-nav-item.active > .text {
   color: #1d4ed8 !important; /* blue-700 */
 }
 
-.sidebar-nav-item.active svg {
+.sidebar-nav-item.active svg,
+.sidebar-nav-item.active > svg,
+.sidebar-nav-item.active .icon,
+.sidebar-nav-item.active > .icon {
   color: #2563eb !important; /* blue-600 */
+}
+
+/* ULTIMATE: Override any conflicting styles */
+.sidebar-nav-item * {
+  color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .search-input {
