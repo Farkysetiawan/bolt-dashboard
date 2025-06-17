@@ -94,13 +94,15 @@ const Dashboard: React.FC = () => {
       default:
         return (
           <div className="space-y-5">
+            {/* Quick Links at the top */}
+            <QuickAccessLinks />
+            
             {/* Mobile: Stack all components */}
             <div className="block lg:hidden space-y-5">
               <TodoList />
               <DailyJournal />
               <ContentTracker />
               <LearningTracker />
-              <QuickAccessLinks />
               <PromptBank />
             </div>
             
@@ -116,7 +118,6 @@ const Dashboard: React.FC = () => {
               {/* Right Column */}
               <div className="space-y-5">
                 <DailyJournal />
-                <QuickAccessLinks />
                 <PromptBank />
               </div>
             </div>
