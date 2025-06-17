@@ -336,7 +336,7 @@
   }
 }
 
-/* ULTIMATE SIDEBAR FIX - MAXIMUM SPECIFICITY */
+/* CRITICAL: ULTIMATE SIDEBAR FIX - FORCE TEXT VISIBILITY */
 .sidebar {
   background-color: white !important;
   border-right: 1px solid #e5e7eb !important;
@@ -348,12 +348,15 @@
   gap: 0.25rem !important;
 }
 
-/* CRITICAL: ULTIMATE SIDEBAR ITEM FIX WITH MAXIMUM SPECIFICITY */
-.sidebar-nav .sidebar-nav-item,
-.sidebar-nav > .sidebar-nav-item,
-.sidebar-nav-item,
+/* CRITICAL: FORCE SIDEBAR ITEM VISIBILITY WITH MAXIMUM SPECIFICITY */
+.sidebar .sidebar-nav .sidebar-nav-item,
+.sidebar .sidebar-nav > .sidebar-nav-item,
+.sidebar .sidebar-nav-item,
+.sidebar button.sidebar-nav-item,
+.sidebar a.sidebar-nav-item,
 button.sidebar-nav-item,
-a.sidebar-nav-item {
+a.sidebar-nav-item,
+.sidebar-nav-item {
   /* FORCE LAYOUT */
   display: flex !important;
   align-items: center !important;
@@ -390,14 +393,21 @@ a.sidebar-nav-item {
   box-sizing: border-box !important;
 }
 
-/* CRITICAL: FORCE TEXT AND ICON VISIBILITY */
-.sidebar-nav-item span,
-.sidebar-nav-item > span,
-.sidebar-nav-item .text,
+/* CRITICAL: FORCE TEXT VISIBILITY WITH MAXIMUM SPECIFICITY */
+.sidebar .sidebar-nav .sidebar-nav-item span,
+.sidebar .sidebar-nav .sidebar-nav-item > span,
+.sidebar .sidebar-nav-item span,
+.sidebar .sidebar-nav-item > span,
+.sidebar button.sidebar-nav-item span,
+.sidebar button.sidebar-nav-item > span,
+.sidebar a.sidebar-nav-item span,
+.sidebar a.sidebar-nav-item > span,
 button.sidebar-nav-item span,
 button.sidebar-nav-item > span,
 a.sidebar-nav-item span,
-a.sidebar-nav-item > span {
+a.sidebar-nav-item > span,
+.sidebar-nav-item span,
+.sidebar-nav-item > span {
   /* FORCE TEXT VISIBILITY */
   display: inline-block !important;
   visibility: visible !important;
@@ -417,15 +427,26 @@ a.sidebar-nav-item > span {
   min-width: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+  
+  /* FORCE CONTENT */
+  content: attr(data-text) !important;
 }
 
-.sidebar-nav-item svg,
-.sidebar-nav-item > svg,
-.sidebar-nav-item .icon,
+/* CRITICAL: FORCE ICON VISIBILITY */
+.sidebar .sidebar-nav .sidebar-nav-item svg,
+.sidebar .sidebar-nav .sidebar-nav-item > svg,
+.sidebar .sidebar-nav-item svg,
+.sidebar .sidebar-nav-item > svg,
+.sidebar button.sidebar-nav-item svg,
+.sidebar button.sidebar-nav-item > svg,
+.sidebar a.sidebar-nav-item svg,
+.sidebar a.sidebar-nav-item > svg,
 button.sidebar-nav-item svg,
 button.sidebar-nav-item > svg,
 a.sidebar-nav-item svg,
-a.sidebar-nav-item > svg {
+a.sidebar-nav-item > svg,
+.sidebar-nav-item svg,
+.sidebar-nav-item > svg {
   /* FORCE ICON VISIBILITY */
   display: inline-block !important;
   visibility: visible !important;
@@ -443,61 +464,91 @@ a.sidebar-nav-item > svg {
 }
 
 /* CRITICAL: HOVER STATE */
-.sidebar-nav-item:hover:not(.active),
+.sidebar .sidebar-nav-item:hover:not(.active),
+.sidebar button.sidebar-nav-item:hover:not(.active),
+.sidebar a.sidebar-nav-item:hover:not(.active),
 button.sidebar-nav-item:hover:not(.active),
-a.sidebar-nav-item:hover:not(.active) {
+a.sidebar-nav-item:hover:not(.active),
+.sidebar-nav-item:hover:not(.active) {
   background-color: #f9fafb !important;
   color: #374151 !important;
   transform: translateY(-1px) !important;
 }
 
 /* CRITICAL: ACTIVE STATE */
-.sidebar-nav-item.active,
+.sidebar .sidebar-nav-item.active,
+.sidebar button.sidebar-nav-item.active,
+.sidebar a.sidebar-nav-item.active,
 button.sidebar-nav-item.active,
-a.sidebar-nav-item.active {
+a.sidebar-nav-item.active,
+.sidebar-nav-item.active {
   background-color: #eff6ff !important;
   color: #1d4ed8 !important;
   animation: scaleIn 0.2s ease-out !important;
 }
 
 /* CRITICAL: FORCE ACTIVE STATE TEXT AND ICONS */
-.sidebar-nav-item.active span,
-.sidebar-nav-item.active > span,
+.sidebar .sidebar-nav-item.active span,
+.sidebar .sidebar-nav-item.active > span,
+.sidebar button.sidebar-nav-item.active span,
+.sidebar button.sidebar-nav-item.active > span,
+.sidebar a.sidebar-nav-item.active span,
+.sidebar a.sidebar-nav-item.active > span,
 button.sidebar-nav-item.active span,
 button.sidebar-nav-item.active > span,
 a.sidebar-nav-item.active span,
-a.sidebar-nav-item.active > span {
+a.sidebar-nav-item.active > span,
+.sidebar-nav-item.active span,
+.sidebar-nav-item.active > span {
   color: #1d4ed8 !important;
 }
 
-.sidebar-nav-item.active svg,
-.sidebar-nav-item.active > svg,
+.sidebar .sidebar-nav-item.active svg,
+.sidebar .sidebar-nav-item.active > svg,
+.sidebar button.sidebar-nav-item.active svg,
+.sidebar button.sidebar-nav-item.active > svg,
+.sidebar a.sidebar-nav-item.active svg,
+.sidebar a.sidebar-nav-item.active > svg,
 button.sidebar-nav-item.active svg,
 button.sidebar-nav-item.active > svg,
 a.sidebar-nav-item.active svg,
-a.sidebar-nav-item.active > svg {
+a.sidebar-nav-item.active > svg,
+.sidebar-nav-item.active svg,
+.sidebar-nav-item.active > svg {
   color: #2563eb !important;
 }
 
 /* CRITICAL: OVERRIDE ANY CONFLICTING STYLES */
-.sidebar-nav-item *,
-.sidebar-nav-item > *,
+.sidebar .sidebar-nav-item *,
+.sidebar .sidebar-nav-item > *,
+.sidebar button.sidebar-nav-item *,
+.sidebar button.sidebar-nav-item > *,
+.sidebar a.sidebar-nav-item *,
+.sidebar a.sidebar-nav-item > *,
 button.sidebar-nav-item *,
 button.sidebar-nav-item > *,
 a.sidebar-nav-item *,
-a.sidebar-nav-item > * {
+a.sidebar-nav-item > *,
+.sidebar-nav-item *,
+.sidebar-nav-item > * {
   color: inherit !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
 
 /* CRITICAL: FORCE FOCUS STATES */
-.sidebar-nav-item:focus,
-.sidebar-nav-item:focus-visible,
+.sidebar .sidebar-nav-item:focus,
+.sidebar .sidebar-nav-item:focus-visible,
+.sidebar button.sidebar-nav-item:focus,
+.sidebar button.sidebar-nav-item:focus-visible,
+.sidebar a.sidebar-nav-item:focus,
+.sidebar a.sidebar-nav-item:focus-visible,
 button.sidebar-nav-item:focus,
 button.sidebar-nav-item:focus-visible,
 a.sidebar-nav-item:focus,
-a.sidebar-nav-item:focus-visible {
+a.sidebar-nav-item:focus-visible,
+.sidebar-nav-item:focus,
+.sidebar-nav-item:focus-visible {
   outline: 2px solid #3b82f6 !important;
   outline-offset: 2px !important;
 }
