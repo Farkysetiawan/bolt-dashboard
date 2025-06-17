@@ -15,7 +15,7 @@ export default defineConfig({
   },
   server: {
     // Enable HTTPS for PWA testing in development
-    // https: true,
+    https: true,
     host: true, // Allow external connections for mobile testing
   }
 })
