@@ -26,7 +26,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   return (
-    <header className="header sticky top-0 z-50">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
         <div className="flex justify-between items-center h-14">
           {/* Logo */}
@@ -96,4 +96,4 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   );
 };
 
-export default DashboardHeader
+export default DashboardHeader;
