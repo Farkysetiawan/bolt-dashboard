@@ -279,10 +279,10 @@ const QuickLinksManager: React.FC = () => {
           <button
             onClick={() => setShowAddForm(!showAddForm)}
             disabled={links.length >= 10}
-            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            title={`Add Link (${links.length}/10)`}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Link ({links.length}/10)
+            <Plus className="w-4 h-4" />
           </button>
         </div>
 

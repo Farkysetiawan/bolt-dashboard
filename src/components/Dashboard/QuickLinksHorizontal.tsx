@@ -56,9 +56,9 @@ const QuickLinksHorizontal: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex space-x-2">
+      <div className="flex space-x-2 overflow-x-auto pb-2">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="w-12 h-12 bg-gray-100 rounded-lg animate-pulse"></div>
+          <div key={i} className="w-16 h-16 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
         ))}
       </div>
     );
@@ -67,7 +67,7 @@ const QuickLinksHorizontal: React.FC = () => {
   if (links.length === 0) {
     return (
       <div className="text-center py-4">
-        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
           <Link className="w-6 h-6 text-gray-400" />
         </div>
         <p className="text-sm text-gray-500">No quick links yet</p>
@@ -76,7 +76,7 @@ const QuickLinksHorizontal: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
       {links.map((link) => {
         const hasCustomLogo = isValidImageUrl(link.icon || '');
         return (
@@ -85,15 +85,15 @@ const QuickLinksHorizontal: React.FC = () => {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col items-center p-2 bg-white border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all duration-150 min-w-[60px]"
+            className="group flex flex-col items-center flex-shrink-0"
             title={link.title || getDomainFromUrl(link.url)}
           >
-            <div className="w-8 h-8 flex items-center justify-center text-gray-600 group-hover:text-blue-600 transition-colors duration-150">
+            <div className="w-16 h-16 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:border-gray-300 hover:shadow-sm transition-all duration-150 mb-2">
               {hasCustomLogo ? (
                 <img
                   src={link.icon}
                   alt={link.title || 'Logo'}
-                  className="w-8 h-8 object-cover rounded"
+                  className="w-12 h-12 object-cover rounded"
                   onError={(e) => {
                     // Fallback to default icon if image fails to load
                     e.currentTarget.style.display = 'none';
@@ -101,9 +101,9 @@ const QuickLinksHorizontal: React.FC = () => {
                   }}
                 />
               ) : null}
-              <ExternalLink className={`w-5 h-5 ${hasCustomLogo ? 'hidden' : ''}`} />
+              <ExternalLink className={`w-6 h-6 text-gray-600 group-hover:text-blue-600 transition-colors duration-150 ${hasCustomLogo ? 'hidden' : ''}`} />
             </div>
-            <span className="text-xs text-gray-600 group-hover:text-gray-900 mt-1 text-center truncate max-w-[50px]">
+            <span className="text-xs text-gray-600 group-hover:text-gray-900 text-center truncate max-w-[64px] leading-tight">
               {link.title || getDomainFromUrl(link.url)}
             </span>
           </a>
