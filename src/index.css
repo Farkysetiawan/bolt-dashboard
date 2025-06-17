@@ -337,7 +337,7 @@
 }
 
 /* ========================================
-   🚀 ULTIMATE SIDEBAR FIX - NUCLEAR OPTION
+   🚀 ULTIMATE SIDEBAR FIX - HORIZONTAL LAYOUT
    ======================================== */
 
 /* FORCE SIDEBAR CONTAINER */
@@ -356,11 +356,11 @@ div.sidebar,
 [class*="sidebar-nav"] {
   display: flex !important;
   flex-direction: column !important;
-  gap: 1px !important; /* SUPER RAPAT - 1px gap antar item */
+  gap: 2px !important; /* MINIMAL gap antar item */
 }
 
 /* ========================================
-   🔥 NUCLEAR SIDEBAR ITEM FIX - MAXIMUM FORCE
+   🔥 NUCLEAR SIDEBAR ITEM FIX - HORIZONTAL LAYOUT
    ======================================== */
 
 /* TARGET SEMUA KEMUNGKINAN SELECTOR - NUCLEAR APPROACH */
@@ -392,25 +392,26 @@ div.sidebar nav a,
 [class*="sidebar"] a.sidebar-nav-item,
 [class*="sidebar"] nav button,
 [class*="sidebar"] nav a {
-  /* FORCE LAYOUT - SUPER DEMPET */
+  /* FORCE HORIZONTAL LAYOUT - SAMPING-SAMPINGAN */
   display: flex !important;
+  flex-direction: row !important; /* HORIZONTAL - KIRI KANAN */
   align-items: center !important;
   justify-content: flex-start !important;
-  gap: 4px !important; /* SUPER RAPAT - 4px gap antara icon dan text */
+  gap: 8px !important; /* JARAK ICON DAN TEXT - DEMPET TAPI ADA SEDIKIT SPACE */
   
-  /* FORCE SPACING - ULTRA COMPACT */
-  padding: 4px 6px !important; /* Lebih kecil padding */
+  /* FORCE SPACING - COMPACT DENGAN PADDING */
+  padding: 6px 8px !important; /* PADDING KECIL TAPI CUKUP */
   margin: 0 !important;
   
   /* FORCE TYPOGRAPHY */
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 500 !important;
   line-height: 1.2 !important;
   text-decoration: none !important;
   white-space: nowrap !important;
   
   /* FORCE APPEARANCE */
-  border-radius: 4px !important;
+  border-radius: 6px !important;
   border: none !important;
   outline: none !important;
   cursor: pointer !important;
@@ -424,15 +425,15 @@ div.sidebar nav a,
   
   /* FORCE DIMENSIONS */
   width: 100% !important;
-  min-height: 24px !important; /* Lebih kecil height */
+  min-height: 28px !important; /* HEIGHT YANG PAS */
   box-sizing: border-box !important;
 }
 
 /* ========================================
-   💥 FORCE TEXT VISIBILITY - NUCLEAR POWER
+   💥 FORCE TEXT VISIBILITY - HORIZONTAL
    ======================================== */
 
-/* TARGET SEMUA KEMUNGKINAN TEXT ELEMENT - NUCLEAR APPROACH */
+/* TARGET SEMUA KEMUNGKINAN TEXT ELEMENT */
 .sidebar button span,
 .sidebar a span,
 .sidebar .sidebar-nav-item span,
@@ -499,7 +500,7 @@ div.sidebar nav a > span,
   text-overflow: ellipsis !important;
   overflow: visible !important;
   
-  /* FORCE LAYOUT - DEMPET */
+  /* FORCE LAYOUT - HORIZONTAL */
   flex: 1 !important;
   min-width: 0 !important;
   margin: 0 !important;
@@ -508,16 +509,13 @@ div.sidebar nav a > span,
   /* FORCE POSITIONING */
   position: relative !important;
   z-index: 10 !important;
-  
-  /* FORCE CONTENT */
-  content: attr(data-text) !important;
 }
 
 /* ========================================
-   🎯 FORCE ICON VISIBILITY - NUCLEAR POWER
+   🎯 FORCE ICON VISIBILITY - HORIZONTAL
    ======================================== */
 
-/* TARGET SEMUA KEMUNGKINAN ICON ELEMENT - NUCLEAR APPROACH */
+/* TARGET SEMUA KEMUNGKINAN ICON ELEMENT */
 .sidebar button svg,
 .sidebar a svg,
 .sidebar .sidebar-nav-item svg,
@@ -577,8 +575,8 @@ div.sidebar nav a > svg,
   
   /* FORCE ICON PROPERTIES - COMPACT */
   color: inherit !important;
-  width: 12px !important; /* Lebih kecil icon */
-  height: 12px !important;
+  width: 14px !important; /* ICON SIZE YANG PAS */
+  height: 14px !important;
   flex-shrink: 0 !important;
   
   /* FORCE LAYOUT */
@@ -591,7 +589,7 @@ div.sidebar nav a > svg,
 }
 
 /* ========================================
-   🎨 HOVER & ACTIVE STATES - NUCLEAR POWER
+   🎨 HOVER & ACTIVE STATES - HORIZONTAL
    ======================================== */
 
 /* HOVER STATE - NUCLEAR APPROACH */
