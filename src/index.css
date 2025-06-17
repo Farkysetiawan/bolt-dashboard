@@ -337,13 +337,14 @@
 }
 
 /* ========================================
-   ULTIMATE SIDEBAR FIX - MAXIMUM FORCE
+   🚀 ULTIMATE SIDEBAR FIX - NUCLEAR OPTION
    ======================================== */
 
 /* FORCE SIDEBAR CONTAINER */
 .sidebar,
 div.sidebar,
-.fixed.sidebar {
+.fixed.sidebar,
+[class*="sidebar"] {
   background-color: white !important;
   border-right: 1px solid #e5e7eb !important;
 }
@@ -351,17 +352,18 @@ div.sidebar,
 /* FORCE SIDEBAR NAV CONTAINER */
 .sidebar .sidebar-nav,
 .sidebar nav,
-.sidebar-nav {
+.sidebar-nav,
+[class*="sidebar-nav"] {
   display: flex !important;
   flex-direction: column !important;
-  gap: 2px !important; /* SUPER RAPAT - 2px gap antar item */
+  gap: 1px !important; /* SUPER RAPAT - 1px gap antar item */
 }
 
 /* ========================================
-   ULTIMATE SIDEBAR ITEM FIX - DEMPET
+   🔥 NUCLEAR SIDEBAR ITEM FIX - MAXIMUM FORCE
    ======================================== */
 
-/* TARGET SEMUA KEMUNGKINAN SELECTOR */
+/* TARGET SEMUA KEMUNGKINAN SELECTOR - NUCLEAR APPROACH */
 .sidebar button,
 .sidebar a,
 .sidebar .sidebar-nav-item,
@@ -371,26 +373,44 @@ button.sidebar-nav-item,
 a.sidebar-nav-item,
 .sidebar-nav-item,
 .sidebar nav button,
-.sidebar nav a {
+.sidebar nav a,
+.sidebar [role="button"],
+.sidebar [class*="nav-item"],
+.sidebar [class*="sidebar-nav"],
+.sidebar [class*="menu-item"],
+div.sidebar button,
+div.sidebar a,
+div.sidebar .sidebar-nav-item,
+div.sidebar button.sidebar-nav-item,
+div.sidebar a.sidebar-nav-item,
+div.sidebar nav button,
+div.sidebar nav a,
+[class*="sidebar"] button,
+[class*="sidebar"] a,
+[class*="sidebar"] .sidebar-nav-item,
+[class*="sidebar"] button.sidebar-nav-item,
+[class*="sidebar"] a.sidebar-nav-item,
+[class*="sidebar"] nav button,
+[class*="sidebar"] nav a {
   /* FORCE LAYOUT - SUPER DEMPET */
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  gap: 6px !important; /* SUPER RAPAT - 6px gap antara icon dan text */
+  gap: 4px !important; /* SUPER RAPAT - 4px gap antara icon dan text */
   
-  /* FORCE SPACING - COMPACT */
-  padding: 6px 8px !important; /* Lebih kecil padding */
+  /* FORCE SPACING - ULTRA COMPACT */
+  padding: 4px 6px !important; /* Lebih kecil padding */
   margin: 0 !important;
   
   /* FORCE TYPOGRAPHY */
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 500 !important;
   line-height: 1.2 !important;
   text-decoration: none !important;
   white-space: nowrap !important;
   
   /* FORCE APPEARANCE */
-  border-radius: 6px !important;
+  border-radius: 4px !important;
   border: none !important;
   outline: none !important;
   cursor: pointer !important;
@@ -404,15 +424,15 @@ a.sidebar-nav-item,
   
   /* FORCE DIMENSIONS */
   width: 100% !important;
-  min-height: 28px !important; /* Lebih kecil height */
+  min-height: 24px !important; /* Lebih kecil height */
   box-sizing: border-box !important;
 }
 
 /* ========================================
-   FORCE TEXT VISIBILITY - MAXIMUM POWER
+   💥 FORCE TEXT VISIBILITY - NUCLEAR POWER
    ======================================== */
 
-/* TARGET SEMUA KEMUNGKINAN TEXT ELEMENT */
+/* TARGET SEMUA KEMUNGKINAN TEXT ELEMENT - NUCLEAR APPROACH */
 .sidebar button span,
 .sidebar a span,
 .sidebar .sidebar-nav-item span,
@@ -432,8 +452,40 @@ button.sidebar-nav-item > span,
 a.sidebar-nav-item > span,
 .sidebar-nav-item > span,
 .sidebar nav button > span,
-.sidebar nav a > span {
-  /* FORCE TEXT VISIBILITY - MAXIMUM POWER */
+.sidebar nav a > span,
+.sidebar [role="button"] span,
+.sidebar [class*="nav-item"] span,
+.sidebar [class*="sidebar-nav"] span,
+.sidebar [class*="menu-item"] span,
+div.sidebar button span,
+div.sidebar a span,
+div.sidebar .sidebar-nav-item span,
+div.sidebar button.sidebar-nav-item span,
+div.sidebar a.sidebar-nav-item span,
+div.sidebar nav button span,
+div.sidebar nav a span,
+div.sidebar button > span,
+div.sidebar a > span,
+div.sidebar .sidebar-nav-item > span,
+div.sidebar button.sidebar-nav-item > span,
+div.sidebar a.sidebar-nav-item > span,
+div.sidebar nav button > span,
+div.sidebar nav a > span,
+[class*="sidebar"] button span,
+[class*="sidebar"] a span,
+[class*="sidebar"] .sidebar-nav-item span,
+[class*="sidebar"] button.sidebar-nav-item span,
+[class*="sidebar"] a.sidebar-nav-item span,
+[class*="sidebar"] nav button span,
+[class*="sidebar"] nav a span,
+[class*="sidebar"] button > span,
+[class*="sidebar"] a > span,
+[class*="sidebar"] .sidebar-nav-item > span,
+[class*="sidebar"] button.sidebar-nav-item > span,
+[class*="sidebar"] a.sidebar-nav-item > span,
+[class*="sidebar"] nav button > span,
+[class*="sidebar"] nav a > span {
+  /* FORCE TEXT VISIBILITY - NUCLEAR POWER */
   display: inline-block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -455,14 +507,17 @@ a.sidebar-nav-item > span,
   
   /* FORCE POSITIONING */
   position: relative !important;
-  z-index: 1 !important;
+  z-index: 10 !important;
+  
+  /* FORCE CONTENT */
+  content: attr(data-text) !important;
 }
 
 /* ========================================
-   FORCE ICON VISIBILITY - DEMPET
+   🎯 FORCE ICON VISIBILITY - NUCLEAR POWER
    ======================================== */
 
-/* TARGET SEMUA KEMUNGKINAN ICON ELEMENT */
+/* TARGET SEMUA KEMUNGKINAN ICON ELEMENT - NUCLEAR APPROACH */
 .sidebar button svg,
 .sidebar a svg,
 .sidebar .sidebar-nav-item svg,
@@ -482,7 +537,39 @@ button.sidebar-nav-item > svg,
 a.sidebar-nav-item > svg,
 .sidebar-nav-item > svg,
 .sidebar nav button > svg,
-.sidebar nav a > svg {
+.sidebar nav a > svg,
+.sidebar [role="button"] svg,
+.sidebar [class*="nav-item"] svg,
+.sidebar [class*="sidebar-nav"] svg,
+.sidebar [class*="menu-item"] svg,
+div.sidebar button svg,
+div.sidebar a svg,
+div.sidebar .sidebar-nav-item svg,
+div.sidebar button.sidebar-nav-item svg,
+div.sidebar a.sidebar-nav-item svg,
+div.sidebar nav button svg,
+div.sidebar nav a svg,
+div.sidebar button > svg,
+div.sidebar a > svg,
+div.sidebar .sidebar-nav-item > svg,
+div.sidebar button.sidebar-nav-item > svg,
+div.sidebar a.sidebar-nav-item > svg,
+div.sidebar nav button > svg,
+div.sidebar nav a > svg,
+[class*="sidebar"] button svg,
+[class*="sidebar"] a svg,
+[class*="sidebar"] .sidebar-nav-item svg,
+[class*="sidebar"] button.sidebar-nav-item svg,
+[class*="sidebar"] a.sidebar-nav-item svg,
+[class*="sidebar"] nav button svg,
+[class*="sidebar"] nav a svg,
+[class*="sidebar"] button > svg,
+[class*="sidebar"] a > svg,
+[class*="sidebar"] .sidebar-nav-item > svg,
+[class*="sidebar"] button.sidebar-nav-item > svg,
+[class*="sidebar"] a.sidebar-nav-item > svg,
+[class*="sidebar"] nav button > svg,
+[class*="sidebar"] nav a > svg {
   /* FORCE ICON VISIBILITY */
   display: inline-block !important;
   visibility: visible !important;
@@ -490,8 +577,8 @@ a.sidebar-nav-item > svg,
   
   /* FORCE ICON PROPERTIES - COMPACT */
   color: inherit !important;
-  width: 14px !important; /* Sedikit lebih kecil icon */
-  height: 14px !important;
+  width: 12px !important; /* Lebih kecil icon */
+  height: 12px !important;
   flex-shrink: 0 !important;
   
   /* FORCE LAYOUT */
@@ -500,14 +587,14 @@ a.sidebar-nav-item > svg,
   
   /* FORCE POSITIONING */
   position: relative !important;
-  z-index: 1 !important;
+  z-index: 10 !important;
 }
 
 /* ========================================
-   HOVER & ACTIVE STATES - DEMPET
+   🎨 HOVER & ACTIVE STATES - NUCLEAR POWER
    ======================================== */
 
-/* HOVER STATE */
+/* HOVER STATE - NUCLEAR APPROACH */
 .sidebar button:hover:not(.active),
 .sidebar a:hover:not(.active),
 .sidebar .sidebar-nav-item:hover:not(.active),
@@ -517,13 +604,27 @@ button.sidebar-nav-item:hover:not(.active),
 a.sidebar-nav-item:hover:not(.active),
 .sidebar-nav-item:hover:not(.active),
 .sidebar nav button:hover:not(.active),
-.sidebar nav a:hover:not(.active) {
+.sidebar nav a:hover:not(.active),
+div.sidebar button:hover:not(.active),
+div.sidebar a:hover:not(.active),
+div.sidebar .sidebar-nav-item:hover:not(.active),
+div.sidebar button.sidebar-nav-item:hover:not(.active),
+div.sidebar a.sidebar-nav-item:hover:not(.active),
+div.sidebar nav button:hover:not(.active),
+div.sidebar nav a:hover:not(.active),
+[class*="sidebar"] button:hover:not(.active),
+[class*="sidebar"] a:hover:not(.active),
+[class*="sidebar"] .sidebar-nav-item:hover:not(.active),
+[class*="sidebar"] button.sidebar-nav-item:hover:not(.active),
+[class*="sidebar"] a.sidebar-nav-item:hover:not(.active),
+[class*="sidebar"] nav button:hover:not(.active),
+[class*="sidebar"] nav a:hover:not(.active) {
   background-color: #f9fafb !important;
   color: #374151 !important;
   transform: translateY(-1px) !important;
 }
 
-/* ACTIVE STATE */
+/* ACTIVE STATE - NUCLEAR APPROACH */
 .sidebar button.active,
 .sidebar a.active,
 .sidebar .sidebar-nav-item.active,
@@ -533,13 +634,27 @@ button.sidebar-nav-item.active,
 a.sidebar-nav-item.active,
 .sidebar-nav-item.active,
 .sidebar nav button.active,
-.sidebar nav a.active {
+.sidebar nav a.active,
+div.sidebar button.active,
+div.sidebar a.active,
+div.sidebar .sidebar-nav-item.active,
+div.sidebar button.sidebar-nav-item.active,
+div.sidebar a.sidebar-nav-item.active,
+div.sidebar nav button.active,
+div.sidebar nav a.active,
+[class*="sidebar"] button.active,
+[class*="sidebar"] a.active,
+[class*="sidebar"] .sidebar-nav-item.active,
+[class*="sidebar"] button.sidebar-nav-item.active,
+[class*="sidebar"] a.sidebar-nav-item.active,
+[class*="sidebar"] nav button.active,
+[class*="sidebar"] nav a.active {
   background-color: #eff6ff !important;
   color: #1d4ed8 !important;
   animation: scaleIn 0.2s ease-out !important;
 }
 
-/* FORCE ACTIVE STATE TEXT AND ICONS */
+/* FORCE ACTIVE STATE TEXT AND ICONS - NUCLEAR APPROACH */
 .sidebar button.active span,
 .sidebar a.active span,
 .sidebar .sidebar-nav-item.active span,
@@ -549,8 +664,25 @@ button.sidebar-nav-item.active span,
 a.sidebar-nav-item.active span,
 .sidebar-nav-item.active span,
 .sidebar nav button.active span,
-.sidebar nav a.active span {
+.sidebar nav a.active span,
+div.sidebar button.active span,
+div.sidebar a.active span,
+div.sidebar .sidebar-nav-item.active span,
+div.sidebar button.sidebar-nav-item.active span,
+div.sidebar a.sidebar-nav-item.active span,
+div.sidebar nav button.active span,
+div.sidebar nav a.active span,
+[class*="sidebar"] button.active span,
+[class*="sidebar"] a.active span,
+[class*="sidebar"] .sidebar-nav-item.active span,
+[class*="sidebar"] button.sidebar-nav-item.active span,
+[class*="sidebar"] a.sidebar-nav-item.active span,
+[class*="sidebar"] nav button.active span,
+[class*="sidebar"] nav a.active span {
   color: #1d4ed8 !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .sidebar button.active svg,
@@ -562,15 +694,32 @@ button.sidebar-nav-item.active svg,
 a.sidebar-nav-item.active svg,
 .sidebar-nav-item.active svg,
 .sidebar nav button.active svg,
-.sidebar nav a.active svg {
+.sidebar nav a.active svg,
+div.sidebar button.active svg,
+div.sidebar a.active svg,
+div.sidebar .sidebar-nav-item.active svg,
+div.sidebar button.sidebar-nav-item.active svg,
+div.sidebar a.sidebar-nav-item.active svg,
+div.sidebar nav button.active svg,
+div.sidebar nav a.active svg,
+[class*="sidebar"] button.active svg,
+[class*="sidebar"] a.active svg,
+[class*="sidebar"] .sidebar-nav-item.active svg,
+[class*="sidebar"] button.sidebar-nav-item.active svg,
+[class*="sidebar"] a.sidebar-nav-item.active svg,
+[class*="sidebar"] nav button.active svg,
+[class*="sidebar"] nav a.active svg {
   color: #2563eb !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* ========================================
-   OVERRIDE CONFLICTING STYLES
+   💣 OVERRIDE CONFLICTING STYLES - NUCLEAR
    ======================================== */
 
-/* FORCE OVERRIDE ANY CONFLICTING STYLES */
+/* FORCE OVERRIDE ANY CONFLICTING STYLES - NUCLEAR APPROACH */
 .sidebar *,
 .sidebar button *,
 .sidebar a *,
@@ -581,13 +730,93 @@ button.sidebar-nav-item *,
 a.sidebar-nav-item *,
 .sidebar-nav-item *,
 .sidebar nav button *,
-.sidebar nav a * {
+.sidebar nav a *,
+div.sidebar *,
+div.sidebar button *,
+div.sidebar a *,
+div.sidebar .sidebar-nav-item *,
+div.sidebar button.sidebar-nav-item *,
+div.sidebar a.sidebar-nav-item *,
+div.sidebar nav button *,
+div.sidebar nav a *,
+[class*="sidebar"] *,
+[class*="sidebar"] button *,
+[class*="sidebar"] a *,
+[class*="sidebar"] .sidebar-nav-item *,
+[class*="sidebar"] button.sidebar-nav-item *,
+[class*="sidebar"] a.sidebar-nav-item *,
+[class*="sidebar"] nav button *,
+[class*="sidebar"] nav a * {
   color: inherit !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
 
-/* FORCE FOCUS STATES */
+/* FORCE REMOVE ANY HIDDEN CLASSES - NUCLEAR APPROACH */
+.sidebar .hidden,
+.sidebar button.hidden,
+.sidebar a.hidden,
+.sidebar .sidebar-nav-item.hidden,
+.sidebar button.sidebar-nav-item.hidden,
+.sidebar a.sidebar-nav-item.hidden,
+button.sidebar-nav-item.hidden,
+a.sidebar-nav-item.hidden,
+.sidebar-nav-item.hidden,
+.sidebar nav button.hidden,
+.sidebar nav a.hidden,
+div.sidebar .hidden,
+div.sidebar button.hidden,
+div.sidebar a.hidden,
+div.sidebar .sidebar-nav-item.hidden,
+div.sidebar button.sidebar-nav-item.hidden,
+div.sidebar a.sidebar-nav-item.hidden,
+div.sidebar nav button.hidden,
+div.sidebar nav a.hidden,
+[class*="sidebar"] .hidden,
+[class*="sidebar"] button.hidden,
+[class*="sidebar"] a.hidden,
+[class*="sidebar"] .sidebar-nav-item.hidden,
+[class*="sidebar"] button.sidebar-nav-item.hidden,
+[class*="sidebar"] a.sidebar-nav-item.hidden,
+[class*="sidebar"] nav button.hidden,
+[class*="sidebar"] nav a.hidden {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* FORCE REMOVE ANY OPACITY CLASSES - NUCLEAR APPROACH */
+.sidebar .opacity-0,
+.sidebar button.opacity-0,
+.sidebar a.opacity-0,
+.sidebar .sidebar-nav-item.opacity-0,
+.sidebar button.sidebar-nav-item.opacity-0,
+.sidebar a.sidebar-nav-item.opacity-0,
+button.sidebar-nav-item.opacity-0,
+a.sidebar-nav-item.opacity-0,
+.sidebar-nav-item.opacity-0,
+.sidebar nav button.opacity-0,
+.sidebar nav a.opacity-0,
+div.sidebar .opacity-0,
+div.sidebar button.opacity-0,
+div.sidebar a.opacity-0,
+div.sidebar .sidebar-nav-item.opacity-0,
+div.sidebar button.sidebar-nav-item.opacity-0,
+div.sidebar a.sidebar-nav-item.opacity-0,
+div.sidebar nav button.opacity-0,
+div.sidebar nav a.opacity-0,
+[class*="sidebar"] .opacity-0,
+[class*="sidebar"] button.opacity-0,
+[class*="sidebar"] a.opacity-0,
+[class*="sidebar"] .sidebar-nav-item.opacity-0,
+[class*="sidebar"] button.sidebar-nav-item.opacity-0,
+[class*="sidebar"] a.sidebar-nav-item.opacity-0,
+[class*="sidebar"] nav button.opacity-0,
+[class*="sidebar"] nav a.opacity-0 {
+  opacity: 1 !important;
+}
+
+/* FORCE FOCUS STATES - NUCLEAR APPROACH */
 .sidebar button:focus,
 .sidebar a:focus,
 .sidebar .sidebar-nav-item:focus,
@@ -607,45 +836,37 @@ button.sidebar-nav-item:focus-visible,
 a.sidebar-nav-item:focus-visible,
 .sidebar-nav-item:focus-visible,
 .sidebar nav button:focus-visible,
-.sidebar nav a:focus-visible {
+.sidebar nav a:focus-visible,
+div.sidebar button:focus,
+div.sidebar a:focus,
+div.sidebar .sidebar-nav-item:focus,
+div.sidebar button.sidebar-nav-item:focus,
+div.sidebar a.sidebar-nav-item:focus,
+div.sidebar nav button:focus,
+div.sidebar nav a:focus,
+div.sidebar button:focus-visible,
+div.sidebar a:focus-visible,
+div.sidebar .sidebar-nav-item:focus-visible,
+div.sidebar button.sidebar-nav-item:focus-visible,
+div.sidebar a.sidebar-nav-item:focus-visible,
+div.sidebar nav button:focus-visible,
+div.sidebar nav a:focus-visible,
+[class*="sidebar"] button:focus,
+[class*="sidebar"] a:focus,
+[class*="sidebar"] .sidebar-nav-item:focus,
+[class*="sidebar"] button.sidebar-nav-item:focus,
+[class*="sidebar"] a.sidebar-nav-item:focus,
+[class*="sidebar"] nav button:focus,
+[class*="sidebar"] nav a:focus,
+[class*="sidebar"] button:focus-visible,
+[class*="sidebar"] a:focus-visible,
+[class*="sidebar"] .sidebar-nav-item:focus-visible,
+[class*="sidebar"] button.sidebar-nav-item:focus-visible,
+[class*="sidebar"] a.sidebar-nav-item:focus-visible,
+[class*="sidebar"] nav button:focus-visible,
+[class*="sidebar"] nav a:focus-visible {
   outline: 2px solid #3b82f6 !important;
   outline-offset: 2px !important;
-}
-
-/* ========================================
-   ADDITIONAL OVERRIDES
-   ======================================== */
-
-/* FORCE REMOVE ANY HIDDEN CLASSES */
-.sidebar .hidden,
-.sidebar button.hidden,
-.sidebar a.hidden,
-.sidebar .sidebar-nav-item.hidden,
-.sidebar button.sidebar-nav-item.hidden,
-.sidebar a.sidebar-nav-item.hidden,
-button.sidebar-nav-item.hidden,
-a.sidebar-nav-item.hidden,
-.sidebar-nav-item.hidden,
-.sidebar nav button.hidden,
-.sidebar nav a.hidden {
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* FORCE REMOVE ANY OPACITY CLASSES */
-.sidebar .opacity-0,
-.sidebar button.opacity-0,
-.sidebar a.opacity-0,
-.sidebar .sidebar-nav-item.opacity-0,
-.sidebar button.sidebar-nav-item.opacity-0,
-.sidebar a.sidebar-nav-item.opacity-0,
-button.sidebar-nav-item.opacity-0,
-a.sidebar-nav-item.opacity-0,
-.sidebar-nav-item.opacity-0,
-.sidebar nav button.opacity-0,
-.sidebar nav a.opacity-0 {
-  opacity: 1 !important;
 }
 
 .search-input {
