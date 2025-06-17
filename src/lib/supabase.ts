@@ -7,21 +7,25 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-// Create Supabase client with optimized settings
+// Optimized Supabase client configuration
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: false, // Faster initial load
+    flowType: 'pkce'
   },
   realtime: {
     params: {
-      eventsPerSecond: 10
+      eventsPerSecond: 5 // Reduced for better performance
     }
   },
   global: {
     headers: {
-      'x-my-custom-header': 'flexboard-app'
+      'x-client-info': 'flexboard-app'
     }
+  },
+  db: {
+    schema: 'public'
   }
 });

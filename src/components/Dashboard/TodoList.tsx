@@ -34,6 +34,7 @@ const TodoList: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -57,6 +58,7 @@ const TodoList: React.FC = () => {
     if (!user?.id) return;
     
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('todos')
         .select('*')
@@ -128,9 +130,10 @@ const TodoList: React.FC = () => {
 
   const addTodo = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTodo.trim() || !user?.id) return;
+    if (!newTodo.trim() || !user?.id || saving) return;
 
     try {
+      setSaving(true);
       const priorityScore = calculatePriorityScore(priorityForm);
       
       const { data, error } = await supabase
@@ -167,14 +170,17 @@ const TodoList: React.FC = () => {
       });
     } catch (error) {
       console.error('Error adding todo:', error);
+    } finally {
+      setSaving(false);
     }
-  }, [newTodo, user?.id, dateStr, priorityForm, calculatePriorityScore]);
+  }, [newTodo, user?.id, dateStr, priorityForm, calculatePriorityScore, saving]);
 
   const updateTodo = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingTodo || !newTodo.trim()) return;
+    if (!editingTodo || !newTodo.trim() || saving) return;
 
     try {
+      setSaving(true);
       const priorityScore = calculatePriorityScore(priorityForm);
       
       const { data, error } = await supabase
@@ -207,8 +213,10 @@ const TodoList: React.FC = () => {
       });
     } catch (error) {
       console.error('Error updating todo:', error);
+    } finally {
+      setSaving(false);
     }
-  }, [editingTodo, newTodo, priorityForm, calculatePriorityScore]);
+  }, [editingTodo, newTodo, priorityForm, calculatePriorityScore, saving]);
 
   const toggleTodo = useCallback(async (id: string, completed: boolean) => {
     try {
@@ -859,6 +867,7 @@ const TodoList: React.FC = () => {
                     placeholder="Enter task name..."
                     className="input"
                     required
+                    disabled={saving}
                   />
                 </div>
 
@@ -884,6 +893,7 @@ const TodoList: React.FC = () => {
                         value={priorityForm[key as keyof PriorityForm]}
                         onChange={(e) => setPriorityForm({...priorityForm, [key]: parseInt(e.target.value)})}
                         className="w-full"
+                        disabled={saving}
                       />
                       <div className="flex justify-between text-xs text-gray-500 mt-1">
                         <span>Low</span>
@@ -906,6 +916,7 @@ const TodoList: React.FC = () => {
                       value={priorityForm.duration_minutes}
                       onChange={(e) => setPriorityForm({...priorityForm, duration_minutes: parseInt(e.target.value)})}
                       className="w-full"
+                      disabled={saving}
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
                       <span>5m</span>
@@ -929,14 +940,16 @@ const TodoList: React.FC = () => {
                 <div className="flex space-x-2 pt-2">
                   <button
                     type="submit"
-                    className="flex-1 btn-primary"
+                    disabled={saving}
+                    className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {editingTodo ? 'Update Task' : 'Add Task'}
+                    {saving ? 'Saving...' : editingTodo ? 'Update Task' : 'Add Task'}
                   </button>
                   <button
                     type="button"
                     onClick={closeModal}
                     className="btn-secondary"
+                    disabled={saving}
                   >
                     Cancel
                   </button>

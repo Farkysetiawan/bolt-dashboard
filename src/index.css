@@ -338,7 +338,7 @@
   }
 }
 
-/* ULTIMATE FIX: Sidebar styles with guaranteed text visibility */
+/* FINAL FIX: Sidebar navigation with absolute text visibility */
 .sidebar {
   @apply bg-white border-r border-gray-200;
 }
@@ -347,7 +347,7 @@
   @apply space-y-1;
 }
 
-/* ULTIMATE SOLUTION: Sidebar navigation with forced text visibility */
+/* CRITICAL: Base sidebar item with forced visibility */
 .sidebar-nav-item {
   display: flex !important;
   align-items: center !important;
@@ -358,71 +358,74 @@
   border-radius: 0.5rem !important;
   transition: all 0.2s ease-out !important;
   cursor: pointer !important;
-  /* CRITICAL: Force text color that cannot be overridden */
-  color: #6b7280 !important; /* gray-500 */
   text-decoration: none !important;
+  /* FORCE BASE COLOR */
+  color: #6b7280 !important;
+  background-color: transparent !important;
 }
 
-/* ULTIMATE: Hover state */
+/* CRITICAL: Hover state */
 .sidebar-nav-item:hover:not(.active) {
-  background-color: #f9fafb !important; /* gray-50 */
-  color: #374151 !important; /* gray-700 */
+  background-color: #f9fafb !important;
+  color: #374151 !important;
   transform: translateY(-1px) !important;
 }
 
-/* ULTIMATE: Active state with maximum specificity */
+/* CRITICAL: Active state */
 .sidebar-nav-item.active {
-  background-color: #eff6ff !important; /* blue-50 */
-  color: #1d4ed8 !important; /* blue-700 */
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
   animation: scaleIn 0.2s ease-out !important;
 }
 
-/* ULTIMATE: Force all text elements to be visible */
+/* CRITICAL: Force text visibility for ALL text elements */
 .sidebar-nav-item span,
 .sidebar-nav-item > span,
-.sidebar-nav-item .text,
-.sidebar-nav-item > .text {
+.sidebar-nav-item .text {
   color: inherit !important;
   opacity: 1 !important;
   visibility: visible !important;
-  display: inline !important;
+  display: inline-block !important;
   font-size: inherit !important;
   font-weight: inherit !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
 }
 
-/* ULTIMATE: Force all icon elements to be visible */
+/* CRITICAL: Force icon visibility */
 .sidebar-nav-item svg,
 .sidebar-nav-item > svg,
-.sidebar-nav-item .icon,
-.sidebar-nav-item > .icon {
+.sidebar-nav-item .icon {
   color: inherit !important;
   opacity: 1 !important;
   visibility: visible !important;
-  display: inline !important;
+  display: inline-block !important;
   width: 1rem !important;
   height: 1rem !important;
+  flex-shrink: 0 !important;
 }
 
-/* ULTIMATE: Active state text and icons */
+/* CRITICAL: Override ANY conflicting styles */
+.sidebar-nav-item *,
+.sidebar-nav-item > *,
+.sidebar-nav-item span *,
+.sidebar-nav-item > span * {
+  color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* CRITICAL: Ensure active state text is always visible */
 .sidebar-nav-item.active span,
 .sidebar-nav-item.active > span,
-.sidebar-nav-item.active .text,
-.sidebar-nav-item.active > .text {
-  color: #1d4ed8 !important; /* blue-700 */
+.sidebar-nav-item.active .text {
+  color: #1d4ed8 !important;
 }
 
 .sidebar-nav-item.active svg,
 .sidebar-nav-item.active > svg,
-.sidebar-nav-item.active .icon,
-.sidebar-nav-item.active > .icon {
-  color: #2563eb !important; /* blue-600 */
-}
-
-/* ULTIMATE: Override any conflicting styles */
-.sidebar-nav-item * {
-  color: inherit !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+.sidebar-nav-item.active .icon {
+  color: #2563eb !important;
 }
 
 .search-input {

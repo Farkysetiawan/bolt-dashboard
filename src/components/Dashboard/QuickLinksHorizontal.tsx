@@ -30,6 +30,8 @@ const QuickLinksHorizontal: React.FC = () => {
 
     try {
       setError(null);
+      setLoading(true);
+      
       const { data, error } = await supabase
         .from('quick_links')
         .select('*')
