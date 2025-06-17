@@ -411,23 +411,19 @@ const TodoList: React.FC = () => {
       if (error) throw error;
 
       const completedTodos = data || [];
+      
+      // FIXED: New points calculation logic
       const totalPoints = completedTodos.reduce((sum, todo) => {
-        let basePoints = todo.priority_score || 0;
-        if (todo.duration_minutes && todo.actual_minutes !== null) {
-          const timeUsageRatio = todo.actual_minutes / todo.duration_minutes;
-          if (timeUsageRatio <= 0.8) {
-            basePoints *= 1.3;
-          } else if (timeUsageRatio <= 1.0) {
-            basePoints *= 1.1;
-          } else if (timeUsageRatio <= 1.5) {
-            basePoints *= 1.0;
-          } else if (timeUsageRatio <= 2.0) {
-            basePoints *= 0.9;
-          } else {
-            basePoints *= 0.7;
-          }
+        let points = todo.priority_score || 0;
+        
+        // Calculate points based on time usage percentage
+        if (todo.duration_minutes && todo.actual_minutes !== null && todo.duration_minutes > 0) {
+          const timeUsagePercentage = (todo.actual_minutes / todo.duration_minutes) * 100;
+          // Points = Priority Score × (Time Used Percentage / 100)
+          points = (todo.priority_score || 0) * (timeUsagePercentage / 100);
         }
-        return sum + basePoints;
+        
+        return sum + points;
       }, 0);
 
       const totalCompleted = completedTodos.length;
