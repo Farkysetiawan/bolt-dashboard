@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Plus, X, Upload, Image, Settings, Edit2, Trash2, ArrowLeft, BookOpen, Video, Headphones, FileText } from 'lucide-react';
+import { Play, Plus, X, Upload, Image, Settings, Edit2, Trash2, ArrowLeft, BookOpen, Video, Headphones, FileText, Link, Calendar, Clock, Star, Tag } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -14,12 +14,19 @@ interface Channel {
 interface ContentItem {
   id: string;
   title: string;
-  type: 'video' | 'article' | 'book' | 'podcast';
-  status: 'watching' | 'completed' | 'planned';
+  type: 'video' | 'article' | 'book' | 'podcast' | 'course' | 'tutorial' | 'documentary' | 'webinar';
+  status: 'watching' | 'completed' | 'planned' | 'paused' | 'dropped';
   progress: number;
   user_id: string;
   channel_id?: string;
   created_at: string;
+  url?: string;
+  duration?: number;
+  rating?: number;
+  notes?: string;
+  tags?: string[];
+  priority?: 'low' | 'medium' | 'high';
+  deadline?: string;
 }
 
 const ChannelManager: React.FC = () => {
@@ -37,7 +44,13 @@ const ChannelManager: React.FC = () => {
   const [contentFormData, setContentFormData] = useState({
     title: '',
     type: 'video' as ContentItem['type'],
-    status: 'planned' as ContentItem['status']
+    status: 'planned' as ContentItem['status'],
+    url: '',
+    duration: '',
+    priority: 'medium' as ContentItem['priority'],
+    deadline: '',
+    notes: '',
+    tags: ''
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -233,36 +246,65 @@ const ChannelManager: React.FC = () => {
 
     setSaving(true);
     try {
-      // Check if channel_id column exists, if not, add it
+      // Parse tags
+      const tags = contentFormData.tags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+
+      // Parse duration (convert to minutes)
+      let durationMinutes = null;
+      if (contentFormData.duration) {
+        const duration = contentFormData.duration.trim();
+        if (duration.includes(':')) {
+          // Format: HH:MM or MM:SS
+          const parts = duration.split(':').map(p => parseInt(p) || 0);
+          if (parts.length === 2) {
+            durationMinutes = parts[0] * 60 + parts[1]; // Assume HH:MM
+          }
+        } else {
+          // Just minutes
+          durationMinutes = parseInt(duration) || null;
+        }
+      }
+
+      const contentData = {
+        title: contentFormData.title.trim(),
+        type: contentFormData.type,
+        status: contentFormData.status,
+        progress: 0,
+        user_id: user?.id,
+        channel_id: selectedChannel.id,
+        // Additional fields (these might not exist in DB yet, so we'll handle gracefully)
+        ...(contentFormData.url && { url: contentFormData.url }),
+        ...(durationMinutes && { duration: durationMinutes }),
+        ...(contentFormData.priority && { priority: contentFormData.priority }),
+        ...(contentFormData.deadline && { deadline: contentFormData.deadline }),
+        ...(contentFormData.notes && { notes: contentFormData.notes }),
+        ...(tags.length > 0 && { tags })
+      };
+
       const { data, error } = await supabase
         .from('content_items')
-        .insert([
-          {
+        .insert([contentData])
+        .select()
+        .single();
+
+      if (error) {
+        // If some fields don't exist, try with basic fields only
+        if (error.message.includes('column') && error.message.includes('does not exist')) {
+          const basicData = {
             title: contentFormData.title.trim(),
             type: contentFormData.type,
             status: contentFormData.status,
             progress: 0,
             user_id: user?.id,
             channel_id: selectedChannel.id
-          }
-        ])
-        .select()
-        .single();
+          };
 
-      if (error) {
-        // If channel_id column doesn't exist, insert without it
-        if (error.message.includes('channel_id')) {
           const { data: fallbackData, error: fallbackError } = await supabase
             .from('content_items')
-            .insert([
-              {
-                title: contentFormData.title.trim(),
-                type: contentFormData.type,
-                status: contentFormData.status,
-                progress: 0,
-                user_id: user?.id
-              }
-            ])
+            .insert([basicData])
             .select()
             .single();
 
@@ -346,7 +388,17 @@ const ChannelManager: React.FC = () => {
   };
 
   const resetContentForm = () => {
-    setContentFormData({ title: '', type: 'video', status: 'planned' });
+    setContentFormData({ 
+      title: '', 
+      type: 'video', 
+      status: 'planned',
+      url: '',
+      duration: '',
+      priority: 'medium',
+      deadline: '',
+      notes: '',
+      tags: ''
+    });
     setShowContentModal(false);
   };
 
@@ -384,6 +436,10 @@ const ChannelManager: React.FC = () => {
       case 'article': return <FileText className="w-4 h-4" />;
       case 'book': return <BookOpen className="w-4 h-4" />;
       case 'podcast': return <Headphones className="w-4 h-4" />;
+      case 'course': return <BookOpen className="w-4 h-4" />;
+      case 'tutorial': return <Play className="w-4 h-4" />;
+      case 'documentary': return <Video className="w-4 h-4" />;
+      case 'webinar': return <Video className="w-4 h-4" />;
       default: return <FileText className="w-4 h-4" />;
     }
   };
@@ -393,8 +449,27 @@ const ChannelManager: React.FC = () => {
       case 'completed': return 'badge badge-success';
       case 'watching': return 'badge badge-info';
       case 'planned': return 'badge badge-gray';
+      case 'paused': return 'badge bg-yellow-100 text-yellow-800';
+      case 'dropped': return 'badge bg-red-100 text-red-800';
       default: return 'badge badge-gray';
     }
+  };
+
+  const getPriorityBadge = (priority?: ContentItem['priority']) => {
+    switch (priority) {
+      case 'high': return 'badge bg-red-100 text-red-800';
+      case 'medium': return 'badge bg-yellow-100 text-yellow-800';
+      case 'low': return 'badge bg-green-100 text-green-800';
+      default: return '';
+    }
+  };
+
+  const formatDuration = (minutes?: number) => {
+    if (!minutes) return '';
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
   };
 
   const getChannelStats = () => {
@@ -512,13 +587,31 @@ const ChannelManager: React.FC = () => {
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center space-x-2.5 min-w-0 flex-1">
                         <div className="text-gray-600">{getTypeIcon(item.type)}</div>
-                        <h4 className="font-medium text-gray-900 truncate text-xs">{item.title}</h4>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 truncate text-xs">{item.title}</h4>
+                          {item.url && (
+                            <a 
+                              href={item.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-600 hover:text-blue-700 flex items-center mt-1"
+                            >
+                              <Link className="w-3 h-3 mr-1" />
+                              Open Link
+                            </a>
+                          )}
+                        </div>
                       </div>
                       
                       <div className="flex items-center space-x-1.5 flex-shrink-0">
                         <span className={getStatusBadge(item.status)}>
                           {item.status}
                         </span>
+                        {item.priority && (
+                          <span className={getPriorityBadge(item.priority)}>
+                            {item.priority}
+                          </span>
+                        )}
                         <button
                           onClick={() => deleteContent(item.id)}
                           className="p-1 text-gray-400 hover:text-red-500 transition-colors hover-scale"
@@ -526,6 +619,30 @@ const ChannelManager: React.FC = () => {
                           <X className="w-3 h-3" />
                         </button>
                       </div>
+                    </div>
+                    
+                    {/* Additional Info */}
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                      <div className="flex items-center space-x-2">
+                        {item.duration && (
+                          <span className="flex items-center">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {formatDuration(item.duration)}
+                          </span>
+                        )}
+                        {item.deadline && (
+                          <span className="flex items-center">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            {new Date(item.deadline).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                      {item.rating && (
+                        <div className="flex items-center">
+                          <Star className="w-3 h-3 mr-1 text-yellow-500" />
+                          <span>{item.rating}/5</span>
+                        </div>
+                      )}
                     </div>
                     
                     {/* Progress Bar */}
@@ -602,25 +719,20 @@ const ChannelManager: React.FC = () => {
           </div>
         </div>
 
-        {/* FIXED: Add Content Modal - ALWAYS RENDER WHEN showContentModal IS TRUE */}
+        {/* ENHANCED: Add Content Modal with Better Options */}
         {showContentModal && (
           <div 
             className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[99999] animate-fadeIn"
-            style={{ zIndex: 99999 }} // Force highest z-index
+            style={{ zIndex: 99999 }}
             onClick={(e) => {
-              // Close modal if clicking on backdrop
               if (e.target === e.currentTarget) {
-                console.log('Backdrop clicked, closing modal');
                 closeContentModal();
               }
             }}
           >
             <div 
-              className="bg-white rounded-xl shadow-2xl max-w-md w-full animate-scaleIn"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent modal close when clicking inside
-                console.log('Modal content clicked, staying open');
-              }}
+              className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn"
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
@@ -645,7 +757,7 @@ const ChannelManager: React.FC = () => {
                       type="text"
                       value={contentFormData.title}
                       onChange={(e) => setContentFormData({ ...contentFormData, title: e.target.value })}
-                      placeholder="Enter content title..."
+                      placeholder="e.g., React Complete Course, JavaScript Fundamentals, Python for Beginners"
                       className="input"
                       required
                       disabled={saving}
@@ -653,50 +765,156 @@ const ChannelManager: React.FC = () => {
                     />
                   </div>
 
-                  {/* Content Type */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Content Type
-                    </label>
-                    <select
-                      value={contentFormData.type}
-                      onChange={(e) => setContentFormData({ ...contentFormData, type: e.target.value as ContentItem['type'] })}
-                      className="input"
-                      disabled={saving}
-                    >
-                      <option value="video">🎥 Video</option>
-                      <option value="article">📄 Article</option>
-                      <option value="book">📚 Book</option>
-                      <option value="podcast">🎧 Podcast</option>
-                    </select>
+                  {/* Content Type & Priority Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Content Type
+                      </label>
+                      <select
+                        value={contentFormData.type}
+                        onChange={(e) => setContentFormData({ ...contentFormData, type: e.target.value as ContentItem['type'] })}
+                        className="input"
+                        disabled={saving}
+                      >
+                        <option value="video">🎥 Video</option>
+                        <option value="course">📚 Online Course</option>
+                        <option value="tutorial">🎯 Tutorial</option>
+                        <option value="article">📄 Article/Blog</option>
+                        <option value="book">📖 Book/eBook</option>
+                        <option value="podcast">🎧 Podcast</option>
+                        <option value="documentary">🎬 Documentary</option>
+                        <option value="webinar">💻 Webinar</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Priority Level
+                      </label>
+                      <select
+                        value={contentFormData.priority}
+                        onChange={(e) => setContentFormData({ ...contentFormData, priority: e.target.value as ContentItem['priority'] })}
+                        className="input"
+                        disabled={saving}
+                      >
+                        <option value="low">🟢 Low Priority</option>
+                        <option value="medium">🟡 Medium Priority</option>
+                        <option value="high">🔴 High Priority</option>
+                      </select>
+                    </div>
                   </div>
 
-                  {/* Content Status */}
+                  {/* Status & Duration Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Current Status
+                      </label>
+                      <select
+                        value={contentFormData.status}
+                        onChange={(e) => setContentFormData({ ...contentFormData, status: e.target.value as ContentItem['status'] })}
+                        className="input"
+                        disabled={saving}
+                      >
+                        <option value="planned">📋 Want to Learn</option>
+                        <option value="watching">▶️ Currently Learning</option>
+                        <option value="paused">⏸️ Paused</option>
+                        <option value="completed">✅ Completed</option>
+                        <option value="dropped">❌ Dropped</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Duration (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={contentFormData.duration}
+                        onChange={(e) => setContentFormData({ ...contentFormData, duration: e.target.value })}
+                        placeholder="e.g., 2:30 (hours:minutes) or 150 (minutes)"
+                        className="input"
+                        disabled={saving}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Format: 2:30 for 2h 30min or just 150 for 150 minutes
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* URL & Deadline Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Content URL (Optional)
+                      </label>
+                      <input
+                        type="url"
+                        value={contentFormData.url}
+                        onChange={(e) => setContentFormData({ ...contentFormData, url: e.target.value })}
+                        placeholder="https://youtube.com/watch?v=... or https://course-site.com"
+                        className="input"
+                        disabled={saving}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Target Completion Date (Optional)
+                      </label>
+                      <input
+                        type="date"
+                        value={contentFormData.deadline}
+                        onChange={(e) => setContentFormData({ ...contentFormData, deadline: e.target.value })}
+                        className="input"
+                        disabled={saving}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tags */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Status
+                      Tags (Optional)
                     </label>
-                    <select
-                      value={contentFormData.status}
-                      onChange={(e) => setContentFormData({ ...contentFormData, status: e.target.value as ContentItem['status'] })}
+                    <input
+                      type="text"
+                      value={contentFormData.tags}
+                      onChange={(e) => setContentFormData({ ...contentFormData, tags: e.target.value })}
+                      placeholder="e.g., javascript, react, frontend, beginner"
                       className="input"
                       disabled={saving}
-                    >
-                      <option value="planned">📋 Planned</option>
-                      <option value="watching">▶️ In Progress</option>
-                      <option value="completed">✅ Completed</option>
-                    </select>
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Separate tags with commas. Helps organize and search your content.
+                    </p>
+                  </div>
+
+                  {/* Notes */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Notes (Optional)
+                    </label>
+                    <textarea
+                      value={contentFormData.notes}
+                      onChange={(e) => setContentFormData({ ...contentFormData, notes: e.target.value })}
+                      placeholder="Any additional notes, thoughts, or reminders about this content..."
+                      className="textarea"
+                      rows={3}
+                      disabled={saving}
+                    />
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex space-x-3 pt-4">
+                  <div className="flex space-x-3 pt-4 border-t border-gray-200">
                     <button
                       type="submit"
                       disabled={saving || !contentFormData.title.trim()}
                       className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      {saving ? 'Adding...' : 'Add Content'}
+                      {saving ? 'Adding Content...' : 'Add Content'}
                     </button>
                     <button
                       type="button"
@@ -863,7 +1081,7 @@ const ChannelManager: React.FC = () => {
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter channel name..."
+                    placeholder="e.g., Programming Courses, Design Tutorials, Business Books"
                     className="input"
                     required
                     disabled={saving}
