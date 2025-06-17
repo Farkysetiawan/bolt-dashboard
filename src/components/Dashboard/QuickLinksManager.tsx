@@ -535,7 +535,7 @@ const QuickLinksManager: React.FC = () => {
               );
             })
           )}
-        </</div>
+        </div>
       </div>
     </div>
   );
