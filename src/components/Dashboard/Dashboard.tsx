@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import DashboardHeader from './DashboardHeader';
 import TodoList from './TodoList';
 import DailyJournal from './DailyJournal';
-import ContentTracker from './ContentTracker';
+import ChannelManager from './ChannelManager';
 import LearningTracker from './LearningTracker';
 import QuickAccessLinks from './QuickAccessLinks';
 import QuickLinksManager from './QuickLinksManager';
@@ -122,7 +122,7 @@ const Dashboard: React.FC = () => {
       case 'journal':
         return <DailyJournal readOnly={false} />;
       case 'content':
-        return <ContentTracker readOnly={false} />;
+        return <ChannelManager />;
       case 'learning':
         return <LearningTracker readOnly={false} />;
       case 'links':
@@ -144,7 +144,6 @@ const Dashboard: React.FC = () => {
             <div className="block lg:hidden space-y-4">
               <div className="stagger-item"><TodoList readOnly={true} /></div>
               <div className="stagger-item"><DailyJournal readOnly={true} /></div>
-              <div className="stagger-item"><ContentTracker readOnly={true} /></div>
               <div className="stagger-item"><LearningTracker readOnly={true} /></div>
               <div className="stagger-item"><PromptBank readOnly={true} /></div>
             </div>
@@ -154,7 +153,6 @@ const Dashboard: React.FC = () => {
               {/* Left Column */}
               <div className="lg:col-span-2 space-y-4">
                 <div className="stagger-item"><TodoList readOnly={true} /></div>
-                <div className="stagger-item"><ContentTracker readOnly={true} /></div>
                 <div className="stagger-item"><LearningTracker readOnly={true} /></div>
               </div>
               
