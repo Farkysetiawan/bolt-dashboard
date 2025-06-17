@@ -336,44 +336,61 @@
   }
 }
 
-/* ULTIMATE SIDEBAR FIX - FORCE EVERYTHING */
-.sidebar {
+/* ========================================
+   ULTIMATE SIDEBAR FIX - MAXIMUM FORCE
+   ======================================== */
+
+/* FORCE SIDEBAR CONTAINER */
+.sidebar,
+div.sidebar,
+.fixed.sidebar {
   background-color: white !important;
   border-right: 1px solid #e5e7eb !important;
 }
 
+/* FORCE SIDEBAR NAV CONTAINER */
+.sidebar .sidebar-nav,
+.sidebar nav,
 .sidebar-nav {
   display: flex !important;
   flex-direction: column !important;
-  gap: 0.125rem !important; /* SUPER RAPAT - 2px gap */
+  gap: 2px !important; /* SUPER RAPAT - 2px gap antar item */
 }
 
-/* FORCE SIDEBAR ITEM LAYOUT - DEMPET */
+/* ========================================
+   ULTIMATE SIDEBAR ITEM FIX - DEMPET
+   ======================================== */
+
+/* TARGET SEMUA KEMUNGKINAN SELECTOR */
+.sidebar button,
+.sidebar a,
 .sidebar .sidebar-nav-item,
 .sidebar button.sidebar-nav-item,
 .sidebar a.sidebar-nav-item,
 button.sidebar-nav-item,
 a.sidebar-nav-item,
-.sidebar-nav-item {
-  /* FORCE LAYOUT - DEMPET */
+.sidebar-nav-item,
+.sidebar nav button,
+.sidebar nav a {
+  /* FORCE LAYOUT - SUPER DEMPET */
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  gap: 0.375rem !important; /* SUPER RAPAT - 6px gap antara icon dan text */
+  gap: 6px !important; /* SUPER RAPAT - 6px gap antara icon dan text */
   
   /* FORCE SPACING - COMPACT */
-  padding: 0.375rem 0.5rem !important; /* Lebih kecil padding */
+  padding: 6px 8px !important; /* Lebih kecil padding */
   margin: 0 !important;
   
   /* FORCE TYPOGRAPHY */
-  font-size: 0.75rem !important;
+  font-size: 12px !important;
   font-weight: 500 !important;
   line-height: 1.2 !important;
   text-decoration: none !important;
   white-space: nowrap !important;
   
   /* FORCE APPEARANCE */
-  border-radius: 0.375rem !important;
+  border-radius: 6px !important;
   border: none !important;
   outline: none !important;
   cursor: pointer !important;
@@ -387,18 +404,36 @@ a.sidebar-nav-item,
   
   /* FORCE DIMENSIONS */
   width: 100% !important;
-  min-height: 1.75rem !important; /* Lebih kecil height */
+  min-height: 28px !important; /* Lebih kecil height */
   box-sizing: border-box !important;
 }
 
-/* FORCE TEXT VISIBILITY - MAXIMUM SPECIFICITY */
+/* ========================================
+   FORCE TEXT VISIBILITY - MAXIMUM POWER
+   ======================================== */
+
+/* TARGET SEMUA KEMUNGKINAN TEXT ELEMENT */
+.sidebar button span,
+.sidebar a span,
 .sidebar .sidebar-nav-item span,
 .sidebar button.sidebar-nav-item span,
 .sidebar a.sidebar-nav-item span,
 button.sidebar-nav-item span,
 a.sidebar-nav-item span,
-.sidebar-nav-item span {
-  /* FORCE TEXT VISIBILITY */
+.sidebar-nav-item span,
+.sidebar nav button span,
+.sidebar nav a span,
+.sidebar button > span,
+.sidebar a > span,
+.sidebar .sidebar-nav-item > span,
+.sidebar button.sidebar-nav-item > span,
+.sidebar a.sidebar-nav-item > span,
+button.sidebar-nav-item > span,
+a.sidebar-nav-item > span,
+.sidebar-nav-item > span,
+.sidebar nav button > span,
+.sidebar nav a > span {
+  /* FORCE TEXT VISIBILITY - MAXIMUM POWER */
   display: inline-block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -417,15 +452,37 @@ a.sidebar-nav-item span,
   min-width: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+  
+  /* FORCE POSITIONING */
+  position: relative !important;
+  z-index: 1 !important;
 }
 
-/* FORCE ICON VISIBILITY - DEMPET */
+/* ========================================
+   FORCE ICON VISIBILITY - DEMPET
+   ======================================== */
+
+/* TARGET SEMUA KEMUNGKINAN ICON ELEMENT */
+.sidebar button svg,
+.sidebar a svg,
 .sidebar .sidebar-nav-item svg,
 .sidebar button.sidebar-nav-item svg,
 .sidebar a.sidebar-nav-item svg,
 button.sidebar-nav-item svg,
 a.sidebar-nav-item svg,
-.sidebar-nav-item svg {
+.sidebar-nav-item svg,
+.sidebar nav button svg,
+.sidebar nav a svg,
+.sidebar button > svg,
+.sidebar a > svg,
+.sidebar .sidebar-nav-item > svg,
+.sidebar button.sidebar-nav-item > svg,
+.sidebar a.sidebar-nav-item > svg,
+button.sidebar-nav-item > svg,
+a.sidebar-nav-item > svg,
+.sidebar-nav-item > svg,
+.sidebar nav button > svg,
+.sidebar nav a > svg {
   /* FORCE ICON VISIBILITY */
   display: inline-block !important;
   visibility: visible !important;
@@ -433,85 +490,162 @@ a.sidebar-nav-item svg,
   
   /* FORCE ICON PROPERTIES - COMPACT */
   color: inherit !important;
-  width: 0.875rem !important; /* Sedikit lebih kecil icon */
-  height: 0.875rem !important;
+  width: 14px !important; /* Sedikit lebih kecil icon */
+  height: 14px !important;
   flex-shrink: 0 !important;
   
   /* FORCE LAYOUT */
   margin: 0 !important;
   padding: 0 !important;
+  
+  /* FORCE POSITIONING */
+  position: relative !important;
+  z-index: 1 !important;
 }
 
-/* HOVER STATE - DEMPET */
+/* ========================================
+   HOVER & ACTIVE STATES - DEMPET
+   ======================================== */
+
+/* HOVER STATE */
+.sidebar button:hover:not(.active),
+.sidebar a:hover:not(.active),
 .sidebar .sidebar-nav-item:hover:not(.active),
 .sidebar button.sidebar-nav-item:hover:not(.active),
 .sidebar a.sidebar-nav-item:hover:not(.active),
 button.sidebar-nav-item:hover:not(.active),
 a.sidebar-nav-item:hover:not(.active),
-.sidebar-nav-item:hover:not(.active) {
+.sidebar-nav-item:hover:not(.active),
+.sidebar nav button:hover:not(.active),
+.sidebar nav a:hover:not(.active) {
   background-color: #f9fafb !important;
   color: #374151 !important;
   transform: translateY(-1px) !important;
 }
 
-/* ACTIVE STATE - DEMPET */
+/* ACTIVE STATE */
+.sidebar button.active,
+.sidebar a.active,
 .sidebar .sidebar-nav-item.active,
 .sidebar button.sidebar-nav-item.active,
 .sidebar a.sidebar-nav-item.active,
 button.sidebar-nav-item.active,
 a.sidebar-nav-item.active,
-.sidebar-nav-item.active {
+.sidebar-nav-item.active,
+.sidebar nav button.active,
+.sidebar nav a.active {
   background-color: #eff6ff !important;
   color: #1d4ed8 !important;
   animation: scaleIn 0.2s ease-out !important;
 }
 
 /* FORCE ACTIVE STATE TEXT AND ICONS */
+.sidebar button.active span,
+.sidebar a.active span,
 .sidebar .sidebar-nav-item.active span,
 .sidebar button.sidebar-nav-item.active span,
 .sidebar a.sidebar-nav-item.active span,
 button.sidebar-nav-item.active span,
 a.sidebar-nav-item.active span,
-.sidebar-nav-item.active span {
+.sidebar-nav-item.active span,
+.sidebar nav button.active span,
+.sidebar nav a.active span {
   color: #1d4ed8 !important;
 }
 
+.sidebar button.active svg,
+.sidebar a.active svg,
 .sidebar .sidebar-nav-item.active svg,
 .sidebar button.sidebar-nav-item.active svg,
 .sidebar a.sidebar-nav-item.active svg,
 button.sidebar-nav-item.active svg,
 a.sidebar-nav-item.active svg,
-.sidebar-nav-item.active svg {
+.sidebar-nav-item.active svg,
+.sidebar nav button.active svg,
+.sidebar nav a.active svg {
   color: #2563eb !important;
 }
 
-/* OVERRIDE ANY CONFLICTING STYLES */
+/* ========================================
+   OVERRIDE CONFLICTING STYLES
+   ======================================== */
+
+/* FORCE OVERRIDE ANY CONFLICTING STYLES */
+.sidebar *,
+.sidebar button *,
+.sidebar a *,
 .sidebar .sidebar-nav-item *,
 .sidebar button.sidebar-nav-item *,
 .sidebar a.sidebar-nav-item *,
 button.sidebar-nav-item *,
 a.sidebar-nav-item *,
-.sidebar-nav-item * {
+.sidebar-nav-item *,
+.sidebar nav button *,
+.sidebar nav a * {
   color: inherit !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
 
 /* FORCE FOCUS STATES */
+.sidebar button:focus,
+.sidebar a:focus,
 .sidebar .sidebar-nav-item:focus,
-.sidebar .sidebar-nav-item:focus-visible,
 .sidebar button.sidebar-nav-item:focus,
-.sidebar button.sidebar-nav-item:focus-visible,
 .sidebar a.sidebar-nav-item:focus,
-.sidebar a.sidebar-nav-item:focus-visible,
 button.sidebar-nav-item:focus,
-button.sidebar-nav-item:focus-visible,
 a.sidebar-nav-item:focus,
-a.sidebar-nav-item:focus-visible,
 .sidebar-nav-item:focus,
-.sidebar-nav-item:focus-visible {
+.sidebar nav button:focus,
+.sidebar nav a:focus,
+.sidebar button:focus-visible,
+.sidebar a:focus-visible,
+.sidebar .sidebar-nav-item:focus-visible,
+.sidebar button.sidebar-nav-item:focus-visible,
+.sidebar a.sidebar-nav-item:focus-visible,
+button.sidebar-nav-item:focus-visible,
+a.sidebar-nav-item:focus-visible,
+.sidebar-nav-item:focus-visible,
+.sidebar nav button:focus-visible,
+.sidebar nav a:focus-visible {
   outline: 2px solid #3b82f6 !important;
   outline-offset: 2px !important;
+}
+
+/* ========================================
+   ADDITIONAL OVERRIDES
+   ======================================== */
+
+/* FORCE REMOVE ANY HIDDEN CLASSES */
+.sidebar .hidden,
+.sidebar button.hidden,
+.sidebar a.hidden,
+.sidebar .sidebar-nav-item.hidden,
+.sidebar button.sidebar-nav-item.hidden,
+.sidebar a.sidebar-nav-item.hidden,
+button.sidebar-nav-item.hidden,
+a.sidebar-nav-item.hidden,
+.sidebar-nav-item.hidden,
+.sidebar nav button.hidden,
+.sidebar nav a.hidden {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* FORCE REMOVE ANY OPACITY CLASSES */
+.sidebar .opacity-0,
+.sidebar button.opacity-0,
+.sidebar a.opacity-0,
+.sidebar .sidebar-nav-item.opacity-0,
+.sidebar button.sidebar-nav-item.opacity-0,
+.sidebar a.sidebar-nav-item.opacity-0,
+button.sidebar-nav-item.opacity-0,
+a.sidebar-nav-item.opacity-0,
+.sidebar-nav-item.opacity-0,
+.sidebar nav button.opacity-0,
+.sidebar nav a.opacity-0 {
+  opacity: 1 !important;
 }
 
 .search-input {
