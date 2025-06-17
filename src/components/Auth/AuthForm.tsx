@@ -37,7 +37,6 @@ const AuthForm: React.FC = () => {
     try {
       if (isSignUp) {
         await signUp(email, password);
-        // Show success message for sign up
         setError('');
       } else {
         await signIn(email, password);
@@ -51,28 +50,28 @@ const AuthForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="mt-6 text-2xl lg:text-3xl font-bold text-gray-900">
+          <h2 className="mt-6 text-2xl lg:text-3xl font-semibold text-gray-900">
             Welcome to FlexBoard
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-3 text-gray-600">
             {isSignUp ? 'Create your account' : 'Sign in to your account'}
           </p>
         </div>
         
-        <form className="mt-8 space-y-6 bg-white p-6 lg:p-8 rounded-xl shadow-lg" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6 bg-white p-8 lg:p-10 rounded-xl shadow-sm border border-gray-200" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm flex items-start space-x-2">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-4 rounded-lg text-sm flex items-start space-x-3">
               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
           
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email address
               </label>
               <input
@@ -83,13 +82,13 @@ const AuthForm: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                className="input"
                 placeholder="Enter your email"
               />
             </div>
             
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <input
@@ -100,12 +99,12 @@ const AuthForm: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                className="input"
                 placeholder="Enter your password"
                 minLength={6}
               />
               {isSignUp && (
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-gray-500">
                   Password must be at least 6 characters long
                 </p>
               )}
@@ -115,7 +114,7 @@ const AuthForm: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed py-3"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -132,9 +131,9 @@ const AuthForm: React.FC = () => {
               type="button"
               onClick={() => {
                 setIsSignUp(!isSignUp);
-                setError(''); // Clear error when switching modes
+                setError('');
               }}
-              className="text-sm text-blue-600 hover:text-blue-500 transition-colors"
+              className="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-150"
             >
               {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
             </button>
@@ -142,7 +141,7 @@ const AuthForm: React.FC = () => {
 
           {!isSignUp && (
             <div className="text-center">
-              <p className="text-xs text-gray-500 mt-4">
+              <p className="text-xs text-gray-500 mt-6">
                 Having trouble signing in? Make sure you've confirmed your email address if you recently signed up.
               </p>
             </div>

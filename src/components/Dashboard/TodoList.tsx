@@ -510,10 +510,10 @@ const TodoList: React.FC = () => {
   };
 
   const getPriorityBadge = (score: number) => {
-    if (score >= 8) return 'badge bg-red-100 text-red-800';
-    if (score >= 6) return 'badge bg-orange-100 text-orange-800';
-    if (score >= 4) return 'badge bg-yellow-100 text-yellow-800';
-    return 'badge bg-green-100 text-green-800';
+    if (score >= 8) return 'bg-red-50 text-red-700 border border-red-200';
+    if (score >= 6) return 'bg-orange-50 text-orange-700 border border-orange-200';
+    if (score >= 4) return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
+    return 'bg-green-50 text-green-700 border border-green-200';
   };
 
   const getPriorityLabel = (score: number) => {
@@ -527,11 +527,11 @@ const TodoList: React.FC = () => {
     return (
       <div className="card animate-fadeIn">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/4 mb-4"></div>
-          <div className="space-y-3">
-            <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-5/6"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-4/6"></div>
+          <div className="h-6 bg-gray-100 rounded w-1/4 mb-6"></div>
+          <div className="space-y-4">
+            <div className="h-4 bg-gray-100 rounded"></div>
+            <div className="h-4 bg-gray-100 rounded w-5/6"></div>
+            <div className="h-4 bg-gray-100 rounded w-4/6"></div>
           </div>
         </div>
       </div>
@@ -543,14 +543,14 @@ const TodoList: React.FC = () => {
       <div className="card animate-fadeIn">
         {/* Header */}
         <div className="card-header">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-              <Clock className="w-4 h-4 text-white" />
+          <div className="flex items-center space-x-4">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Clock className="w-5 h-5 text-white" />
             </div>
             <h2 className="card-title">Today's Tasks</h2>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <button
               onClick={() => setShowAddModal(true)}
               className="btn-primary"
@@ -570,45 +570,45 @@ const TodoList: React.FC = () => {
 
         {/* Stats Panel */}
         {showStats && (
-          <div className="mb-6 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">
+          <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">
               Performance - {format(new Date(), 'MMMM yyyy')}
             </h3>
             
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{monthlyStats.totalPoints}</div>
-                <div className="text-sm text-gray-600 dark:text-slate-400">Total Points</div>
+            <div className="grid-4 mb-6">
+              <div className="stat-card">
+                <div className="stat-value text-blue-600">{monthlyStats.totalPoints}</div>
+                <div className="stat-label">Total Points</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{monthlyStats.totalCompleted}</div>
-                <div className="text-sm text-gray-600 dark:text-slate-400">Tasks Done</div>
+              <div className="stat-card">
+                <div className="stat-value text-green-600">{monthlyStats.totalCompleted}</div>
+                <div className="stat-label">Tasks Done</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">{monthlyStats.averageScore}</div>
-                <div className="text-sm text-gray-600 dark:text-slate-400">Avg Score</div>
+              <div className="stat-card">
+                <div className="stat-value text-purple-600">{monthlyStats.averageScore}</div>
+                <div className="stat-label">Avg Score</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">
+              <div className="stat-card">
+                <div className="stat-value text-orange-600">
                   {monthlyStats.timeUsage > 0 ? `${monthlyStats.timeUsage}%` : 'N/A'}
                 </div>
-                <div className="text-sm text-gray-600 dark:text-slate-400">Effort Level</div>
+                <div className="stat-label">Effort Level</div>
               </div>
             </div>
 
-            <div className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div className="p-4 bg-white rounded-lg border border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-slate-400">Time Spent:</span>
-                  <span className="font-medium">{formatMinutes(monthlyStats.totalActual)}</span>
+                  <span className="text-gray-500">Time Spent:</span>
+                  <span className="font-medium text-gray-900">{formatMinutes(monthlyStats.totalActual)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-slate-400">Estimated:</span>
-                  <span className="font-medium">{formatMinutes(monthlyStats.totalEstimated)}</span>
+                  <span className="text-gray-500">Estimated:</span>
+                  <span className="font-medium text-gray-900">{formatMinutes(monthlyStats.totalEstimated)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-slate-400">Effort Level:</span>
-                  <span className="font-medium">{monthlyStats.usageLabel}</span>
+                  <span className="text-gray-500">Effort Level:</span>
+                  <span className="font-medium text-gray-900">{monthlyStats.usageLabel}</span>
                 </div>
               </div>
             </div>
@@ -616,9 +616,9 @@ const TodoList: React.FC = () => {
         )}
 
         {/* Date Navigation */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
               <button
                 onClick={() => navigateDate('prev')}
                 className="btn-ghost p-2"
@@ -628,10 +628,10 @@ const TodoList: React.FC = () => {
               
               <button
                 onClick={() => setShowCalendar(!showCalendar)}
-                className="flex items-center space-x-2 px-3 py-2 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                className="flex items-center space-x-3 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors duration-150"
               >
                 <Calendar className="w-4 h-4" />
-                <span className="font-medium">
+                <span className="font-medium text-gray-900">
                   {format(selectedDate, 'EEE, MMM d')}
                 </span>
               </button>
@@ -656,10 +656,10 @@ const TodoList: React.FC = () => {
 
           {/* Week Calendar */}
           {showCalendar && (
-            <div className="p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+            <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
               <div className="grid grid-cols-7 gap-2">
                 {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                  <div key={day} className="text-center text-sm font-medium text-gray-600 dark:text-slate-400 py-2">
+                  <div key={day} className="text-center text-xs font-medium text-gray-500 py-3">
                     {day}
                   </div>
                 ))}
@@ -670,12 +670,12 @@ const TodoList: React.FC = () => {
                       setSelectedDate(day);
                       setShowCalendar(false);
                     }}
-                    className={`p-2 text-sm rounded-lg transition-colors ${
+                    className={`p-3 text-sm rounded-lg transition-colors duration-150 ${
                       isSameDay(day, selectedDate)
-                        ? 'bg-blue-500 text-white'
+                        ? 'bg-blue-600 text-white'
                         : isToday(day)
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium'
-                        : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                        ? 'bg-blue-50 text-blue-700 font-medium'
+                        : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     {format(day, 'd')}
@@ -687,22 +687,22 @@ const TodoList: React.FC = () => {
         </div>
 
         {/* Date Info */}
-        <div className="mb-6 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+        <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
-            <span className="font-medium text-gray-900 dark:text-slate-100">
+            <span className="font-medium text-gray-900">
               {isToday(selectedDate) ? 'Today' : format(selectedDate, 'EEEE, MMMM d')}
             </span>
-            <span className="text-sm text-gray-600 dark:text-slate-400">
+            <span className="text-sm text-gray-500">
               {todos.length} {todos.length === 1 ? 'task' : 'tasks'}
             </span>
           </div>
         </div>
 
         {/* Todo List */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {todos.length === 0 ? (
-            <div className="text-center py-12 text-gray-500 dark:text-slate-400">
-              <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-slate-600" />
+            <div className="text-center py-16 text-gray-500">
+              <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
               <p className="text-lg font-medium mb-2">
                 No tasks for {isToday(selectedDate) ? 'today' : format(selectedDate, 'MMM d')}
               </p>
@@ -712,37 +712,37 @@ const TodoList: React.FC = () => {
             todos.map((todo) => (
               <div
                 key={todo.id}
-                className={`p-4 rounded-lg border transition-colors ${
+                className={`p-6 rounded-lg border transition-colors duration-150 ${
                   todo.completed
-                    ? 'bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700'
-                    : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+                    ? 'bg-gray-50 border-gray-200'
+                    : 'bg-white border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-start space-x-3 flex-1 min-w-0">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start space-x-4 flex-1 min-w-0">
                     <button
                       onClick={() => toggleTodo(todo.id, todo.completed)}
-                      className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                      className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors duration-150 ${
                         todo.completed
-                          ? 'bg-green-500 border-green-500 text-white'
-                          : 'border-gray-300 dark:border-slate-600 hover:border-green-500'
+                          ? 'bg-green-600 border-green-600 text-white'
+                          : 'border-gray-300 hover:border-green-500'
                       }`}
                     >
                       {todo.completed && <Check className="w-3 h-3" />}
                     </button>
                     
                     <div className="flex-1 min-w-0">
-                      <h3 className={`font-medium mb-2 ${
+                      <h3 className={`font-medium mb-3 ${
                         todo.completed
-                          ? 'text-gray-500 dark:text-slate-400 line-through'
-                          : 'text-gray-900 dark:text-slate-100'
+                          ? 'text-gray-500 line-through'
+                          : 'text-gray-900'
                       }`}>
                         {todo.title}
                       </h3>
                       
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-3">
                         {todo.duration_minutes && (
-                          <span className="text-sm text-gray-600 dark:text-slate-400">
+                          <span className="text-sm text-gray-500">
                             Est: {formatMinutes(todo.duration_minutes)}
                           </span>
                         )}
@@ -752,14 +752,14 @@ const TodoList: React.FC = () => {
                         </span>
                         
                         {todo.priority_score && (
-                          <span className={getPriorityBadge(todo.priority_score)}>
+                          <span className={`badge ${getPriorityBadge(todo.priority_score)}`}>
                             {getPriorityLabel(todo.priority_score)} ({todo.priority_score.toFixed(1)})
                           </span>
                         )}
                       </div>
                       
                       {activeTimer === todo.id && (
-                        <div className="mt-2 text-blue-600 dark:text-blue-400 font-medium">
+                        <div className="mt-3 text-blue-600 font-medium">
                           ⏱️ {formatTime(timerSeconds)}
                         </div>
                       )}
@@ -767,21 +767,21 @@ const TodoList: React.FC = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex items-center space-x-1 flex-shrink-0">
+                  <div className="flex items-center space-x-2 flex-shrink-0">
                     {!todo.completed && (
                       <>
                         {activeTimer === todo.id ? (
                           <>
                             <button
                               onClick={() => pauseTimer(todo.id)}
-                              className="p-2 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+                              className="p-2 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors duration-150"
                               title="Pause timer"
                             >
                               <Pause className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => finishTask(todo.id)}
-                              className="p-2 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                              className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors duration-150"
                               title="Finish task"
                             >
                               <Square className="w-4 h-4" />
@@ -790,7 +790,7 @@ const TodoList: React.FC = () => {
                         ) : (
                           <button
                             onClick={() => startTimer(todo.id)}
-                            className="p-2 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                            className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors duration-150"
                             title="Start timer"
                           >
                             <Play className="w-4 h-4" />
@@ -801,7 +801,7 @@ const TodoList: React.FC = () => {
                     
                     <button
                       onClick={() => openEditModal(todo)}
-                      className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                      className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors duration-150"
                       title="Edit task"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -809,7 +809,7 @@ const TodoList: React.FC = () => {
                     
                     <button
                       onClick={() => deleteTodo(todo.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-150"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -823,25 +823,25 @@ const TodoList: React.FC = () => {
 
       {/* Add/Edit Task Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-slate-700">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
+        <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-200">
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-lg font-semibold text-gray-900">
                   {editingTodo ? 'Edit Task' : 'Add New Task'}
                 </h3>
                 <button
                   onClick={closeModal}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 rounded-lg transition-colors"
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors duration-150"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={editingTodo ? updateTodo : addTodo} className="space-y-4">
+              <form onSubmit={editingTodo ? updateTodo : addTodo} className="space-y-6">
                 {/* Task Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Task Name
                   </label>
                   <input
@@ -855,8 +855,8 @@ const TodoList: React.FC = () => {
                 </div>
 
                 {/* Priority Settings */}
-                <div className="space-y-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
-                  <h4 className="font-medium text-gray-900 dark:text-slate-100">Priority & Duration</h4>
+                <div className="space-y-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                  <h4 className="font-medium text-gray-900">Priority & Duration</h4>
                   
                   {[
                     { key: 'urgency', label: 'Urgency' },
@@ -865,7 +865,7 @@ const TodoList: React.FC = () => {
                     { key: 'impact', label: 'Impact' }
                   ].map(({ key, label }) => (
                     <div key={key}>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
                         {label}
                       </label>
                       <input
@@ -877,7 +877,7 @@ const TodoList: React.FC = () => {
                         onChange={(e) => setPriorityForm({...priorityForm, [key]: parseInt(e.target.value)})}
                         className="w-full"
                       />
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-slate-400 mt-1">
+                      <div className="flex justify-between text-xs text-gray-500 mt-2">
                         <span>Low</span>
                         <span className="font-medium">{priorityForm[key as keyof PriorityForm]}</span>
                         <span>High</span>
@@ -887,7 +887,7 @@ const TodoList: React.FC = () => {
 
                   {/* Duration */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
                       Estimated Duration
                     </label>
                     <input
@@ -899,7 +899,7 @@ const TodoList: React.FC = () => {
                       onChange={(e) => setPriorityForm({...priorityForm, duration_minutes: parseInt(e.target.value)})}
                       className="w-full"
                     />
-                    <div className="flex justify-between text-xs text-gray-500 dark:text-slate-400 mt-1">
+                    <div className="flex justify-between text-xs text-gray-500 mt-2">
                       <span>5m</span>
                       <span className="font-medium">{formatMinutes(priorityForm.duration_minutes)}</span>
                       <span>8h</span>
@@ -908,10 +908,10 @@ const TodoList: React.FC = () => {
                 </div>
 
                 {/* Priority Score */}
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Priority Score:</span>
-                    <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                    <span className="text-sm font-medium text-blue-700">Priority Score:</span>
+                    <span className="text-lg font-semibold text-blue-600">
                       {calculatePriorityScore(priorityForm).toFixed(1)}
                     </span>
                   </div>

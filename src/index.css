@@ -2,13 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @layer base {
   * {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gray-50 text-gray-900;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
   }
   
   /* Prevent horizontal scroll */
@@ -25,34 +29,22 @@
 }
 
 :root {
-  --background: 255 255 255;
-  --foreground: 15 23 42;
-  --border: 226 232 240;
+  --background: 249 250 251;
+  --foreground: 17 24 39;
+  --border: 229 231 235;
   --accent: 59 130 246;
   --accent-foreground: 255 255 255;
-  --muted: 248 250 252;
-  --muted-foreground: 100 116 139;
+  --muted: 243 244 246;
+  --muted-foreground: 107 114 128;
   --card: 255 255 255;
-  --card-foreground: 15 23 42;
-}
-
-.dark {
-  --background: 2 6 23;
-  --foreground: 248 250 252;
-  --border: 30 41 59;
-  --accent: 59 130 246;
-  --accent-foreground: 255 255 255;
-  --muted: 15 23 42;
-  --muted-foreground: 148 163 184;
-  --card: 15 23 42;
-  --card-foreground: 248 250 252;
+  --card-foreground: 17 24 39;
 }
 
 /* Clean, minimal animations */
 @keyframes fadeIn {
   from { 
     opacity: 0; 
-    transform: translateY(8px);
+    transform: translateY(4px);
   }
   to { 
     opacity: 1; 
@@ -63,7 +55,7 @@
 @keyframes slideIn {
   from { 
     opacity: 0; 
-    transform: translateX(-16px); 
+    transform: translateX(-8px); 
   }
   to { 
     opacity: 1; 
@@ -72,82 +64,99 @@
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .animate-slideIn {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.2s ease-out;
 }
 
-/* Clean button styles */
+/* Premium button styles */
 .btn-primary {
-  @apply bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+  @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors duration-150 text-sm;
 }
 
 .btn-secondary {
-  @apply bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+  @apply bg-white hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-lg font-medium transition-colors duration-150 border border-gray-200 text-sm;
 }
 
 .btn-ghost {
-  @apply hover:bg-gray-100 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg transition-colors duration-200;
+  @apply hover:bg-gray-100 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg transition-colors duration-150;
 }
 
-/* Clean card styles */
+/* Premium card styles */
 .card {
-  @apply bg-white border border-gray-200 rounded-xl p-6 shadow-sm;
+  @apply bg-white border border-gray-200 rounded-xl p-8 shadow-sm;
 }
 
 .card-header {
-  @apply flex items-center justify-between mb-6;
+  @apply flex items-center justify-between mb-8;
 }
 
 .card-title {
   @apply text-lg font-semibold text-gray-900;
 }
 
-/* Clean form styles */
+/* Premium form styles */
 .input {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200;
+  @apply w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150 bg-white text-gray-900 placeholder-gray-500;
 }
 
 .textarea {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-colors duration-200;
+  @apply w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-150 bg-white text-gray-900 placeholder-gray-500;
 }
 
 /* Clean status badges */
 .badge {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
 }
 
 .badge-success {
-  @apply bg-green-100 text-green-800;
+  @apply bg-green-50 text-green-700 border border-green-200;
 }
 
 .badge-warning {
-  @apply bg-yellow-100 text-yellow-800;
+  @apply bg-yellow-50 text-yellow-700 border border-yellow-200;
 }
 
 .badge-info {
-  @apply bg-blue-100 text-blue-800;
+  @apply bg-blue-50 text-blue-700 border border-blue-200;
 }
 
 .badge-gray {
-  @apply bg-gray-100 text-gray-800;
+  @apply bg-gray-50 text-gray-700 border border-gray-200;
 }
 
 /* Progress bars */
 .progress-bar {
-  @apply w-full bg-gray-200 rounded-full h-2;
+  @apply w-full bg-gray-100 rounded-full h-2;
 }
 
 .progress-fill {
   @apply bg-blue-500 h-2 rounded-full transition-all duration-300;
 }
 
+/* Table styles */
+.table {
+  @apply w-full;
+}
+
+.table th {
+  @apply text-left py-4 px-0 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200;
+}
+
+.table td {
+  @apply py-4 px-0 text-sm text-gray-900 border-b border-gray-100;
+}
+
+.table tr:last-child td {
+  @apply border-b-0;
+}
+
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .card {
-    @apply p-4 rounded-lg;
+    @apply p-6 rounded-lg;
   }
   
   .card-title {
@@ -159,43 +168,116 @@
   }
 }
 
-/* Dark mode */
-.dark .card {
-  @apply bg-slate-900 border-slate-700;
+/* Sidebar styles */
+.sidebar {
+  @apply bg-white border-r border-gray-200;
 }
 
-.dark .card-title {
-  @apply text-slate-100;
+.sidebar-nav {
+  @apply space-y-1;
 }
 
-.dark .input, .dark .textarea {
-  @apply bg-slate-800 border-slate-600 text-slate-100 focus:border-blue-500;
+.sidebar-nav-item {
+  @apply flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-150;
 }
 
-.dark .btn-secondary {
-  @apply bg-slate-700 hover:bg-slate-600 text-slate-200;
+.sidebar-nav-item.active {
+  @apply bg-blue-50 text-blue-700 border-r-2 border-blue-600;
 }
 
-.dark .btn-ghost {
-  @apply hover:bg-slate-800 text-slate-400 hover:text-slate-200;
+.sidebar-nav-item:not(.active) {
+  @apply text-gray-600 hover:bg-gray-50 hover:text-gray-900;
 }
 
-.dark .progress-bar {
-  @apply bg-slate-700;
+/* Header styles */
+.header {
+  @apply bg-white border-b border-gray-200;
 }
 
-.dark .badge-success {
-  @apply bg-green-900 text-green-200;
+.search-input {
+  @apply w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-150 placeholder-gray-500;
 }
 
-.dark .badge-warning {
-  @apply bg-yellow-900 text-yellow-200;
+/* Content area */
+.content-area {
+  @apply bg-gray-50 min-h-screen;
 }
 
-.dark .badge-info {
-  @apply bg-blue-900 text-blue-200;
+.page-header {
+  @apply mb-8;
 }
 
+.page-title {
+  @apply text-2xl font-semibold text-gray-900 mb-2;
+}
+
+.page-subtitle {
+  @apply text-gray-600;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  @apply text-sm text-gray-500 mb-6;
+}
+
+.breadcrumb-separator {
+  @apply mx-2 text-gray-300;
+}
+
+/* Tab navigation */
+.tab-nav {
+  @apply border-b border-gray-200 mb-8;
+}
+
+.tab-nav-item {
+  @apply py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-150;
+}
+
+.tab-nav-item.active {
+  @apply border-blue-500 text-blue-600;
+}
+
+.tab-nav-item:not(.active) {
+  @apply border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300;
+}
+
+/* Grid layouts */
+.grid-2 {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-8;
+}
+
+.grid-3 {
+  @apply grid grid-cols-1 lg:grid-cols-3 gap-8;
+}
+
+.grid-4 {
+  @apply grid grid-cols-2 lg:grid-cols-4 gap-6;
+}
+
+/* Stats cards */
+.stat-card {
+  @apply bg-white border border-gray-200 rounded-lg p-6 text-center;
+}
+
+.stat-value {
+  @apply text-2xl font-semibold text-gray-900 mb-1;
+}
+
+.stat-label {
+  @apply text-sm text-gray-500;
+}
+
+/* Remove all dark mode styles */
+.dark .card,
+.dark .card-title,
+.dark .input,
+.dark .textarea,
+.dark .btn-secondary,
+.dark .btn-ghost,
+.dark .progress-bar,
+.dark .badge-success,
+.dark .badge-warning,
+.dark .badge-info,
 .dark .badge-gray {
-  @apply bg-slate-700 text-slate-300;
+  /* All dark mode styles removed */
 }

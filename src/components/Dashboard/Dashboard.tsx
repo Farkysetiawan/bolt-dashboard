@@ -92,9 +92,9 @@ const Dashboard: React.FC = () => {
       case 'all':
       default:
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Mobile: Stack all components */}
-            <div className="block lg:hidden space-y-6">
+            <div className="block lg:hidden space-y-8">
               <TodoList />
               <DailyJournal />
               <ContentTracker />
@@ -104,16 +104,16 @@ const Dashboard: React.FC = () => {
             </div>
             
             {/* Desktop: Grid layout */}
-            <div className="hidden lg:grid lg:grid-cols-3 gap-6">
+            <div className="hidden lg:grid lg:grid-cols-3 gap-8">
               {/* Left Column */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-8">
                 <TodoList />
                 <ContentTracker />
                 <LearningTracker />
               </div>
               
               {/* Right Column */}
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <DailyJournal />
                 <QuickAccessLinks />
                 <PromptBank />
@@ -146,7 +146,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="content-area">
       <DashboardHeader 
         onUserClick={handleUserIconClick}
         onAnalyticsClick={handleAnalyticsIconClick}
@@ -157,16 +157,16 @@ const Dashboard: React.FC = () => {
       {/* Mobile Navigation */}
       <div className="lg:hidden">
         {/* Mobile Header */}
-        <div className="sticky top-16 z-30 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 px-4 py-3">
+        <div className="sticky top-16 z-30 bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
+            <h1 className="text-lg font-semibold text-gray-900">
               {activeCategory === 'profile' ? 'Profile' : 
                activeCategory === 'analytics' ? 'Analytics' :
                categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
             </h1>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-150"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -177,23 +177,21 @@ const Dashboard: React.FC = () => {
         {mobileMenuOpen && (
           <>
             <div 
-              className="fixed inset-0 bg-black bg-opacity-50 z-40"
+              className="fixed inset-0 bg-black bg-opacity-25 z-40"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="fixed top-28 left-4 right-4 bg-white dark:bg-slate-800 rounded-xl shadow-lg z-50 border border-gray-200 dark:border-slate-700">
+            <div className="fixed top-32 left-4 right-4 bg-white rounded-xl shadow-lg z-50 border border-gray-200">
               <div className="p-2">
                 {categories.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category.id)}
-                    className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-left transition-colors ${
-                      activeCategory === category.id
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                        : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
+                    className={`sidebar-nav-item w-full ${
+                      activeCategory === category.id ? 'active' : ''
                     }`}
                   >
-                    <span className="text-gray-500 dark:text-slate-400">{category.icon}</span>
-                    <span className="font-medium">{category.name}</span>
+                    <span className="text-gray-400">{category.icon}</span>
+                    <span>{category.name}</span>
                   </button>
                 ))}
               </div>
@@ -204,24 +202,22 @@ const Dashboard: React.FC = () => {
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
-        <div className="w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 fixed top-16 left-0 h-screen overflow-y-auto">
-          <div className="p-6">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100 uppercase tracking-wide mb-4">
+        <div className="sidebar w-64 fixed top-16 left-0 h-screen overflow-y-auto">
+          <div className="p-8">
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-6">
               Navigation
             </h2>
-            <nav className="space-y-1">
+            <nav className="sidebar-nav">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                    activeCategory === category.id
-                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                      : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'
+                  className={`sidebar-nav-item w-full ${
+                    activeCategory === category.id ? 'active' : ''
                   }`}
                 >
-                  <span className="text-gray-500 dark:text-slate-400">{category.icon}</span>
-                  <span className="font-medium">{category.name}</span>
+                  <span className="text-gray-400">{category.icon}</span>
+                  <span>{category.name}</span>
                 </button>
               ))}
             </nav>
@@ -231,15 +227,15 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content */}
       <main className="lg:ml-64">
-        <div className="max-w-7xl mx-auto px-4 py-6 lg:px-6 lg:py-8">
-          {/* Desktop Page Title */}
-          <div className="hidden lg:block mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
+        <div className="max-w-7xl mx-auto px-6 py-8 lg:px-8 lg:py-12">
+          {/* Desktop Page Header */}
+          <div className="page-header hidden lg:block">
+            <h1 className="page-title">
               {activeCategory === 'profile' ? 'Profile' : 
                activeCategory === 'analytics' ? 'Analytics' :
                categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
             </h1>
-            <p className="text-gray-600 dark:text-slate-400 mt-1">
+            <p className="page-subtitle">
               {activeCategory === 'all' 
                 ? 'Overview of all your productivity tools'
                 : activeCategory === 'profile'

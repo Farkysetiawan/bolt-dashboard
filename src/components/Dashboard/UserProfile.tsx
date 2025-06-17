@@ -138,26 +138,26 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
     switch (status) {
       case 'completed': return 'badge badge-success';
       case 'processing': return 'badge badge-warning';
-      case 'failed': return 'badge bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'failed': return 'bg-red-50 text-red-700 border border-red-200';
       default: return 'badge badge-gray';
     }
   };
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="card animate-fadeIn">
           <div className="animate-pulse">
-            <div className="flex items-center space-x-4 mb-6">
-              <div className="w-16 h-16 bg-gray-200 dark:bg-slate-700 rounded-full"></div>
-              <div className="space-y-2">
-                <div className="h-6 bg-gray-200 dark:bg-slate-700 rounded w-48"></div>
-                <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-32"></div>
+            <div className="flex items-center space-x-6 mb-8">
+              <div className="w-20 h-20 bg-gray-100 rounded-full"></div>
+              <div className="space-y-3">
+                <div className="h-6 bg-gray-100 rounded w-48"></div>
+                <div className="h-4 bg-gray-100 rounded w-32"></div>
               </div>
             </div>
             <div className="space-y-4">
-              <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-100 rounded"></div>
+              <div className="h-4 bg-gray-100 rounded w-3/4"></div>
             </div>
           </div>
         </div>
@@ -166,16 +166,16 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Breadcrumbs */}
-      <nav className="text-sm text-gray-600 dark:text-slate-400">
+      <nav className="breadcrumbs">
         <span>Settings</span>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900 dark:text-slate-100 font-medium">Profile</span>
+        <span className="breadcrumb-separator">/</span>
+        <span className="text-gray-900 font-medium">Profile</span>
       </nav>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-slate-700">
+      <div className="tab-nav">
         <nav className="flex space-x-8">
           {[
             { id: 'general', label: 'General' },
@@ -185,10 +185,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-300 dark:hover:border-slate-600'
+              className={`tab-nav-item ${
+                activeTab === tab.id ? 'active' : ''
               }`}
             >
               {tab.label}
@@ -214,10 +212,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
           </div>
 
           {isEditing ? (
-            <form onSubmit={handleSave} className="space-y-6">
+            <form onSubmit={handleSave} className="space-y-8">
               {/* Avatar Section */}
-              <div className="flex items-center space-x-6">
-                <div className="w-20 h-20 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center overflow-hidden">
+              <div className="flex items-center space-x-8">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
                   {editForm.avatar_url ? (
                     <img
                       src={editForm.avatar_url}
@@ -229,10 +227,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                       }}
                     />
                   ) : null}
-                  <User className={`w-8 h-8 text-gray-400 ${editForm.avatar_url ? 'hidden' : ''}`} />
+                  <User className={`w-10 h-10 text-gray-400 ${editForm.avatar_url ? 'hidden' : ''}`} />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Avatar URL
                   </label>
                   <input
@@ -246,9 +244,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
               </div>
 
               {/* Form Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Full Name
                   </label>
                   <input
@@ -261,7 +259,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email
                   </label>
                   <input
@@ -270,14 +268,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                     disabled
                     className="input opacity-50 cursor-not-allowed"
                   />
-                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-gray-500 mt-2">
                     Email cannot be changed
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Bio
                 </label>
                 <textarea
@@ -310,10 +308,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
               </div>
             </form>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* Profile Display */}
-              <div className="flex items-center space-x-6">
-                <div className="w-20 h-20 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center overflow-hidden">
+              <div className="flex items-center space-x-8">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
                   {profile?.avatar_url ? (
                     <img
                       src={profile.avatar_url}
@@ -325,18 +323,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                       }}
                     />
                   ) : null}
-                  <User className={`w-8 h-8 text-gray-400 ${profile?.avatar_url ? 'hidden' : ''}`} />
+                  <User className={`w-10 h-10 text-gray-400 ${profile?.avatar_url ? 'hidden' : ''}`} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
+                  <h3 className="text-xl font-semibold text-gray-900">
                     {profile?.full_name || 'No name set'}
                   </h3>
-                  <p className="text-gray-600 dark:text-slate-400 flex items-center mt-1">
+                  <p className="text-gray-600 flex items-center mt-2">
                     <Mail className="w-4 h-4 mr-2" />
                     {profile?.email}
                   </p>
                   {profile?.created_at && (
-                    <p className="text-sm text-gray-500 dark:text-slate-400 flex items-center mt-1">
+                    <p className="text-sm text-gray-500 flex items-center mt-2">
                       <Calendar className="w-4 h-4 mr-2" />
                       Member since {new Date(profile.created_at).toLocaleDateString()}
                     </p>
@@ -347,15 +345,15 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
               {/* Bio */}
               {profile?.bio && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">About</h4>
-                  <p className="text-gray-600 dark:text-slate-400 leading-relaxed">{profile.bio}</p>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">About</h4>
+                  <p className="text-gray-600 leading-relaxed">{profile.bio}</p>
                 </div>
               )}
 
               {!profile?.bio && !profile?.full_name && (
-                <div className="text-center py-8">
-                  <User className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-4" />
-                  <p className="text-gray-500 dark:text-slate-400 mb-4">Your profile is incomplete</p>
+                <div className="text-center py-12">
+                  <User className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 mb-6">Your profile is incomplete</p>
                   <button
                     onClick={() => setIsEditing(true)}
                     className="btn-primary"
@@ -371,7 +369,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
 
       {/* Billing Tab */}
       {activeTab === 'billing' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Current Plan */}
           <div className="card animate-fadeIn">
             <div className="card-header">
@@ -379,31 +377,31 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
               <button className="btn-primary">Upgrade Plan</button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-                <h3 className="font-semibold text-blue-900 dark:text-blue-100">Free Plan</h3>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">$0<span className="text-sm font-normal">/month</span></p>
-                <ul className="text-sm text-blue-700 dark:text-blue-300 mt-3 space-y-1">
+            <div className="grid-3">
+              <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 className="font-semibold text-blue-900">Free Plan</h3>
+                <p className="text-2xl font-bold text-blue-600 mt-3">$0<span className="text-sm font-normal">/month</span></p>
+                <ul className="text-sm text-blue-700 mt-4 space-y-2">
                   <li>• Basic task management</li>
                   <li>• Up to 100 tasks</li>
                   <li>• Basic analytics</li>
                 </ul>
               </div>
               
-              <div className="p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
-                <h3 className="font-semibold text-gray-900 dark:text-slate-100">Pro Plan</h3>
-                <p className="text-2xl font-bold text-gray-600 dark:text-slate-400 mt-2">$9<span className="text-sm font-normal">/month</span></p>
-                <ul className="text-sm text-gray-600 dark:text-slate-400 mt-3 space-y-1">
+              <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-gray-900">Pro Plan</h3>
+                <p className="text-2xl font-bold text-gray-600 mt-3">$9<span className="text-sm font-normal">/month</span></p>
+                <ul className="text-sm text-gray-600 mt-4 space-y-2">
                   <li>• Unlimited tasks</li>
                   <li>• Advanced analytics</li>
                   <li>• Priority support</li>
                 </ul>
               </div>
               
-              <div className="p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
-                <h3 className="font-semibold text-gray-900 dark:text-slate-100">Team Plan</h3>
-                <p className="text-2xl font-bold text-gray-600 dark:text-slate-400 mt-2">$19<span className="text-sm font-normal">/month</span></p>
-                <ul className="text-sm text-gray-600 dark:text-slate-400 mt-3 space-y-1">
+              <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-gray-900">Team Plan</h3>
+                <p className="text-2xl font-bold text-gray-600 mt-3">$19<span className="text-sm font-normal">/month</span></p>
+                <ul className="text-sm text-gray-600 mt-4 space-y-2">
                   <li>• Everything in Pro</li>
                   <li>• Team collaboration</li>
                   <li>• Admin controls</li>
@@ -419,39 +417,39 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
             </div>
             
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="table">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-slate-700">
-                    <th className="text-left py-3 px-0 text-sm font-medium text-gray-700 dark:text-slate-300">Date</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Description</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Amount</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Status</th>
-                    <th className="text-right py-3 px-0 text-sm font-medium text-gray-700 dark:text-slate-300">Invoice</th>
+                  <tr>
+                    <th>Date</th>
+                    <th className="px-6">Description</th>
+                    <th className="px-6">Amount</th>
+                    <th className="px-6">Status</th>
+                    <th className="text-right">Invoice</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-gray-100 dark:border-slate-800">
-                    <td className="py-3 px-0 text-sm text-gray-900 dark:text-slate-100">Jan 15, 2024</td>
-                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-slate-400">Pro Plan - Monthly</td>
-                    <td className="py-3 px-4 text-sm text-gray-900 dark:text-slate-100 font-medium">$9.00</td>
-                    <td className="py-3 px-4">
+                  <tr>
+                    <td>Jan 15, 2024</td>
+                    <td className="px-6 text-gray-600">Pro Plan - Monthly</td>
+                    <td className="px-6 font-medium">$9.00</td>
+                    <td className="px-6">
                       <span className="badge badge-success">Paid</span>
                     </td>
-                    <td className="py-3 px-0 text-right">
-                      <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">
+                    <td className="text-right">
+                      <button className="text-blue-600 hover:text-blue-700 text-sm">
                         Download
                       </button>
                     </td>
                   </tr>
-                  <tr className="border-b border-gray-100 dark:border-slate-800">
-                    <td className="py-3 px-0 text-sm text-gray-900 dark:text-slate-100">Dec 15, 2023</td>
-                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-slate-400">Pro Plan - Monthly</td>
-                    <td className="py-3 px-4 text-sm text-gray-900 dark:text-slate-100 font-medium">$9.00</td>
-                    <td className="py-3 px-4">
+                  <tr>
+                    <td>Dec 15, 2023</td>
+                    <td className="px-6 text-gray-600">Pro Plan - Monthly</td>
+                    <td className="px-6 font-medium">$9.00</td>
+                    <td className="px-6">
                       <span className="badge badge-success">Paid</span>
                     </td>
-                    <td className="py-3 px-0 text-right">
-                      <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm">
+                    <td className="text-right">
+                      <button className="text-blue-600 hover:text-blue-700 text-sm">
                         Download
                       </button>
                     </td>
@@ -465,16 +463,16 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
 
       {/* Password Tab */}
       {activeTab === 'password' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Change Password */}
           <div className="card animate-fadeIn">
             <div className="card-header">
               <h2 className="card-title">Change Password</h2>
             </div>
             
-            <form className="space-y-4 max-w-md">
+            <form className="space-y-6 max-w-md">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Current Password
                 </label>
                 <input
@@ -485,7 +483,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   New Password
                 </label>
                 <input
@@ -496,7 +494,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Confirm New Password
                 </label>
                 <input
@@ -523,34 +521,34 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
             </div>
             
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="table">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-slate-700">
-                    <th className="text-left py-3 px-0 text-sm font-medium text-gray-700 dark:text-slate-300">Export</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Date</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Size</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700 dark:text-slate-300">Status</th>
-                    <th className="text-right py-3 px-0 text-sm font-medium text-gray-700 dark:text-slate-300">Download</th>
+                  <tr>
+                    <th>Export</th>
+                    <th className="px-6">Date</th>
+                    <th className="px-6">Size</th>
+                    <th className="px-6">Status</th>
+                    <th className="text-right">Download</th>
                   </tr>
                 </thead>
                 <tbody>
                   {mockData.map((item) => (
-                    <tr key={item.id} className="border-b border-gray-100 dark:border-slate-800">
-                      <td className="py-3 px-0 text-sm text-gray-900 dark:text-slate-100 font-medium">{item.name}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600 dark:text-slate-400">{item.date}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600 dark:text-slate-400">{item.size}</td>
-                      <td className="py-3 px-4">
-                        <span className={getStatusBadge(item.status)}>
+                    <tr key={item.id}>
+                      <td className="font-medium">{item.name}</td>
+                      <td className="px-6 text-gray-600">{item.date}</td>
+                      <td className="px-6 text-gray-600">{item.size}</td>
+                      <td className="px-6">
+                        <span className={`badge ${getStatusBadge(item.status)}`}>
                           {item.status}
                         </span>
                       </td>
-                      <td className="py-3 px-0 text-right">
+                      <td className="text-right">
                         {item.status === 'completed' ? (
-                          <button className="p-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                          <button className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors duration-150">
                             <Download className="w-4 h-4" />
                           </button>
                         ) : (
-                          <span className="text-gray-400 dark:text-slate-500 text-sm">-</span>
+                          <span className="text-gray-400 text-sm">-</span>
                         )}
                       </td>
                     </tr>
@@ -568,22 +566,22 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
           <h2 className="card-title">Account Statistics</h2>
         </div>
         
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">0</div>
-            <div className="text-sm text-gray-600 dark:text-slate-400">Total Tasks</div>
+        <div className="grid-4">
+          <div className="stat-card">
+            <div className="stat-value text-blue-600">0</div>
+            <div className="stat-label">Total Tasks</div>
           </div>
-          <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">0</div>
-            <div className="text-sm text-gray-600 dark:text-slate-400">Completed Goals</div>
+          <div className="stat-card">
+            <div className="stat-value text-green-600">0</div>
+            <div className="stat-label">Completed Goals</div>
           </div>
-          <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">0</div>
-            <div className="text-sm text-gray-600 dark:text-slate-400">Journal Entries</div>
+          <div className="stat-card">
+            <div className="stat-value text-purple-600">0</div>
+            <div className="stat-label">Journal Entries</div>
           </div>
-          <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
-            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">0</div>
-            <div className="text-sm text-gray-600 dark:text-slate-400">Quick Links</div>
+          <div className="stat-card">
+            <div className="stat-value text-orange-600">0</div>
+            <div className="stat-label">Quick Links</div>
           </div>
         </div>
       </div>
