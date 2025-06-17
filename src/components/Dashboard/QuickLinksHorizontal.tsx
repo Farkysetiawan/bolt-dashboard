@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, Plus, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link, Plus, ExternalLink, ChevronLeft, ChevronRight, Smartphone, Globe } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -10,6 +10,7 @@ interface QuickLink {
   icon?: string;
   user_id: string;
   order_index?: number;
+  open_in_app?: boolean;
 }
 
 const QuickLinksHorizontal: React.FC = () => {
@@ -85,6 +86,31 @@ const QuickLinksHorizontal: React.FC = () => {
     return url && (url.startsWith('http') || url.startsWith('data:image/'));
   };
 
+  const getAppUrl = (url: string, domain: string): string => {
+    // Common app URL schemes
+    const appSchemes: { [key: string]: string } = {
+      'youtube.com': url.replace('https://www.youtube.com', 'youtube://').replace('https://youtube.com', 'youtube://'),
+      'youtu.be': url.replace('https://youtu.be/', 'youtube://watch?v='),
+      'instagram.com': url.replace('https://www.instagram.com', 'instagram://').replace('https://instagram.com', 'instagram://'),
+      'twitter.com': url.replace('https://twitter.com', 'twitter://').replace('https://www.twitter.com', 'twitter://'),
+      'x.com': url.replace('https://x.com', 'twitter://').replace('https://www.x.com', 'twitter://'),
+      'facebook.com': url.replace('https://www.facebook.com', 'fb://').replace('https://facebook.com', 'fb://'),
+      'tiktok.com': url.replace('https://www.tiktok.com', 'tiktok://').replace('https://tiktok.com', 'tiktok://'),
+      'linkedin.com': url.replace('https://www.linkedin.com', 'linkedin://').replace('https://linkedin.com', 'linkedin://'),
+      'spotify.com': url.replace('https://open.spotify.com', 'spotify:'),
+      'discord.com': url.replace('https://discord.com', 'discord://').replace('https://www.discord.com', 'discord://'),
+      'telegram.org': url.replace('https://t.me', 'tg://').replace('https://telegram.me', 'tg://'),
+      'whatsapp.com': url.replace('https://wa.me', 'whatsapp://send?phone=').replace('https://web.whatsapp.com', 'whatsapp://'),
+      'reddit.com': url.replace('https://www.reddit.com', 'reddit://').replace('https://reddit.com', 'reddit://'),
+      'pinterest.com': url.replace('https://www.pinterest.com', 'pinterest://').replace('https://pinterest.com', 'pinterest://'),
+      'twitch.tv': url.replace('https://www.twitch.tv', 'twitch://').replace('https://twitch.tv', 'twitch://'),
+      'github.com': url.replace('https://github.com', 'github://'),
+      'zoom.us': url.replace('https://zoom.us/j/', 'zoomus://zoom.us/join?confno='),
+    };
+
+    return appSchemes[domain] || url;
+  };
+
   if (loading) {
     return (
       <div className="flex space-x-2 overflow-x-auto pb-2">
@@ -142,17 +168,20 @@ const QuickLinksHorizontal: React.FC = () => {
       >
         {links.map((link) => {
           const hasCustomLogo = isValidImageUrl(link.icon || '');
+          const domain = getDomainFromUrl(link.url);
+          const finalUrl = link.open_in_app ? getAppUrl(link.url, domain) : link.url;
+          
           return (
             <a
               key={link.id}
-              href={link.url}
+              href={finalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col items-center flex-shrink-0"
+              className="group flex flex-col items-center flex-shrink-0 relative"
               title={link.title || getDomainFromUrl(link.url)}
               style={{ scrollSnapAlign: 'start' }}
             >
-              <div className="w-16 h-16 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:border-gray-300 hover:shadow-sm transition-all duration-150 mb-2">
+              <div className="w-16 h-16 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:border-gray-300 hover:shadow-sm transition-all duration-150 mb-2 relative">
                 {hasCustomLogo ? (
                   <img
                     src={link.icon}
@@ -166,6 +195,15 @@ const QuickLinksHorizontal: React.FC = () => {
                   />
                 ) : null}
                 <ExternalLink className={`w-6 h-6 text-gray-600 group-hover:text-blue-600 transition-colors duration-150 ${hasCustomLogo ? 'hidden' : ''}`} />
+                
+                {/* App/Browser indicator */}
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-white border border-gray-200 rounded-full flex items-center justify-center">
+                  {link.open_in_app ? (
+                    <Smartphone className="w-2.5 h-2.5 text-blue-600" />
+                  ) : (
+                    <Globe className="w-2.5 h-2.5 text-gray-600" />
+                  )}
+                </div>
               </div>
               <span className="text-xs text-gray-600 group-hover:text-gray-900 text-center truncate max-w-[64px] leading-tight">
                 {link.title || getDomainFromUrl(link.url)}

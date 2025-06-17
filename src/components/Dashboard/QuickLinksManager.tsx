@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, Plus, ExternalLink, Edit2, X, ChevronUp, ChevronDown, Save, AlertCircle, Upload, Image } from 'lucide-react';
+import { Link, Plus, ExternalLink, Edit2, X, ChevronUp, ChevronDown, Save, AlertCircle, Upload, Image, Smartphone, Globe } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -10,6 +10,7 @@ interface QuickLink {
   icon?: string;
   user_id: string;
   order_index?: number;
+  open_in_app?: boolean; // New field for app integration
 }
 
 const QuickLinksManager: React.FC = () => {
@@ -20,7 +21,8 @@ const QuickLinksManager: React.FC = () => {
   const [formData, setFormData] = useState({
     title: '',
     url: '',
-    icon: ''
+    icon: '',
+    open_in_app: false
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [saving, setSaving] = useState(false);
@@ -51,6 +53,18 @@ const QuickLinksManager: React.FC = () => {
     }
   };
 
+  const normalizeUrl = (url: string): string => {
+    const trimmedUrl = url.trim();
+    
+    // If it already has a protocol, return as is
+    if (trimmedUrl.match(/^https?:\/\//)) {
+      return trimmedUrl;
+    }
+    
+    // Add https:// if no protocol
+    return `https://${trimmedUrl}`;
+  };
+
   const validateForm = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
@@ -60,8 +74,13 @@ const QuickLinksManager: React.FC = () => {
 
     if (!formData.url.trim()) {
       newErrors.url = 'URL is required';
-    } else if (!formData.url.match(/^https?:\/\/.+/)) {
-      newErrors.url = 'URL must start with http:// or https://';
+    } else {
+      const normalizedUrl = normalizeUrl(formData.url);
+      try {
+        new URL(normalizedUrl);
+      } catch {
+        newErrors.url = 'Please enter a valid URL (e.g., example.com)';
+      }
     }
 
     if (!editingLink && links.length >= 10) {
@@ -146,14 +165,17 @@ const QuickLinksManager: React.FC = () => {
 
     setSaving(true);
     try {
+      const normalizedUrl = normalizeUrl(formData.url);
+      
       if (editingLink) {
         // Update existing link
         const { data, error } = await supabase
           .from('quick_links')
           .update({
             title: formData.title.trim(),
-            url: formData.url.trim(),
-            icon: formData.icon || null
+            url: normalizedUrl,
+            icon: formData.icon || null,
+            open_in_app: formData.open_in_app
           })
           .eq('id', editingLink.id)
           .select()
@@ -168,8 +190,9 @@ const QuickLinksManager: React.FC = () => {
           .insert([
             {
               title: formData.title.trim(),
-              url: formData.url.trim(),
+              url: normalizedUrl,
               icon: formData.icon || null,
+              open_in_app: formData.open_in_app,
               user_id: user?.id
             }
           ])
@@ -194,7 +217,8 @@ const QuickLinksManager: React.FC = () => {
     setFormData({
       title: link.title,
       url: link.url,
-      icon: link.icon || ''
+      icon: link.icon || '',
+      open_in_app: link.open_in_app || false
     });
     setShowAddForm(true);
     setErrors({});
@@ -228,7 +252,7 @@ const QuickLinksManager: React.FC = () => {
   };
 
   const resetForm = () => {
-    setFormData({ title: '', url: '', icon: '' });
+    setFormData({ title: '', url: '', icon: '', open_in_app: false });
     setEditingLink(null);
     setShowAddForm(false);
     setErrors({});
@@ -248,6 +272,31 @@ const QuickLinksManager: React.FC = () => {
 
   const isValidImageUrl = (url: string): boolean => {
     return url && (url.startsWith('http') || url.startsWith('data:image/'));
+  };
+
+  const getAppUrl = (url: string, domain: string): string => {
+    // Common app URL schemes
+    const appSchemes: { [key: string]: string } = {
+      'youtube.com': url.replace('https://www.youtube.com', 'youtube://').replace('https://youtube.com', 'youtube://'),
+      'youtu.be': url.replace('https://youtu.be/', 'youtube://watch?v='),
+      'instagram.com': url.replace('https://www.instagram.com', 'instagram://').replace('https://instagram.com', 'instagram://'),
+      'twitter.com': url.replace('https://twitter.com', 'twitter://').replace('https://www.twitter.com', 'twitter://'),
+      'x.com': url.replace('https://x.com', 'twitter://').replace('https://www.x.com', 'twitter://'),
+      'facebook.com': url.replace('https://www.facebook.com', 'fb://').replace('https://facebook.com', 'fb://'),
+      'tiktok.com': url.replace('https://www.tiktok.com', 'tiktok://').replace('https://tiktok.com', 'tiktok://'),
+      'linkedin.com': url.replace('https://www.linkedin.com', 'linkedin://').replace('https://linkedin.com', 'linkedin://'),
+      'spotify.com': url.replace('https://open.spotify.com', 'spotify:'),
+      'discord.com': url.replace('https://discord.com', 'discord://').replace('https://www.discord.com', 'discord://'),
+      'telegram.org': url.replace('https://t.me', 'tg://').replace('https://telegram.me', 'tg://'),
+      'whatsapp.com': url.replace('https://wa.me', 'whatsapp://send?phone=').replace('https://web.whatsapp.com', 'whatsapp://'),
+      'reddit.com': url.replace('https://www.reddit.com', 'reddit://').replace('https://reddit.com', 'reddit://'),
+      'pinterest.com': url.replace('https://www.pinterest.com', 'pinterest://').replace('https://pinterest.com', 'pinterest://'),
+      'twitch.tv': url.replace('https://www.twitch.tv', 'twitch://').replace('https://twitch.tv', 'twitch://'),
+      'github.com': url.replace('https://github.com', 'github://'),
+      'zoom.us': url.replace('https://zoom.us/j/', 'zoomus://zoom.us/join?confno='),
+    };
+
+    return appSchemes[domain] || url;
   };
 
   if (loading) {
@@ -383,16 +432,45 @@ const QuickLinksManager: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                   URL
                 </label>
-                <input
-                  type="url"
-                  value={formData.url}
-                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                  placeholder="https://example.com"
-                  className={`input ${errors.url ? 'border-red-300 focus:ring-red-500' : ''}`}
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                    https://
+                  </span>
+                  <input
+                    type="text"
+                    value={formData.url.replace(/^https?:\/\//, '')}
+                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                    placeholder="example.com"
+                    className={`input pl-16 ${errors.url ? 'border-red-300 focus:ring-red-500' : ''}`}
+                  />
+                </div>
                 {errors.url && (
                   <p className="text-red-600 text-xs mt-1">{errors.url}</p>
                 )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Just enter the domain (e.g., example.com). https:// will be added automatically.
+                </p>
+              </div>
+
+              {/* Open in App Option */}
+              <div>
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={formData.open_in_app}
+                    onChange={(e) => setFormData({ ...formData, open_in_app: e.target.checked })}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <div className="flex items-center space-x-2">
+                    <Smartphone className="w-4 h-4 text-gray-600" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                      Try to open in app (if available)
+                    </span>
+                  </div>
+                </label>
+                <p className="text-xs text-gray-500 mt-1 ml-7">
+                  When enabled, will attempt to open supported apps (YouTube, Instagram, Twitter, etc.) instead of browser.
+                </p>
               </div>
 
               {/* Preview */}
@@ -411,9 +489,16 @@ const QuickLinksManager: React.FC = () => {
                         <ExternalLink className="w-5 h-5" />
                       )}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{formData.title}</p>
-                      <p className="text-xs text-gray-500 dark:text-slate-400">{getDomainFromUrl(formData.url)}</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400">{getDomainFromUrl(normalizeUrl(formData.url))}</p>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      {formData.open_in_app ? (
+                        <Smartphone className="w-4 h-4 text-blue-600" title="Opens in app" />
+                      ) : (
+                        <Globe className="w-4 h-4 text-gray-600" title="Opens in browser" />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -451,6 +536,7 @@ const QuickLinksManager: React.FC = () => {
           ) : (
             links.map((link, index) => {
               const hasCustomLogo = isValidImageUrl(link.icon || '');
+              const domain = getDomainFromUrl(link.url);
               return (
                 <div
                   key={link.id}
@@ -472,11 +558,18 @@ const QuickLinksManager: React.FC = () => {
                       <ExternalLink className={`w-5 h-5 text-gray-600 dark:text-slate-400 ${hasCustomLogo ? 'hidden' : ''}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 dark:text-slate-100 truncate">
-                        {link.title}
-                      </h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium text-gray-900 dark:text-slate-100 truncate">
+                          {link.title}
+                        </h3>
+                        {link.open_in_app ? (
+                          <Smartphone className="w-4 h-4 text-blue-600 flex-shrink-0" title="Opens in app" />
+                        ) : (
+                          <Globe className="w-4 h-4 text-gray-600 flex-shrink-0" title="Opens in browser" />
+                        )}
+                      </div>
                       <p className="text-sm text-gray-500 dark:text-slate-400 truncate">
-                        {getDomainFromUrl(link.url)}
+                        {domain}
                       </p>
                     </div>
                   </div>
@@ -504,13 +597,17 @@ const QuickLinksManager: React.FC = () => {
 
                     {/* Visit link */}
                     <a
-                      href={link.url}
+                      href={link.open_in_app ? getAppUrl(link.url, domain) : link.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                      title="Visit link"
+                      title={`Visit ${link.open_in_app ? 'in app' : 'in browser'}`}
                     >
-                      <ExternalLink className="w-4 h-4" />
+                      {link.open_in_app ? (
+                        <Smartphone className="w-4 h-4" />
+                      ) : (
+                        <ExternalLink className="w-4 h-4" />
+                      )}
                     </a>
 
                     {/* Edit */}
