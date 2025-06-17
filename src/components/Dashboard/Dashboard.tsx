@@ -216,8 +216,10 @@ const Dashboard: React.FC = () => {
                       }`}
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
+                      <span className="flex items-center gap-2">
                       <span className="text-gray-400">{category.icon}</span>
-                      <span className="text-sm text-gray-700 font-medium">{category.name}</span>
+                      <span className="text-gray-800 text-sm">{category.name}</span>
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -243,8 +245,10 @@ const Dashboard: React.FC = () => {
                     }`}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
+                    <span className="flex items-center gap-2">
                     <span className="text-gray-400">{category.icon}</span>
-                    <span className="text-sm text-gray-700 font-medium">{category.name}</span>
+                    <span className="text-gray-800 text-sm">{category.name}</span>
+                    </span>
                   </button>
                 ))}
               </nav>
