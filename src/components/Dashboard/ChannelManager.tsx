@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Plus, X, Upload, Image, Settings, Edit2, Trash2, ArrowLeft } from 'lucide-react';
+import { Play, Plus, X, Upload, Image, Settings, Edit2, Trash2, ArrowLeft, BookOpen, Video, Headphones, FileText } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -11,14 +11,33 @@ interface Channel {
   user_id: string;
 }
 
+interface ContentItem {
+  id: string;
+  title: string;
+  type: 'video' | 'article' | 'book' | 'podcast';
+  status: 'watching' | 'completed' | 'planned';
+  progress: number;
+  user_id: string;
+  channel_id?: string;
+  created_at: string;
+}
+
 const ChannelManager: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
+  const [channelContent, setChannelContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [contentLoading, setContentLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showContentModal, setShowContentModal] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     logo_url: ''
+  });
+  const [contentFormData, setContentFormData] = useState({
+    title: '',
+    type: 'video' as ContentItem['type'],
+    status: 'planned' as ContentItem['status']
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -30,6 +49,12 @@ const ChannelManager: React.FC = () => {
       fetchChannels();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (selectedChannel) {
+      fetchChannelContent();
+    }
+  }, [selectedChannel]);
 
   const fetchChannels = async () => {
     try {
@@ -45,6 +70,41 @@ const ChannelManager: React.FC = () => {
       console.error('Error fetching channels:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchChannelContent = async () => {
+    if (!selectedChannel) return;
+    
+    setContentLoading(true);
+    try {
+      // First, try to get content with channel_id
+      let { data, error } = await supabase
+        .from('content_items')
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('channel_id', selectedChannel.id)
+        .order('created_at', { ascending: false });
+
+      // If no content found or channel_id doesn't exist, get all user content
+      if (!data || data.length === 0) {
+        const { data: allContent, error: allError } = await supabase
+          .from('content_items')
+          .select('*')
+          .eq('user_id', user?.id)
+          .order('created_at', { ascending: false });
+        
+        if (allError) throw allError;
+        data = allContent || [];
+      }
+
+      if (error) throw error;
+      setChannelContent(data || []);
+    } catch (error) {
+      console.error('Error fetching channel content:', error);
+      setChannelContent([]);
+    } finally {
+      setContentLoading(false);
     }
   };
 
@@ -121,7 +181,7 @@ const ChannelManager: React.FC = () => {
 
     setSaving(true);
     try {
-      if (selectedChannel) {
+      if (selectedChannel && showAddModal) {
         // Update existing channel
         const { data, error } = await supabase
           .from('channels')
@@ -138,6 +198,7 @@ const ChannelManager: React.FC = () => {
         setChannels(channels.map(channel => 
           channel.id === selectedChannel.id ? data : channel
         ));
+        setSelectedChannel(data);
       } else {
         // Add new channel
         const { data, error } = await supabase
@@ -166,8 +227,100 @@ const ChannelManager: React.FC = () => {
     }
   };
 
+  const handleContentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contentFormData.title.trim() || !selectedChannel) return;
+
+    setSaving(true);
+    try {
+      // Check if channel_id column exists, if not, add it
+      const { data, error } = await supabase
+        .from('content_items')
+        .insert([
+          {
+            title: contentFormData.title.trim(),
+            type: contentFormData.type,
+            status: contentFormData.status,
+            progress: 0,
+            user_id: user?.id,
+            channel_id: selectedChannel.id
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        // If channel_id column doesn't exist, insert without it
+        if (error.message.includes('channel_id')) {
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('content_items')
+            .insert([
+              {
+                title: contentFormData.title.trim(),
+                type: contentFormData.type,
+                status: contentFormData.status,
+                progress: 0,
+                user_id: user?.id
+              }
+            ])
+            .select()
+            .single();
+
+          if (fallbackError) throw fallbackError;
+          setChannelContent([fallbackData, ...channelContent]);
+        } else {
+          throw error;
+        }
+      } else {
+        setChannelContent([data, ...channelContent]);
+      }
+      
+      resetContentForm();
+    } catch (error) {
+      console.error('Error adding content:', error);
+      alert('Failed to add content. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateContentProgress = async (id: string, progress: number) => {
+    try {
+      const status = progress >= 100 ? 'completed' : progress > 0 ? 'watching' : 'planned';
+      const { error } = await supabase
+        .from('content_items')
+        .update({ progress, status })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setChannelContent(channelContent.map(item => 
+        item.id === id ? { ...item, progress, status } : item
+      ));
+    } catch (error) {
+      console.error('Error updating progress:', error);
+    }
+  };
+
+  const deleteContent = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this content?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('content_items')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      setChannelContent(channelContent.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting content:', error);
+      alert('Failed to delete content. Please try again.');
+    }
+  };
+
   const deleteChannel = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this channel?')) return;
+    if (!confirm('Are you sure you want to delete this channel? This will not delete the content items.')) return;
 
     try {
       const { error } = await supabase
@@ -187,14 +340,17 @@ const ChannelManager: React.FC = () => {
   const resetForm = () => {
     setFormData({ name: '', logo_url: '' });
     setShowAddModal(false);
-    setSelectedChannel(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
+  const resetContentForm = () => {
+    setContentFormData({ title: '', type: 'video', status: 'planned' });
+    setShowContentModal(false);
+  };
+
   const openEditModal = (channel: Channel) => {
-    setSelectedChannel(channel);
     setFormData({
       name: channel.name,
       logo_url: channel.logo_url || ''
@@ -204,6 +360,34 @@ const ChannelManager: React.FC = () => {
 
   const isValidImageUrl = (url: string): boolean => {
     return url && (url.startsWith('http') || url.startsWith('data:image/'));
+  };
+
+  const getTypeIcon = (type: ContentItem['type']) => {
+    switch (type) {
+      case 'video': return <Video className="w-4 h-4" />;
+      case 'article': return <FileText className="w-4 h-4" />;
+      case 'book': return <BookOpen className="w-4 h-4" />;
+      case 'podcast': return <Headphones className="w-4 h-4" />;
+      default: return <FileText className="w-4 h-4" />;
+    }
+  };
+
+  const getStatusBadge = (status: ContentItem['status']) => {
+    switch (status) {
+      case 'completed': return 'badge badge-success';
+      case 'watching': return 'badge badge-info';
+      case 'planned': return 'badge badge-gray';
+      default: return 'badge badge-gray';
+    }
+  };
+
+  const getChannelStats = () => {
+    const total = channelContent.length;
+    const completed = channelContent.filter(item => item.status === 'completed').length;
+    const inProgress = channelContent.filter(item => item.status === 'watching').length;
+    const planned = channelContent.filter(item => item.status === 'planned').length;
+    
+    return { total, completed, inProgress, planned };
   };
 
   if (loading) {
@@ -222,6 +406,8 @@ const ChannelManager: React.FC = () => {
 
   // If a channel is selected, show channel management
   if (selectedChannel && !showAddModal) {
+    const stats = getChannelStats();
+    
     return (
       <div className="space-y-6">
         {/* Channel Management Header */}
@@ -273,16 +459,81 @@ const ChannelManager: React.FC = () => {
           <div className="card animate-fadeIn">
             <div className="card-header">
               <h3 className="card-title">Channel Content</h3>
-              <button className="btn-primary">
+              <button 
+                onClick={() => setShowContentModal(true)}
+                className="btn-primary"
+              >
                 <Plus className="w-3 h-3 mr-1.5" />
                 Add Content
               </button>
             </div>
-            <div className="text-center py-8 text-gray-500">
-              <Play className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-              <p className="text-sm">No content added yet</p>
-              <p className="text-xs">Start adding videos, articles, or other content</p>
-            </div>
+            
+            {contentLoading ? (
+              <div className="animate-pulse space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-16 bg-gray-100 rounded-lg"></div>
+                ))}
+              </div>
+            ) : channelContent.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Play className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <p className="text-sm mb-2">No content added yet</p>
+                <button
+                  onClick={() => setShowContentModal(true)}
+                  className="text-blue-600 hover:text-blue-700 text-xs"
+                >
+                  Add your first content
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {channelContent.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 hover-lift stagger-item"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+                        <div className="text-gray-600">{getTypeIcon(item.type)}</div>
+                        <h4 className="font-medium text-gray-900 truncate text-xs">{item.title}</h4>
+                      </div>
+                      
+                      <div className="flex items-center space-x-1.5 flex-shrink-0">
+                        <span className={getStatusBadge(item.status)}>
+                          {item.status}
+                        </span>
+                        <button
+                          onClick={() => deleteContent(item.id)}
+                          className="p-1 text-gray-400 hover:text-red-500 transition-colors hover-scale"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-1 progress-bar">
+                        <div
+                          className="progress-fill"
+                          style={{ width: `${item.progress}%` }}
+                        ></div>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={item.progress}
+                        onChange={(e) => updateContentProgress(item.id, parseInt(e.target.value) || 0)}
+                        className="w-12 px-1.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                      />
+                      <span className="text-xs text-gray-500">%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Channel Statistics */}
@@ -292,19 +543,19 @@ const ChannelManager: React.FC = () => {
             </div>
             <div className="grid-2">
               <div className="stat-card">
-                <div className="stat-value text-blue-600">0</div>
+                <div className="stat-value text-blue-600">{stats.total}</div>
                 <div className="stat-label">Total Content</div>
               </div>
               <div className="stat-card">
-                <div className="stat-value text-green-600">0</div>
+                <div className="stat-value text-green-600">{stats.completed}</div>
                 <div className="stat-label">Completed</div>
               </div>
               <div className="stat-card">
-                <div className="stat-value text-orange-600">0</div>
+                <div className="stat-value text-orange-600">{stats.inProgress}</div>
                 <div className="stat-label">In Progress</div>
               </div>
               <div className="stat-card">
-                <div className="stat-value text-gray-600">0</div>
+                <div className="stat-value text-gray-600">{stats.planned}</div>
                 <div className="stat-label">Planned</div>
               </div>
             </div>
@@ -395,7 +646,7 @@ const ChannelManager: React.FC = () => {
         </div>
       )}
 
-      {/* Floating Add Button - TETAP DI KANAN BAWAH */}
+      {/* Floating Add Button */}
       <button
         onClick={() => setShowAddModal(true)}
         className="fixed bottom-4 right-4 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-40 hover-lift"
@@ -404,7 +655,7 @@ const ChannelManager: React.FC = () => {
         <Plus className="w-6 h-6" />
       </button>
 
-      {/* Add/Edit Channel Modal - PERFECT CENTER POSITION */}
+      {/* Add/Edit Channel Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scaleIn">
@@ -422,15 +673,13 @@ const ChannelManager: React.FC = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Logo Upload - FIXED LAYOUT: SIDE BY SIDE WITH PROPER SPACING */}
+                {/* Logo Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Channel Logo (Optional)
                   </label>
                   
-                  {/* CENTERED CONTAINER WITH SIDE-BY-SIDE LAYOUT */}
                   <div className="flex items-center justify-center space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    {/* Logo Preview - LEFT SIDE */}
                     <div className="w-16 h-16 bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                       {formData.logo_url && isValidImageUrl(formData.logo_url) ? (
                         <img
@@ -443,7 +692,6 @@ const ChannelManager: React.FC = () => {
                       )}
                     </div>
                     
-                    {/* Upload Button - RIGHT SIDE */}
                     <div className="flex-1">
                       <input
                         ref={fileInputRef}
@@ -507,6 +755,97 @@ const ChannelManager: React.FC = () => {
                   <button
                     type="button"
                     onClick={resetForm}
+                    className="btn-secondary"
+                    disabled={saving}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Content Modal */}
+      {showContentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Add Content</h3>
+                <button
+                  onClick={resetContentForm}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-all duration-200 hover-scale"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleContentSubmit} className="space-y-5">
+                {/* Content Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Content Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={contentFormData.title}
+                    onChange={(e) => setContentFormData({ ...contentFormData, title: e.target.value })}
+                    placeholder="Enter content title..."
+                    className="input"
+                    required
+                    disabled={saving}
+                  />
+                </div>
+
+                {/* Content Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Content Type
+                  </label>
+                  <select
+                    value={contentFormData.type}
+                    onChange={(e) => setContentFormData({ ...contentFormData, type: e.target.value as ContentItem['type'] })}
+                    className="input"
+                    disabled={saving}
+                  >
+                    <option value="video">Video</option>
+                    <option value="article">Article</option>
+                    <option value="book">Book</option>
+                    <option value="podcast">Podcast</option>
+                  </select>
+                </div>
+
+                {/* Content Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={contentFormData.status}
+                    onChange={(e) => setContentFormData({ ...contentFormData, status: e.target.value as ContentItem['status'] })}
+                    className="input"
+                    disabled={saving}
+                  >
+                    <option value="planned">Planned</option>
+                    <option value="watching">In Progress</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    type="submit"
+                    disabled={saving || !contentFormData.title.trim()}
+                    className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {saving ? 'Adding...' : 'Add Content'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetContentForm}
                     className="btn-secondary"
                     disabled={saving}
                   >
