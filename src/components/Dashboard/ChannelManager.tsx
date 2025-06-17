@@ -460,7 +460,10 @@ const ChannelManager: React.FC = () => {
             <div className="card-header">
               <h3 className="card-title">Channel Content</h3>
               <button 
-                onClick={() => setShowContentModal(true)}
+                onClick={() => {
+                  console.log('Add Content button clicked'); // Debug log
+                  setShowContentModal(true);
+                }}
                 className="btn-primary"
               >
                 <Plus className="w-3 h-3 mr-1.5" />
@@ -479,7 +482,10 @@ const ChannelManager: React.FC = () => {
                 <Play className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                 <p className="text-sm mb-2">No content added yet</p>
                 <button
-                  onClick={() => setShowContentModal(true)}
+                  onClick={() => {
+                    console.log('Add first content button clicked'); // Debug log
+                    setShowContentModal(true);
+                  }}
                   className="text-blue-600 hover:text-blue-700 text-xs"
                 >
                   Add your first content
@@ -767,15 +773,29 @@ const ChannelManager: React.FC = () => {
         </div>
       )}
 
-      {/* Add Content Modal */}
+      {/* Add Content Modal - FIXED MODAL */}
       {showContentModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] animate-fadeIn"
+          onClick={(e) => {
+            // Close modal if clicking on backdrop
+            if (e.target === e.currentTarget) {
+              setShowContentModal(false);
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn"
+            onClick={(e) => e.stopPropagation()} // Prevent modal close when clicking inside
+          >
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Add Content</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Add Content to {selectedChannel?.name}</h3>
                 <button
-                  onClick={resetContentForm}
+                  onClick={() => {
+                    console.log('Close modal button clicked'); // Debug log
+                    setShowContentModal(false);
+                  }}
                   className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-all duration-200 hover-scale"
                 >
                   <X className="w-5 h-5" />
@@ -796,6 +816,7 @@ const ChannelManager: React.FC = () => {
                     className="input"
                     required
                     disabled={saving}
+                    autoFocus
                   />
                 </div>
 
@@ -810,10 +831,10 @@ const ChannelManager: React.FC = () => {
                     className="input"
                     disabled={saving}
                   >
-                    <option value="video">Video</option>
-                    <option value="article">Article</option>
-                    <option value="book">Book</option>
-                    <option value="podcast">Podcast</option>
+                    <option value="video">🎥 Video</option>
+                    <option value="article">📄 Article</option>
+                    <option value="book">📚 Book</option>
+                    <option value="podcast">🎧 Podcast</option>
                   </select>
                 </div>
 
@@ -828,9 +849,9 @@ const ChannelManager: React.FC = () => {
                     className="input"
                     disabled={saving}
                   >
-                    <option value="planned">Planned</option>
-                    <option value="watching">In Progress</option>
-                    <option value="completed">Completed</option>
+                    <option value="planned">📋 Planned</option>
+                    <option value="watching">▶️ In Progress</option>
+                    <option value="completed">✅ Completed</option>
                   </select>
                 </div>
 
@@ -841,11 +862,15 @@ const ChannelManager: React.FC = () => {
                     disabled={saving || !contentFormData.title.trim()}
                     className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
+                    <Plus className="w-4 h-4 mr-2" />
                     {saving ? 'Adding...' : 'Add Content'}
                   </button>
                   <button
                     type="button"
-                    onClick={resetContentForm}
+                    onClick={() => {
+                      console.log('Cancel button clicked'); // Debug log
+                      setShowContentModal(false);
+                    }}
                     className="btn-secondary"
                     disabled={saving}
                   >
