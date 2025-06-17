@@ -228,7 +228,7 @@ const Dashboard: React.FC = () => {
 
         {/* Desktop Sidebar */}
         <div className="hidden lg:block">
-          <div className="fixed top-12 left-0 w-52 h-screen bg-white border-r border-gray-200 overflow-y-auto animate-slideIn">
+          <div className="fixed top-12 left-0 w-52 h-screen bg-white border-r border-gray-200 overflow-y-auto animate-slideIn sidebar">
             <div className="p-4">
               <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
                 Navigation

@@ -158,7 +158,11 @@ const TodoList: React.FC = () => {
         .single();
 
       if (error) throw error;
+      
+      // Add to local state immediately for better UX
       setTodos(prev => [data, ...prev]);
+      
+      // Reset form
       setNewTodo('');
       setShowAddModal(false);
       setPriorityForm({
@@ -201,6 +205,8 @@ const TodoList: React.FC = () => {
       if (error) throw error;
       
       setTodos(prev => prev.map(todo => todo.id === editingTodo.id ? data : todo));
+      
+      // Reset form
       setNewTodo('');
       setEditingTodo(null);
       setShowAddModal(false);
@@ -569,6 +575,7 @@ const TodoList: React.FC = () => {
               onClick={() => setShowAddModal(true)}
               className="btn-icon-primary"
               title="Add Task"
+              disabled={saving}
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -849,6 +856,7 @@ const TodoList: React.FC = () => {
                 <button
                   onClick={closeModal}
                   className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-all duration-200 hover-scale"
+                  disabled={saving}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -940,7 +948,7 @@ const TodoList: React.FC = () => {
                 <div className="flex space-x-2 pt-2">
                   <button
                     type="submit"
-                    disabled={saving}
+                    disabled={saving || !newTodo.trim()}
                     className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {saving ? 'Saving...' : editingTodo ? 'Update Task' : 'Add Task'}
