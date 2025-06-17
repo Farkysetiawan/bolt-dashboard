@@ -404,7 +404,7 @@ const ChannelManager: React.FC = () => {
         <Plus className="w-6 h-6" />
       </button>
 
-      {/* Add/Edit Channel Modal - DIPERBAIKI POSISI TENGAH */}
+      {/* Add/Edit Channel Modal - PERFECT CENTER POSITION */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scaleIn">
@@ -422,15 +422,16 @@ const ChannelManager: React.FC = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Logo Upload */}
+                {/* Logo Upload - FIXED LAYOUT: SIDE BY SIDE WITH PROPER SPACING */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Channel Logo (Optional)
                   </label>
                   
-                  <div className="flex items-center space-x-4">
-                    {/* Logo Preview */}
-                    <div className="w-16 h-16 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+                  {/* CENTERED CONTAINER WITH SIDE-BY-SIDE LAYOUT */}
+                  <div className="flex items-center justify-center space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    {/* Logo Preview - LEFT SIDE */}
+                    <div className="w-16 h-16 bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                       {formData.logo_url && isValidImageUrl(formData.logo_url) ? (
                         <img
                           src={formData.logo_url}
@@ -442,7 +443,7 @@ const ChannelManager: React.FC = () => {
                       )}
                     </div>
                     
-                    {/* Upload Button */}
+                    {/* Upload Button - RIGHT SIDE */}
                     <div className="flex-1">
                       <input
                         ref={fileInputRef}
@@ -455,17 +456,17 @@ const ChannelManager: React.FC = () => {
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                        className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover-lift"
                       >
-                        <Upload className="w-4 h-4 mr-2" />
-                        {uploading ? 'Processing...' : 'Upload Logo'}
+                        <Upload className="w-4 h-4" />
+                        <span>{uploading ? 'Processing...' : 'Upload Logo'}</span>
                       </button>
                       
                       {formData.logo_url && (
                         <button
                           type="button"
                           onClick={() => setFormData({ ...formData, logo_url: '' })}
-                          className="mt-2 text-sm text-red-600 hover:text-red-700 w-full"
+                          className="mt-2 w-full text-sm text-red-600 hover:text-red-700 transition-colors"
                         >
                           Remove Logo
                         </button>
@@ -473,7 +474,7 @@ const ChannelManager: React.FC = () => {
                     </div>
                   </div>
                   
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 mt-2 text-center">
                     Upload a PNG or JPG image. It will be automatically resized to 200x200px.
                   </p>
                 </div>
