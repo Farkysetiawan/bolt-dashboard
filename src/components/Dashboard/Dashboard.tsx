@@ -5,6 +5,7 @@ import DailyJournal from './DailyJournal';
 import ContentTracker from './ContentTracker';
 import LearningTracker from './LearningTracker';
 import QuickAccessLinks from './QuickAccessLinks';
+import QuickLinksManager from './QuickLinksManager';
 import PromptBank from './PromptBank';
 import UserProfile from './UserProfile';
 import AnalyticsDashboard from './AnalyticsDashboard';
@@ -84,7 +85,7 @@ const Dashboard: React.FC = () => {
       case 'learning':
         return <LearningTracker />;
       case 'links':
-        return <QuickAccessLinks />;
+        return <QuickLinksManager />;
       case 'prompts':
         return <PromptBank />;
       case 'profile':
