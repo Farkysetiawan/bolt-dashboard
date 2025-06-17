@@ -358,6 +358,22 @@ const ChannelManager: React.FC = () => {
     setShowAddModal(true);
   };
 
+  // FIXED: Add Content Modal Handler
+  const openAddContentModal = () => {
+    console.log('Opening add content modal...'); // Debug log
+    setShowContentModal(true);
+    // Force re-render to ensure modal appears
+    setTimeout(() => {
+      console.log('Modal state after timeout:', showContentModal);
+    }, 100);
+  };
+
+  const closeContentModal = () => {
+    console.log('Closing add content modal...'); // Debug log
+    setShowContentModal(false);
+    resetContentForm();
+  };
+
   const isValidImageUrl = (url: string): boolean => {
     return url && (url.startsWith('http') || url.startsWith('data:image/'));
   };
@@ -460,10 +476,7 @@ const ChannelManager: React.FC = () => {
             <div className="card-header">
               <h3 className="card-title">Channel Content</h3>
               <button 
-                onClick={() => {
-                  console.log('Add Content button clicked'); // Debug log
-                  setShowContentModal(true);
-                }}
+                onClick={openAddContentModal}
                 className="btn-primary"
               >
                 <Plus className="w-3 h-3 mr-1.5" />
@@ -482,10 +495,7 @@ const ChannelManager: React.FC = () => {
                 <Play className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                 <p className="text-sm mb-2">No content added yet</p>
                 <button
-                  onClick={() => {
-                    console.log('Add first content button clicked'); // Debug log
-                    setShowContentModal(true);
-                  }}
+                  onClick={openAddContentModal}
                   className="text-blue-600 hover:text-blue-700 text-xs"
                 >
                   Add your first content
@@ -591,6 +601,117 @@ const ChannelManager: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* FIXED: Add Content Modal - ALWAYS RENDER WHEN showContentModal IS TRUE */}
+        {showContentModal && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[99999] animate-fadeIn"
+            style={{ zIndex: 99999 }} // Force highest z-index
+            onClick={(e) => {
+              // Close modal if clicking on backdrop
+              if (e.target === e.currentTarget) {
+                console.log('Backdrop clicked, closing modal');
+                closeContentModal();
+              }
+            }}
+          >
+            <div 
+              className="bg-white rounded-xl shadow-2xl max-w-md w-full animate-scaleIn"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent modal close when clicking inside
+                console.log('Modal content clicked, staying open');
+              }}
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Add Content to {selectedChannel?.name}
+                  </h3>
+                  <button
+                    onClick={closeContentModal}
+                    className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-all duration-200 hover-scale"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleContentSubmit} className="space-y-5">
+                  {/* Content Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Content Title *
+                    </label>
+                    <input
+                      type="text"
+                      value={contentFormData.title}
+                      onChange={(e) => setContentFormData({ ...contentFormData, title: e.target.value })}
+                      placeholder="Enter content title..."
+                      className="input"
+                      required
+                      disabled={saving}
+                      autoFocus
+                    />
+                  </div>
+
+                  {/* Content Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Content Type
+                    </label>
+                    <select
+                      value={contentFormData.type}
+                      onChange={(e) => setContentFormData({ ...contentFormData, type: e.target.value as ContentItem['type'] })}
+                      className="input"
+                      disabled={saving}
+                    >
+                      <option value="video">🎥 Video</option>
+                      <option value="article">📄 Article</option>
+                      <option value="book">📚 Book</option>
+                      <option value="podcast">🎧 Podcast</option>
+                    </select>
+                  </div>
+
+                  {/* Content Status */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Status
+                    </label>
+                    <select
+                      value={contentFormData.status}
+                      onChange={(e) => setContentFormData({ ...contentFormData, status: e.target.value as ContentItem['status'] })}
+                      className="input"
+                      disabled={saving}
+                    >
+                      <option value="planned">📋 Planned</option>
+                      <option value="watching">▶️ In Progress</option>
+                      <option value="completed">✅ Completed</option>
+                    </select>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex space-x-3 pt-4">
+                    <button
+                      type="submit"
+                      disabled={saving || !contentFormData.title.trim()}
+                      className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      {saving ? 'Adding...' : 'Add Content'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={closeContentModal}
+                      className="btn-secondary"
+                      disabled={saving}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -761,116 +882,6 @@ const ChannelManager: React.FC = () => {
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="btn-secondary"
-                    disabled={saving}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Content Modal - FIXED MODAL */}
-      {showContentModal && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] animate-fadeIn"
-          onClick={(e) => {
-            // Close modal if clicking on backdrop
-            if (e.target === e.currentTarget) {
-              setShowContentModal(false);
-            }
-          }}
-        >
-          <div 
-            className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn"
-            onClick={(e) => e.stopPropagation()} // Prevent modal close when clicking inside
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Add Content to {selectedChannel?.name}</h3>
-                <button
-                  onClick={() => {
-                    console.log('Close modal button clicked'); // Debug log
-                    setShowContentModal(false);
-                  }}
-                  className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-all duration-200 hover-scale"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <form onSubmit={handleContentSubmit} className="space-y-5">
-                {/* Content Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Content Title *
-                  </label>
-                  <input
-                    type="text"
-                    value={contentFormData.title}
-                    onChange={(e) => setContentFormData({ ...contentFormData, title: e.target.value })}
-                    placeholder="Enter content title..."
-                    className="input"
-                    required
-                    disabled={saving}
-                    autoFocus
-                  />
-                </div>
-
-                {/* Content Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Content Type
-                  </label>
-                  <select
-                    value={contentFormData.type}
-                    onChange={(e) => setContentFormData({ ...contentFormData, type: e.target.value as ContentItem['type'] })}
-                    className="input"
-                    disabled={saving}
-                  >
-                    <option value="video">🎥 Video</option>
-                    <option value="article">📄 Article</option>
-                    <option value="book">📚 Book</option>
-                    <option value="podcast">🎧 Podcast</option>
-                  </select>
-                </div>
-
-                {/* Content Status */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <select
-                    value={contentFormData.status}
-                    onChange={(e) => setContentFormData({ ...contentFormData, status: e.target.value as ContentItem['status'] })}
-                    className="input"
-                    disabled={saving}
-                  >
-                    <option value="planned">📋 Planned</option>
-                    <option value="watching">▶️ In Progress</option>
-                    <option value="completed">✅ Completed</option>
-                  </select>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex space-x-3 pt-4">
-                  <button
-                    type="submit"
-                    disabled={saving || !contentFormData.title.trim()}
-                    className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    {saving ? 'Adding...' : 'Add Content'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      console.log('Cancel button clicked'); // Debug log
-                      setShowContentModal(false);
-                    }}
                     className="btn-secondary"
                     disabled={saving}
                   >
