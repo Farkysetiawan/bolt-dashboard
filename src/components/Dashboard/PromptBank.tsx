@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lightbulb, Plus, X, Copy } from 'lucide-react';
+import { Lightbulb, Plus, X, Copy, Edit2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -11,14 +11,13 @@ interface Prompt {
   user_id: string;
 }
 
-const PromptBank: React.FC = () => {
+interface PromptBankProps {
+  readOnly?: boolean;
+}
+
+const PromptBank: React.FC<PromptBankProps> = ({ readOnly = false }) => {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newPrompt, setNewPrompt] = useState({
-    title: '',
-    content: '',
-    category: 'general',
-  });
+  const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const { user } = useAuth();
 
@@ -34,51 +33,15 @@ const PromptBank: React.FC = () => {
         .from('prompts')
         .select('*')
         .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(readOnly ? 3 : 50);
 
       if (error) throw error;
       setPrompts(data || []);
     } catch (error) {
       console.error('Error fetching prompts:', error);
-    }
-  };
-
-  const addPrompt = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPrompt.title.trim() || !newPrompt.content.trim()) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('prompts')
-        .insert([
-          {
-            ...newPrompt,
-            user_id: user?.id,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) throw error;
-      setPrompts([data, ...prompts]);
-      setNewPrompt({ title: '', content: '', category: 'general' });
-      setShowAddForm(false);
-    } catch (error) {
-      console.error('Error adding prompt:', error);
-    }
-  };
-
-  const deletePrompt = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('prompts')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      setPrompts(prompts.filter(prompt => prompt.id !== id));
-    } catch (error) {
-      console.error('Error deleting prompt:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,6 +65,21 @@ const PromptBank: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="card animate-fadeIn">
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-100 rounded w-1/4 mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-3 bg-gray-100 rounded"></div>
+            <div className="h-3 bg-gray-100 rounded w-5/6"></div>
+            <div className="h-3 bg-gray-100 rounded w-4/6"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card animate-fadeIn">
       {/* Header */}
@@ -112,70 +90,38 @@ const PromptBank: React.FC = () => {
           </div>
           <h2 className="card-title">Prompt Bank</h2>
         </div>
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="btn-icon-primary"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
+        {!readOnly ? (
+          <button
+            onClick={() => window.location.href = '/?category=prompts'}
+            className="btn-icon-primary"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        ) : (
+          <button
+            onClick={() => window.location.href = '/?category=prompts'}
+            className="btn-icon-secondary"
+            title="Manage Prompts"
+          >
+            <Edit2 className="w-3 h-3" />
+          </button>
+        )}
       </div>
-
-      {/* Add Form */}
-      {showAddForm && (
-        <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-slideDown">
-          <form onSubmit={addPrompt} className="space-y-3">
-            <input
-              type="text"
-              value={newPrompt.title}
-              onChange={(e) => setNewPrompt({ ...newPrompt, title: e.target.value })}
-              placeholder="Prompt title..."
-              className="input"
-              required
-            />
-            
-            <textarea
-              value={newPrompt.content}
-              onChange={(e) => setNewPrompt({ ...newPrompt, content: e.target.value })}
-              placeholder="Prompt content..."
-              className="textarea"
-              rows={3}
-              required
-            />
-            
-            <select
-              value={newPrompt.category}
-              onChange={(e) => setNewPrompt({ ...newPrompt, category: e.target.value })}
-              className="input"
-            >
-              <option value="general">General</option>
-              <option value="work">Work</option>
-              <option value="creative">Creative</option>
-              <option value="learning">Learning</option>
-              <option value="personal">Personal</option>
-            </select>
-            
-            <div className="flex space-x-2">
-              <button type="submit" className="btn-primary">
-                Add Prompt
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                className="btn-secondary"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {/* Prompts List */}
       <div className="space-y-2.5 max-h-80 overflow-y-auto">
         {prompts.length === 0 ? (
           <div className="text-center py-6 text-gray-500 animate-fadeIn">
             <Lightbulb className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-            <p className="text-xs">No prompts yet. Add some above!</p>
+            <p className="text-xs mb-2">No prompts yet</p>
+            {!readOnly && (
+              <button
+                onClick={() => window.location.href = '/?category=prompts'}
+                className="text-blue-600 hover:text-blue-700 text-xs"
+              >
+                Add some prompts
+              </button>
+            )}
           </div>
         ) : (
           prompts.map((prompt, index) => (
@@ -200,22 +146,33 @@ const PromptBank: React.FC = () => {
                   >
                     <Copy className="w-3 h-3" />
                   </button>
-                  <button
-                    onClick={() => deletePrompt(prompt.id)}
-                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 hover-scale"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
                 </div>
               </div>
               
-              <p className="text-xs text-gray-600 leading-relaxed">{prompt.content}</p>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                {readOnly && prompt.content.length > 100 
+                  ? `${prompt.content.substring(0, 100)}...`
+                  : prompt.content
+                }
+              </p>
               
               {copiedId === prompt.id && (
                 <p className="text-xs text-green-600 mt-1.5 animate-fadeIn">Copied to clipboard!</p>
               )}
             </div>
           ))
+        )}
+        
+        {/* Show more link for read-only mode */}
+        {readOnly && prompts.length >= 3 && (
+          <div className="text-center py-2">
+            <button 
+              onClick={() => window.location.href = '/?category=prompts'}
+              className="text-blue-600 hover:text-blue-700 text-xs"
+            >
+              View all prompts →
+            </button>
+          </div>
         )}
       </div>
     </div>

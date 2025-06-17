@@ -118,17 +118,17 @@ const Dashboard: React.FC = () => {
       case 'analytics':
         return <AnalyticsDashboard />;
       case 'todos':
-        return <TodoList />;
+        return <TodoList readOnly={false} />;
       case 'journal':
-        return <DailyJournal />;
+        return <DailyJournal readOnly={false} />;
       case 'content':
-        return <ContentTracker />;
+        return <ContentTracker readOnly={false} />;
       case 'learning':
-        return <LearningTracker />;
+        return <LearningTracker readOnly={false} />;
       case 'links':
         return <QuickLinksManager />;
       case 'prompts':
-        return <PromptBank />;
+        return <PromptBank readOnly={false} />;
       case 'profile':
         return <UserProfile />;
       case 'all':
@@ -142,26 +142,26 @@ const Dashboard: React.FC = () => {
             
             {/* Mobile: Stack all components */}
             <div className="block lg:hidden space-y-4">
-              <div className="stagger-item"><TodoList /></div>
-              <div className="stagger-item"><DailyJournal /></div>
-              <div className="stagger-item"><ContentTracker /></div>
-              <div className="stagger-item"><LearningTracker /></div>
-              <div className="stagger-item"><PromptBank /></div>
+              <div className="stagger-item"><TodoList readOnly={true} /></div>
+              <div className="stagger-item"><DailyJournal readOnly={true} /></div>
+              <div className="stagger-item"><ContentTracker readOnly={true} /></div>
+              <div className="stagger-item"><LearningTracker readOnly={true} /></div>
+              <div className="stagger-item"><PromptBank readOnly={true} /></div>
             </div>
             
             {/* Desktop: Grid layout */}
             <div className="hidden lg:grid lg:grid-cols-3 gap-4">
               {/* Left Column */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="stagger-item"><TodoList /></div>
-                <div className="stagger-item"><ContentTracker /></div>
-                <div className="stagger-item"><LearningTracker /></div>
+                <div className="stagger-item"><TodoList readOnly={true} /></div>
+                <div className="stagger-item"><ContentTracker readOnly={true} /></div>
+                <div className="stagger-item"><LearningTracker readOnly={true} /></div>
               </div>
               
               {/* Right Column */}
               <div className="space-y-4">
-                <div className="stagger-item"><DailyJournal /></div>
-                <div className="stagger-item"><PromptBank /></div>
+                <div className="stagger-item"><DailyJournal readOnly={true} /></div>
+                <div className="stagger-item"><PromptBank readOnly={true} /></div>
               </div>
             </div>
           </div>

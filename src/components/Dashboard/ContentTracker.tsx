@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Plus, X } from 'lucide-react';
+import { Play, Plus, X, Edit2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -12,14 +12,13 @@ interface ContentItem {
   user_id: string;
 }
 
-const ContentTracker: React.FC = () => {
+interface ContentTrackerProps {
+  readOnly?: boolean;
+}
+
+const ContentTracker: React.FC<ContentTrackerProps> = ({ readOnly = false }) => {
   const [items, setItems] = useState<ContentItem[]>([]);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newItem, setNewItem] = useState({
-    title: '',
-    type: 'video' as ContentItem['type'],
-    status: 'planned' as ContentItem['status'],
-  });
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -34,42 +33,21 @@ const ContentTracker: React.FC = () => {
         .from('content_items')
         .select('*')
         .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(readOnly ? 5 : 50);
 
       if (error) throw error;
       setItems(data || []);
     } catch (error) {
       console.error('Error fetching content items:', error);
-    }
-  };
-
-  const addItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newItem.title.trim()) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('content_items')
-        .insert([
-          {
-            ...newItem,
-            progress: 0,
-            user_id: user?.id,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) throw error;
-      setItems([data, ...items]);
-      setNewItem({ title: '', type: 'video', status: 'planned' });
-      setShowAddForm(false);
-    } catch (error) {
-      console.error('Error adding content item:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const updateProgress = async (id: string, progress: number) => {
+    if (readOnly) return;
+    
     try {
       const status = progress >= 100 ? 'completed' : 'watching';
       const { error } = await supabase
@@ -83,20 +61,6 @@ const ContentTracker: React.FC = () => {
       ));
     } catch (error) {
       console.error('Error updating progress:', error);
-    }
-  };
-
-  const deleteItem = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('content_items')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      setItems(items.filter(item => item.id !== id));
-    } catch (error) {
-      console.error('Error deleting content item:', error);
     }
   };
 
@@ -119,6 +83,21 @@ const ContentTracker: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="card animate-fadeIn">
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-100 rounded w-1/4 mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-3 bg-gray-100 rounded"></div>
+            <div className="h-3 bg-gray-100 rounded w-5/6"></div>
+            <div className="h-3 bg-gray-100 rounded w-4/6"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card animate-fadeIn">
       {/* Header */}
@@ -129,72 +108,38 @@ const ContentTracker: React.FC = () => {
           </div>
           <h2 className="card-title">Content Tracker</h2>
         </div>
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="btn-icon-primary"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
+        {!readOnly ? (
+          <button
+            onClick={() => window.location.href = '/?category=content'}
+            className="btn-icon-primary"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        ) : (
+          <button
+            onClick={() => window.location.href = '/?category=content'}
+            className="btn-icon-secondary"
+            title="Manage Content"
+          >
+            <Edit2 className="w-3 h-3" />
+          </button>
+        )}
       </div>
-
-      {/* Add Form */}
-      {showAddForm && (
-        <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-slideDown">
-          <form onSubmit={addItem} className="space-y-3">
-            <input
-              type="text"
-              value={newItem.title}
-              onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
-              placeholder="Content title..."
-              className="input"
-              required
-            />
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <select
-                value={newItem.type}
-                onChange={(e) => setNewItem({ ...newItem, type: e.target.value as ContentItem['type'] })}
-                className="input"
-              >
-                <option value="video">Video</option>
-                <option value="article">Article</option>
-                <option value="book">Book</option>
-                <option value="podcast">Podcast</option>
-              </select>
-              
-              <select
-                value={newItem.status}
-                onChange={(e) => setNewItem({ ...newItem, status: e.target.value as ContentItem['status'] })}
-                className="input"
-              >
-                <option value="planned">Planned</option>
-                <option value="watching">In Progress</option>
-                <option value="completed">Completed</option>
-              </select>
-            </div>
-            
-            <div className="flex space-x-2">
-              <button type="submit" className="btn-primary">
-                Add
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                className="btn-secondary"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {/* Content List */}
       <div className="space-y-2.5">
         {items.length === 0 ? (
           <div className="text-center py-6 text-gray-500 animate-fadeIn">
             <Play className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-            <p className="text-xs">No content tracked yet. Add some above!</p>
+            <p className="text-xs mb-2">No content tracked yet</p>
+            {!readOnly && (
+              <button
+                onClick={() => window.location.href = '/?category=content'}
+                className="text-blue-600 hover:text-blue-700 text-xs"
+              >
+                Add some content
+              </button>
+            )}
           </div>
         ) : (
           items.map((item, index) => (
@@ -213,12 +158,6 @@ const ContentTracker: React.FC = () => {
                   <span className={getStatusBadge(item.status)}>
                     {item.status}
                   </span>
-                  <button
-                    onClick={() => deleteItem(item.id)}
-                    className="p-1 text-gray-400 hover:text-red-500 transition-colors hover-scale"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
                 </div>
               </div>
               
@@ -230,18 +169,36 @@ const ContentTracker: React.FC = () => {
                     style={{ width: `${item.progress}%` }}
                   ></div>
                 </div>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={item.progress}
-                  onChange={(e) => updateProgress(item.id, parseInt(e.target.value) || 0)}
-                  className="w-12 px-1.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                />
+                {!readOnly ? (
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={item.progress}
+                    onChange={(e) => updateProgress(item.id, parseInt(e.target.value) || 0)}
+                    className="w-12 px-1.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                  />
+                ) : (
+                  <span className="text-xs text-gray-600 w-12 text-right">
+                    {item.progress}%
+                  </span>
+                )}
                 <span className="text-xs text-gray-500">%</span>
               </div>
             </div>
           ))
+        )}
+        
+        {/* Show more link for read-only mode */}
+        {readOnly && items.length >= 5 && (
+          <div className="text-center py-2">
+            <button 
+              onClick={() => window.location.href = '/?category=content'}
+              className="text-blue-600 hover:text-blue-700 text-xs"
+            >
+              View all content →
+            </button>
+          </div>
         )}
       </div>
     </div>
