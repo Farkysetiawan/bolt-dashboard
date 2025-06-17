@@ -429,13 +429,13 @@ const QuickLinksManager: React.FC = () => {
                 )}
               </div>
 
-              {/* URL */}
+              {/* URL - FIXED: Better spacing and positioning */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   URL
                 </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none z-10">
+                <div className="flex items-center">
+                  <span className="inline-flex items-center px-3 py-2 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l-md">
                     https://
                   </span>
                   <input
@@ -443,7 +443,7 @@ const QuickLinksManager: React.FC = () => {
                     value={formData.url}
                     onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                     placeholder="example.com"
-                    className={`input pl-20 ${errors.url ? 'border-red-300 focus:ring-red-500' : ''}`}
+                    className={`input rounded-l-none border-l-0 ${errors.url ? 'border-red-300 focus:ring-red-500' : ''}`}
                   />
                 </div>
                 {errors.url && (
