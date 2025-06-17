@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Check, X, Clock, Calendar, ChevronLeft, ChevronRight, Play, Pause, Square, BarChart3, Edit2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
@@ -50,29 +50,37 @@ const TodoList: React.FC = () => {
   const [timerSeconds, setTimerSeconds] = useState(0);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchTodos();
-      checkActiveTimer();
-    }
-  }, [user, selectedDate]);
+  // Memoize date string to prevent unnecessary re-renders
+  const dateStr = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (activeTimer) {
-      interval = setInterval(() => {
-        setTimerSeconds(prev => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [activeTimer]);
-
-  const checkActiveTimer = async () => {
+  const fetchTodos = useCallback(async () => {
+    if (!user?.id) return;
+    
     try {
       const { data, error } = await supabase
         .from('todos')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
+        .eq('date', dateStr)
+        .order('priority_score', { ascending: false });
+
+      if (error) throw error;
+      setTodos(data || []);
+    } catch (error) {
+      console.error('Error fetching todos:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id, dateStr]);
+
+  const checkActiveTimer = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('todos')
+        .select('*')
+        .eq('user_id', user.id)
         .eq('is_timer_active', true)
         .maybeSingle();
 
@@ -88,28 +96,26 @@ const TodoList: React.FC = () => {
     } catch (error) {
       console.error('Error checking active timer:', error);
     }
-  };
+  }, [user?.id]);
 
-  const fetchTodos = async () => {
-    try {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      const { data, error } = await supabase
-        .from('todos')
-        .select('*')
-        .eq('user_id', user?.id)
-        .eq('date', dateStr)
-        .order('priority_score', { ascending: false });
-
-      if (error) throw error;
-      setTodos(data || []);
-    } catch (error) {
-      console.error('Error fetching todos:', error);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (user) {
+      fetchTodos();
+      checkActiveTimer();
     }
-  };
+  }, [fetchTodos, checkActiveTimer]);
 
-  const calculatePriorityScore = (form: PriorityForm): number => {
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (activeTimer) {
+      interval = setInterval(() => {
+        setTimerSeconds(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [activeTimer]);
+
+  const calculatePriorityScore = useCallback((form: PriorityForm): number => {
     const { urgency, importance, effort, impact } = form;
     const urgencyScore = urgency * 0.3;
     const importanceScore = importance * 0.3;
@@ -118,14 +124,13 @@ const TodoList: React.FC = () => {
     const finalScore = urgencyScore + importanceScore + impactScore + effortScore;
     const normalizedScore = Math.min(Math.max(finalScore, 0.1), 10.0);
     return Math.round(normalizedScore * 10) / 10;
-  };
+  }, []);
 
-  const addTodo = async (e: React.FormEvent) => {
+  const addTodo = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTodo.trim()) return;
+    if (!newTodo.trim() || !user?.id) return;
 
     try {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
       const priorityScore = calculatePriorityScore(priorityForm);
       
       const { data, error } = await supabase
@@ -134,7 +139,7 @@ const TodoList: React.FC = () => {
           {
             title: newTodo.trim(),
             completed: false,
-            user_id: user?.id,
+            user_id: user.id,
             date: dateStr,
             urgency: priorityForm.urgency,
             importance: priorityForm.importance,
@@ -150,7 +155,7 @@ const TodoList: React.FC = () => {
         .single();
 
       if (error) throw error;
-      setTodos([data, ...todos]);
+      setTodos(prev => [data, ...prev]);
       setNewTodo('');
       setShowAddModal(false);
       setPriorityForm({
@@ -163,9 +168,9 @@ const TodoList: React.FC = () => {
     } catch (error) {
       console.error('Error adding todo:', error);
     }
-  };
+  }, [newTodo, user?.id, dateStr, priorityForm, calculatePriorityScore]);
 
-  const updateTodo = async (e: React.FormEvent) => {
+  const updateTodo = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTodo || !newTodo.trim()) return;
 
@@ -189,7 +194,7 @@ const TodoList: React.FC = () => {
 
       if (error) throw error;
       
-      setTodos(todos.map(todo => todo.id === editingTodo.id ? data : todo));
+      setTodos(prev => prev.map(todo => todo.id === editingTodo.id ? data : todo));
       setNewTodo('');
       setEditingTodo(null);
       setShowAddModal(false);
@@ -203,9 +208,9 @@ const TodoList: React.FC = () => {
     } catch (error) {
       console.error('Error updating todo:', error);
     }
-  };
+  }, [editingTodo, newTodo, priorityForm, calculatePriorityScore]);
 
-  const toggleTodo = async (id: string, completed: boolean) => {
+  const toggleTodo = useCallback(async (id: string, completed: boolean) => {
     try {
       const { error } = await supabase
         .from('todos')
@@ -213,15 +218,15 @@ const TodoList: React.FC = () => {
         .eq('id', id);
 
       if (error) throw error;
-      setTodos(todos.map(todo => 
+      setTodos(prev => prev.map(todo => 
         todo.id === id ? { ...todo, completed: !completed } : todo
       ));
     } catch (error) {
       console.error('Error updating todo:', error);
     }
-  };
+  }, []);
 
-  const deleteTodo = async (id: string) => {
+  const deleteTodo = useCallback(async (id: string) => {
     try {
       const { error } = await supabase
         .from('todos')
@@ -229,13 +234,13 @@ const TodoList: React.FC = () => {
         .eq('id', id);
 
       if (error) throw error;
-      setTodos(todos.filter(todo => todo.id !== id));
+      setTodos(prev => prev.filter(todo => todo.id !== id));
     } catch (error) {
       console.error('Error deleting todo:', error);
     }
-  };
+  }, []);
 
-  const startTimer = async (todoId: string) => {
+  const startTimer = useCallback(async (todoId: string) => {
     try {
       if (activeTimer) {
         await pauseTimer(activeTimer);
@@ -257,9 +262,9 @@ const TodoList: React.FC = () => {
     } catch (error) {
       console.error('Error starting timer:', error);
     }
-  };
+  }, [activeTimer, fetchTodos]);
 
-  const pauseTimer = async (todoId: string) => {
+  const pauseTimer = useCallback(async (todoId: string) => {
     try {
       const todo = todos.find(t => t.id === todoId);
       if (!todo) return;
@@ -285,9 +290,9 @@ const TodoList: React.FC = () => {
     } catch (error) {
       console.error('Error pausing timer:', error);
     }
-  };
+  }, [todos, timerSeconds, fetchTodos]);
 
-  const finishTask = async (todoId: string) => {
+  const finishTask = useCallback(async (todoId: string) => {
     try {
       const todo = todos.find(t => t.id === todoId);
       if (!todo) return;
@@ -320,9 +325,9 @@ const TodoList: React.FC = () => {
     } catch (error) {
       console.error('Error finishing task:', error);
     }
-  };
+  }, [todos, activeTimer, timerSeconds, fetchTodos]);
 
-  const formatTime = (seconds: number): string => {
+  const formatTime = useCallback((seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
@@ -331,9 +336,9 @@ const TodoList: React.FC = () => {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
-  };
+  }, []);
 
-  const formatMinutes = (minutes: number): string => {
+  const formatMinutes = useCallback((minutes: number): string => {
     if (minutes < 1) {
       const seconds = Math.round(minutes * 60);
       return `${seconds}s`;
@@ -344,32 +349,30 @@ const TodoList: React.FC = () => {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = Math.round((minutes % 60) * 10) / 10;
     return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
-  };
+  }, []);
 
-  const generateWeekDays = () => {
+  const weekDays = useMemo(() => {
     const start = startOfWeek(selectedDate, { weekStartsOn: 1 });
     const days = [];
     for (let i = 0; i < 7; i++) {
       days.push(addDays(start, i));
     }
     return days;
-  };
+  }, [selectedDate]);
 
-  const weekDays = generateWeekDays();
-
-  const navigateDate = (direction: 'prev' | 'next') => {
+  const navigateDate = useCallback((direction: 'prev' | 'next') => {
     if (direction === 'prev') {
-      setSelectedDate(subDays(selectedDate, 1));
+      setSelectedDate(prev => subDays(prev, 1));
     } else {
-      setSelectedDate(addDays(selectedDate, 1));
+      setSelectedDate(prev => addDays(prev, 1));
     }
-  };
+  }, []);
 
-  const goToToday = () => {
+  const goToToday = useCallback(() => {
     setSelectedDate(new Date());
-  };
+  }, []);
 
-  const openEditModal = (todo: Todo) => {
+  const openEditModal = useCallback((todo: Todo) => {
     setEditingTodo(todo);
     setNewTodo(todo.title);
     setPriorityForm({
@@ -380,9 +383,9 @@ const TodoList: React.FC = () => {
       duration_minutes: todo.duration_minutes || 30
     });
     setShowAddModal(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setShowAddModal(false);
     setEditingTodo(null);
     setNewTodo('');
@@ -393,9 +396,19 @@ const TodoList: React.FC = () => {
       impact: 5,
       duration_minutes: 30
     });
-  };
+  }, []);
 
-  const getMonthlyStats = async () => {
+  const getMonthlyStats = useCallback(async () => {
+    if (!user?.id) return {
+      totalPoints: 0,
+      totalCompleted: 0,
+      averageScore: 0,
+      timeUsage: 0,
+      usageLabel: 'No data',
+      totalEstimated: 0,
+      totalActual: 0
+    };
+
     try {
       const monthStart = startOfMonth(new Date());
       const monthEnd = endOfMonth(new Date());
@@ -403,7 +416,7 @@ const TodoList: React.FC = () => {
       const { data, error } = await supabase
         .from('todos')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .gte('date', format(monthStart, 'yyyy-MM-dd'))
         .lte('date', format(monthEnd, 'yyyy-MM-dd'))
         .eq('completed', true);
@@ -412,14 +425,11 @@ const TodoList: React.FC = () => {
 
       const completedTodos = data || [];
       
-      // FIXED: New points calculation logic
       const totalPoints = completedTodos.reduce((sum, todo) => {
         let points = todo.priority_score || 0;
         
-        // Calculate points based on time usage percentage
         if (todo.duration_minutes && todo.actual_minutes !== null && todo.duration_minutes > 0) {
           const timeUsagePercentage = (todo.actual_minutes / todo.duration_minutes) * 100;
-          // Points = Priority Score × (Time Used Percentage / 100)
           points = (todo.priority_score || 0) * (timeUsagePercentage / 100);
         }
         
@@ -472,7 +482,7 @@ const TodoList: React.FC = () => {
         totalActual: 0
       };
     }
-  };
+  }, [user?.id]);
 
   const [monthlyStats, setMonthlyStats] = useState({
     totalPoints: 0,
@@ -488,36 +498,36 @@ const TodoList: React.FC = () => {
     if (user && showStats) {
       getMonthlyStats().then(setMonthlyStats);
     }
-  }, [user, showStats, todos]);
+  }, [user, showStats, todos, getMonthlyStats]);
 
-  const getTaskStatus = (todo: Todo) => {
+  const getTaskStatus = useCallback((todo: Todo) => {
     if (todo.completed) return 'Completed';
     if (todo.is_timer_active) return 'In Progress';
     return 'Pending';
-  };
+  }, []);
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case 'Completed': return 'badge badge-success';
       case 'In Progress': return 'badge badge-info';
       case 'Pending': return 'badge badge-gray';
       default: return 'badge badge-gray';
     }
-  };
+  }, []);
 
-  const getPriorityBadge = (score: number) => {
+  const getPriorityBadge = useCallback((score: number) => {
     if (score >= 8) return 'bg-red-50 text-red-700 border border-red-200';
     if (score >= 6) return 'bg-orange-50 text-orange-700 border border-orange-200';
     if (score >= 4) return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
     return 'bg-green-50 text-green-700 border border-green-200';
-  };
+  }, []);
 
-  const getPriorityLabel = (score: number) => {
+  const getPriorityLabel = useCallback((score: number) => {
     if (score >= 8) return 'Critical';
     if (score >= 6) return 'High';
     if (score >= 4) return 'Medium';
     return 'Low';
-  };
+  }, []);
 
   if (loading) {
     return (

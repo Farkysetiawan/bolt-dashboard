@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, Plus, ExternalLink, ChevronLeft, ChevronRight, Smartphone, Globe } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
@@ -16,53 +16,64 @@ interface QuickLink {
 const QuickLinksHorizontal: React.FC = () => {
   const [links, setLinks] = useState<QuickLink[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchLinks();
+  const fetchLinks = useCallback(async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
     }
-  }, [user]);
+
+    try {
+      setError(null);
+      const { data, error } = await supabase
+        .from('quick_links')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+        .limit(10);
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      setLinks(data || []);
+    } catch (error) {
+      console.error('Error fetching quick links:', error);
+      setError('Failed to load quick links');
+      setLinks([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchLinks();
+  }, [fetchLinks]);
 
   useEffect(() => {
     checkScrollability();
   }, [links]);
 
-  const fetchLinks = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('quick_links')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: true })
-        .limit(10);
-
-      if (error) throw error;
-      setLinks(data || []);
-    } catch (error) {
-      console.error('Error fetching quick links:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const checkScrollability = () => {
+  const checkScrollability = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
-  };
+  }, []);
 
-  const scroll = (direction: 'left' | 'right') => {
+  const scroll = useCallback((direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const scrollAmount = 150; // Reduced scroll amount for mobile
+    const scrollAmount = 150;
     const newScrollLeft = direction === 'left' 
       ? container.scrollLeft - scrollAmount
       : container.scrollLeft + scrollAmount;
@@ -71,23 +82,22 @@ const QuickLinksHorizontal: React.FC = () => {
       left: newScrollLeft,
       behavior: 'smooth'
     });
-  };
+  }, []);
 
-  const getDomainFromUrl = (url: string): string => {
+  const getDomainFromUrl = useCallback((url: string): string => {
     try {
       const domain = new URL(url).hostname;
       return domain.replace('www.', '');
     } catch {
       return url;
     }
-  };
+  }, []);
 
-  const isValidImageUrl = (url: string): boolean => {
+  const isValidImageUrl = useCallback((url: string): boolean => {
     return url && (url.startsWith('http') || url.startsWith('data:image/'));
-  };
+  }, []);
 
-  const getAppUrl = (url: string, domain: string): string => {
-    // Common app URL schemes
+  const getAppUrl = useCallback((url: string, domain: string): string => {
     const appSchemes: { [key: string]: string } = {
       'youtube.com': url.replace('https://www.youtube.com', 'youtube://').replace('https://youtube.com', 'youtube://'),
       'youtu.be': url.replace('https://youtu.be/', 'youtube://watch?v='),
@@ -109,7 +119,7 @@ const QuickLinksHorizontal: React.FC = () => {
     };
 
     return appSchemes[domain] || url;
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -117,6 +127,23 @@ const QuickLinksHorizontal: React.FC = () => {
         {[...Array(5)].map((_, i) => (
           <div key={i} className="w-12 h-12 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
         ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-3 animate-fadeIn">
+        <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+          <ExternalLink className="w-5 h-5 text-red-400" />
+        </div>
+        <p className="text-xs text-red-600 mb-2">{error}</p>
+        <button 
+          onClick={fetchLinks}
+          className="text-xs text-blue-600 hover:text-blue-700"
+        >
+          Try again
+        </button>
       </div>
     );
   }
@@ -163,7 +190,7 @@ const QuickLinksHorizontal: React.FC = () => {
         onScroll={checkScrollability}
         style={{ 
           scrollSnapType: 'x mandatory',
-          WebkitOverflowScrolling: 'touch' // Smooth scrolling on iOS
+          WebkitOverflowScrolling: 'touch'
         }}
       >
         {links.map((link, index) => {
@@ -191,7 +218,6 @@ const QuickLinksHorizontal: React.FC = () => {
                     alt={link.title || 'Logo'}
                     className="w-10 h-10 object-cover rounded"
                     onError={(e) => {
-                      // Fallback to default icon if image fails to load
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }}

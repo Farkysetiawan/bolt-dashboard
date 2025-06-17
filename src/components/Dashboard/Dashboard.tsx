@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import DashboardHeader from './DashboardHeader';
 import TodoList from './TodoList';
 import DailyJournal from './DailyJournal';
@@ -72,7 +72,48 @@ const Dashboard: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('all');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const renderContent = () => {
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleCategorySelect = useCallback((categoryId: CategoryType) => {
+    setActiveCategory(categoryId);
+    setMobileMenuOpen(false);
+  }, []);
+
+  const handleUserIconClick = useCallback(() => {
+    setActiveCategory(prev => prev === 'profile' ? 'all' : 'profile');
+  }, []);
+
+  const handleAnalyticsIconClick = useCallback(() => {
+    setActiveCategory(prev => prev === 'analytics' ? 'all' : 'analytics');
+  }, []);
+
+  // Memoize page info to prevent recalculation
+  const pageInfo = useMemo(() => {
+    const category = categories.find(cat => cat.id === activeCategory);
+    
+    if (activeCategory === 'profile') {
+      return {
+        title: 'Profile',
+        subtitle: 'Manage your account information and preferences'
+      };
+    }
+    
+    if (activeCategory === 'analytics') {
+      return {
+        title: 'Analytics',
+        subtitle: 'Track your productivity trends and insights'
+      };
+    }
+    
+    return {
+      title: category?.name || 'Dashboard',
+      subtitle: activeCategory === 'all' 
+        ? 'Overview of all your productivity tools'
+        : `Manage your ${category?.name.toLowerCase()}`
+    };
+  }, [activeCategory]);
+
+  // Lazy render content to improve performance
+  const renderContent = useCallback(() => {
     switch (activeCategory) {
       case 'analytics':
         return <AnalyticsDashboard />;
@@ -126,28 +167,7 @@ const Dashboard: React.FC = () => {
           </div>
         );
     }
-  };
-
-  const handleCategorySelect = (categoryId: CategoryType) => {
-    setActiveCategory(categoryId);
-    setMobileMenuOpen(false);
-  };
-
-  const handleUserIconClick = () => {
-    if (activeCategory === 'profile') {
-      setActiveCategory('all');
-    } else {
-      setActiveCategory('profile');
-    }
-  };
-
-  const handleAnalyticsIconClick = () => {
-    if (activeCategory === 'analytics') {
-      setActiveCategory('all');
-    } else {
-      setActiveCategory('analytics');
-    }
-  };
+  }, [activeCategory]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -166,13 +186,12 @@ const Dashboard: React.FC = () => {
           <div className="sticky top-12 z-30 bg-white border-b border-gray-200 px-3 py-2 animate-slideDown">
             <div className="flex items-center justify-between">
               <h1 className="text-sm font-semibold text-gray-900">
-                {activeCategory === 'profile' ? 'Profile' : 
-                 activeCategory === 'analytics' ? 'Analytics' :
-                 categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
+                {pageInfo.title}
               </h1>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="btn-icon-secondary micro-bounce"
+                aria-label="Toggle menu"
               >
                 {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
@@ -239,23 +258,21 @@ const Dashboard: React.FC = () => {
             {/* Desktop Page Header */}
             <div className="page-header hidden lg:block animate-fadeIn">
               <h1 className="page-title">
-                {activeCategory === 'profile' ? 'Profile' : 
-                 activeCategory === 'analytics' ? 'Analytics' :
-                 categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
+                {pageInfo.title}
               </h1>
               <p className="page-subtitle">
-                {activeCategory === 'all' 
-                  ? 'Overview of all your productivity tools'
-                  : activeCategory === 'profile'
-                  ? 'Manage your account information and preferences'
-                  : activeCategory === 'analytics'
-                  ? 'Track your productivity trends and insights'
-                  : `Manage your ${categories.find(cat => cat.id === activeCategory)?.name.toLowerCase()}`
-                }
+                {pageInfo.subtitle}
               </p>
             </div>
             
-            {renderContent()}
+            {/* Render content with error boundary */}
+            <React.Suspense fallback={
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            }>
+              {renderContent()}
+            </React.Suspense>
           </div>
         </main>
       </div>
