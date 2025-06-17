@@ -338,7 +338,7 @@
   }
 }
 
-/* Compact sidebar styles */
+/* FIXED: Compact sidebar styles with proper text visibility */
 .sidebar {
   @apply bg-white border-r border-gray-200;
 }
@@ -351,12 +351,26 @@
   @apply flex items-center space-x-2 px-2.5 py-2 text-xs font-medium rounded-lg transition-all duration-200 hover-lift;
 }
 
+/* FIXED: Ensure text is always visible in active state */
 .sidebar-nav-item.active {
   @apply bg-blue-50 text-blue-700 animate-scaleIn;
 }
 
+.sidebar-nav-item.active span {
+  @apply text-blue-700 !important;
+}
+
 .sidebar-nav-item:not(.active) {
   @apply text-gray-600 hover:bg-gray-50 hover:text-gray-900;
+}
+
+.sidebar-nav-item:not(.active) span {
+  @apply text-gray-600;
+}
+
+/* FIXED: Ensure icon colors are consistent */
+.sidebar-nav-item.active .text-gray-400 {
+  @apply text-blue-600 !important;
 }
 
 .search-input {
