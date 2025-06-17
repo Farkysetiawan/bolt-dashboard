@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, Plus, ExternalLink, Edit2, X, Globe, Github, Youtube, Twitter, Instagram, Facebook, Linkedin, Mail, Phone, Calendar, Settings, Home, Search, Heart, Star, Bookmark, Camera, Music, Video, File, Folder, Download, Upload, Share, Lock, Unlock, Eye, EyeOff, Bell, MessageCircle, Users, User, ShoppingCart, CreditCard, Truck, Package, MapPin, Clock, Zap, Wifi, Battery, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, Repeat, Shuffle, Monitor, Smartphone, Tablet, Laptop, Headphones, Mic, Speaker, Printer, Keyboard, Mouse, HardDrive, Cpu, MemoryStick, Database, Server, Cloud, Code, Terminal, Bug, Wrench, Hammer, Scissors, Paperclip, Pin, Flag, Tag, Filter, SortAsc as Sort, Grid, List, BarChart, PieChart, TrendingUp, TrendingDown, Activity, Target, Award, Trophy, Medal, Gift, Coffee, Pizza, Gamepad2, Palette, Brush, Pen, Pencil, Eraser, Ruler, Compass, Calculator, Book, BookOpen, GraduationCap, ChevronUp, ChevronDown, Save, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, Plus, ExternalLink, Edit2, X, ChevronUp, ChevronDown, Save, AlertCircle, Upload, Image } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -12,113 +12,6 @@ interface QuickLink {
   order_index?: number;
 }
 
-// Preset icons mapping
-const presetIcons = {
-  globe: Globe,
-  github: Github,
-  youtube: Youtube,
-  twitter: Twitter,
-  instagram: Instagram,
-  facebook: Facebook,
-  linkedin: Linkedin,
-  mail: Mail,
-  phone: Phone,
-  calendar: Calendar,
-  settings: Settings,
-  home: Home,
-  search: Search,
-  heart: Heart,
-  star: Star,
-  bookmark: Bookmark,
-  camera: Camera,
-  music: Music,
-  video: Video,
-  file: File,
-  folder: Folder,
-  download: Download,
-  upload: Upload,
-  share: Share,
-  lock: Lock,
-  unlock: Unlock,
-  eye: Eye,
-  'eye-off': EyeOff,
-  bell: Bell,
-  'message-circle': MessageCircle,
-  users: Users,
-  user: User,
-  'shopping-cart': ShoppingCart,
-  'credit-card': CreditCard,
-  truck: Truck,
-  package: Package,
-  'map-pin': MapPin,
-  clock: Clock,
-  zap: Zap,
-  wifi: Wifi,
-  battery: Battery,
-  'volume-2': Volume2,
-  'volume-x': VolumeX,
-  play: Play,
-  pause: Pause,
-  'skip-back': SkipBack,
-  'skip-forward': SkipForward,
-  repeat: Repeat,
-  shuffle: Shuffle,
-  monitor: Monitor,
-  smartphone: Smartphone,
-  tablet: Tablet,
-  laptop: Laptop,
-  headphones: Headphones,
-  mic: Mic,
-  speaker: Speaker,
-  printer: Printer,
-  keyboard: Keyboard,
-  mouse: Mouse,
-  'hard-drive': HardDrive,
-  cpu: Cpu,
-  'memory-stick': MemoryStick,
-  database: Database,
-  server: Server,
-  cloud: Cloud,
-  code: Code,
-  terminal: Terminal,
-  bug: Bug,
-  wrench: Wrench,
-  hammer: Hammer,
-  scissors: Scissors,
-  paperclip: Paperclip,
-  pin: Pin,
-  flag: Flag,
-  tag: Tag,
-  filter: Filter,
-  sort: Sort,
-  grid: Grid,
-  list: List,
-  'bar-chart': BarChart,
-  'pie-chart': PieChart,
-  'trending-up': TrendingUp,
-  'trending-down': TrendingDown,
-  activity: Activity,
-  target: Target,
-  award: Award,
-  trophy: Trophy,
-  medal: Medal,
-  gift: Gift,
-  coffee: Coffee,
-  pizza: Pizza,
-  'gamepad-2': Gamepad2,
-  palette: Palette,
-  brush: Brush,
-  pen: Pen,
-  pencil: Pencil,
-  eraser: Eraser,
-  ruler: Ruler,
-  compass: Compass,
-  calculator: Calculator,
-  book: Book,
-  'book-open': BookOpen,
-  'graduation-cap': GraduationCap
-};
-
 const QuickLinksManager: React.FC = () => {
   const [links, setLinks] = useState<QuickLink[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,10 +20,12 @@ const QuickLinksManager: React.FC = () => {
   const [formData, setFormData] = useState({
     title: '',
     url: '',
-    icon: 'globe'
+    icon: ''
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -177,6 +72,74 @@ const QuickLinksManager: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setErrors({ ...errors, icon: 'Please select an image file' });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors({ ...errors, icon: 'Image must be smaller than 5MB' });
+      return;
+    }
+
+    setUploading(true);
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        // Create canvas to resize image to 500x500
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = 500;
+        canvas.height = 500;
+        
+        if (ctx) {
+          // Draw image scaled to fit 500x500 while maintaining aspect ratio
+          const scale = Math.min(500 / img.width, 500 / img.height);
+          const scaledWidth = img.width * scale;
+          const scaledHeight = img.height * scale;
+          const x = (500 - scaledWidth) / 2;
+          const y = (500 - scaledHeight) / 2;
+          
+          // Fill background with white
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, 500, 500);
+          
+          // Draw the image
+          ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+          
+          // Convert to base64
+          const resizedDataUrl = canvas.toDataURL('image/png', 0.9);
+          setFormData({ ...formData, icon: resizedDataUrl });
+          setErrors({ ...errors, icon: '' });
+        }
+        setUploading(false);
+      };
+      
+      img.onerror = () => {
+        setErrors({ ...errors, icon: 'Invalid image file' });
+        setUploading(false);
+      };
+      
+      img.src = e.target?.result as string;
+    };
+    
+    reader.onerror = () => {
+      setErrors({ ...errors, icon: 'Failed to read file' });
+      setUploading(false);
+    };
+    
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -190,7 +153,7 @@ const QuickLinksManager: React.FC = () => {
           .update({
             title: formData.title.trim(),
             url: formData.url.trim(),
-            icon: formData.icon
+            icon: formData.icon || null
           })
           .eq('id', editingLink.id)
           .select()
@@ -206,7 +169,7 @@ const QuickLinksManager: React.FC = () => {
             {
               title: formData.title.trim(),
               url: formData.url.trim(),
-              icon: formData.icon,
+              icon: formData.icon || null,
               user_id: user?.id
             }
           ])
@@ -231,7 +194,7 @@ const QuickLinksManager: React.FC = () => {
     setFormData({
       title: link.title,
       url: link.url,
-      icon: link.icon || 'globe'
+      icon: link.icon || ''
     });
     setShowAddForm(true);
     setErrors({});
@@ -262,20 +225,16 @@ const QuickLinksManager: React.FC = () => {
     // Swap positions
     [newLinks[index], newLinks[targetIndex]] = [newLinks[targetIndex], newLinks[index]];
     setLinks(newLinks);
-
-    // Update order in database (simplified - using created_at for now)
-    // In a real implementation, you'd want an order_index column
   };
 
   const resetForm = () => {
-    setFormData({ title: '', url: '', icon: 'globe' });
+    setFormData({ title: '', url: '', icon: '' });
     setEditingLink(null);
     setShowAddForm(false);
     setErrors({});
-  };
-
-  const getIconComponent = (iconName: string) => {
-    return presetIcons[iconName as keyof typeof presetIcons] || Globe;
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const getDomainFromUrl = (url: string): string => {
@@ -287,13 +246,9 @@ const QuickLinksManager: React.FC = () => {
     }
   };
 
-  const popularIcons = [
-    'globe', 'github', 'youtube', 'twitter', 'instagram', 'facebook', 'linkedin',
-    'mail', 'calendar', 'settings', 'home', 'search', 'heart', 'star', 'bookmark',
-    'camera', 'music', 'video', 'file', 'folder', 'download', 'upload', 'share',
-    'clock', 'zap', 'wifi', 'monitor', 'smartphone', 'laptop', 'code', 'terminal',
-    'database', 'server', 'cloud', 'book', 'graduation-cap', 'coffee', 'pizza'
-  ];
+  const isValidImageUrl = (url: string): boolean => {
+    return url && (url.startsWith('http') || url.startsWith('data:image/'));
+  };
 
   if (loading) {
     return (
@@ -346,31 +301,64 @@ const QuickLinksManager: React.FC = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Icon Selection */}
+              {/* Logo Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                  Icon
+                  Logo (PNG, 500x500px recommended)
                 </label>
-                <div className="grid grid-cols-8 gap-2 p-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-md max-h-32 overflow-y-auto">
-                  {popularIcons.map((iconName) => {
-                    const IconComponent = getIconComponent(iconName);
-                    return (
+                
+                <div className="flex items-center space-x-4">
+                  {/* Current logo preview */}
+                  <div className="w-16 h-16 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+                    {formData.icon && isValidImageUrl(formData.icon) ? (
+                      <img
+                        src={formData.icon}
+                        alt="Logo preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Image className="w-6 h-6 text-gray-400" />
+                    )}
+                  </div>
+                  
+                  {/* Upload button */}
+                  <div className="flex-1">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {uploading ? 'Processing...' : 'Upload Logo'}
+                    </button>
+                    
+                    {formData.icon && (
                       <button
-                        key={iconName}
                         type="button"
-                        onClick={() => setFormData({ ...formData, icon: iconName })}
-                        className={`p-2 rounded-md transition-colors ${
-                          formData.icon === iconName
-                            ? 'bg-blue-100 text-blue-600 border-2 border-blue-300'
-                            : 'hover:bg-gray-100 dark:hover:bg-slate-700 border-2 border-transparent'
-                        }`}
-                        title={iconName}
+                        onClick={() => setFormData({ ...formData, icon: '' })}
+                        className="ml-2 text-sm text-red-600 hover:text-red-700"
                       >
-                        <IconComponent className="w-4 h-4" />
+                        Remove
                       </button>
-                    );
-                  })}
+                    )}
+                  </div>
                 </div>
+                
+                {errors.icon && (
+                  <p className="text-red-600 text-xs mt-1">{errors.icon}</p>
+                )}
+                
+                <p className="text-xs text-gray-500 mt-1">
+                  Upload a PNG image. It will be automatically resized to 500x500px.
+                </p>
               </div>
 
               {/* Title */}
@@ -412,8 +400,16 @@ const QuickLinksManager: React.FC = () => {
                 <div className="p-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-md">
                   <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Preview:</p>
                   <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-slate-800 rounded-md">
-                    <div className="w-8 h-8 flex items-center justify-center text-gray-600 dark:text-slate-400">
-                      {React.createElement(getIconComponent(formData.icon), { className: "w-5 h-5" })}
+                    <div className="w-8 h-8 flex items-center justify-center text-gray-600 dark:text-slate-400 bg-white rounded overflow-hidden">
+                      {formData.icon && isValidImageUrl(formData.icon) ? (
+                        <img
+                          src={formData.icon}
+                          alt="Logo"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <ExternalLink className="w-5 h-5" />
+                      )}
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{formData.title}</p>
@@ -427,7 +423,7 @@ const QuickLinksManager: React.FC = () => {
               <div className="flex space-x-2">
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={saving || uploading}
                   className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -454,15 +450,26 @@ const QuickLinksManager: React.FC = () => {
             </div>
           ) : (
             links.map((link, index) => {
-              const IconComponent = getIconComponent(link.icon || 'globe');
+              const hasCustomLogo = isValidImageUrl(link.icon || '');
               return (
                 <div
                   key={link.id}
                   className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors"
                 >
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    <div className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-slate-800 rounded-lg">
-                      <IconComponent className="w-5 h-5 text-gray-600 dark:text-slate-400" />
+                    <div className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-slate-800 rounded-lg overflow-hidden">
+                      {hasCustomLogo ? (
+                        <img
+                          src={link.icon}
+                          alt={link.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <ExternalLink className={`w-5 h-5 text-gray-600 dark:text-slate-400 ${hasCustomLogo ? 'hidden' : ''}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 dark:text-slate-100 truncate">
@@ -528,7 +535,7 @@ const QuickLinksManager: React.FC = () => {
               );
             })
           )}
-        </div>
+        </</div>
       </div>
     </div>
   );

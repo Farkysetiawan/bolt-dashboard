@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Plus, ExternalLink, Edit2, X, Globe, Github, Youtube, Twitter, Instagram, Facebook, Linkedin, Mail, Phone, Calendar, Settings, Home, Search, Heart, Star, Bookmark, Camera, Music, Video, File, Folder, Download, Upload, Share, Lock, Unlock, Eye, EyeOff, Bell, MessageCircle, Users, User, ShoppingCart, CreditCard, Truck, Package, MapPin, Clock, Zap, Wifi, Battery, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, Repeat, Shuffle, Monitor, Smartphone, Tablet, Laptop, Headphones, Mic, Speaker, Printer, Keyboard, Mouse, HardDrive, Cpu, MemoryStick, Database, Server, Cloud, Code, Terminal, Bug, Wrench, Hammer, Scissors, Paperclip, Pin, Flag, Tag, Filter, SortAsc as Sort, Grid, List, BarChart, PieChart, TrendingUp, TrendingDown, Activity, Target, Award, Trophy, Medal, Gift, Coffee, Pizza, Gamepad2, Palette, Brush, Pen, Pencil, Eraser, Ruler, Compass, Calculator, Book, BookOpen, GraduationCap } from 'lucide-react';
+import { Link, Plus, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -11,113 +11,6 @@ interface QuickLink {
   user_id: string;
   order_index?: number;
 }
-
-// Preset icons mapping
-const presetIcons = {
-  globe: Globe,
-  github: Github,
-  youtube: Youtube,
-  twitter: Twitter,
-  instagram: Instagram,
-  facebook: Facebook,
-  linkedin: Linkedin,
-  mail: Mail,
-  phone: Phone,
-  calendar: Calendar,
-  settings: Settings,
-  home: Home,
-  search: Search,
-  heart: Heart,
-  star: Star,
-  bookmark: Bookmark,
-  camera: Camera,
-  music: Music,
-  video: Video,
-  file: File,
-  folder: Folder,
-  download: Download,
-  upload: Upload,
-  share: Share,
-  lock: Lock,
-  unlock: Unlock,
-  eye: Eye,
-  'eye-off': EyeOff,
-  bell: Bell,
-  'message-circle': MessageCircle,
-  users: Users,
-  user: User,
-  'shopping-cart': ShoppingCart,
-  'credit-card': CreditCard,
-  truck: Truck,
-  package: Package,
-  'map-pin': MapPin,
-  clock: Clock,
-  zap: Zap,
-  wifi: Wifi,
-  battery: Battery,
-  'volume-2': Volume2,
-  'volume-x': VolumeX,
-  play: Play,
-  pause: Pause,
-  'skip-back': SkipBack,
-  'skip-forward': SkipForward,
-  repeat: Repeat,
-  shuffle: Shuffle,
-  monitor: Monitor,
-  smartphone: Smartphone,
-  tablet: Tablet,
-  laptop: Laptop,
-  headphones: Headphones,
-  mic: Mic,
-  speaker: Speaker,
-  printer: Printer,
-  keyboard: Keyboard,
-  mouse: Mouse,
-  'hard-drive': HardDrive,
-  cpu: Cpu,
-  'memory-stick': MemoryStick,
-  database: Database,
-  server: Server,
-  cloud: Cloud,
-  code: Code,
-  terminal: Terminal,
-  bug: Bug,
-  wrench: Wrench,
-  hammer: Hammer,
-  scissors: Scissors,
-  paperclip: Paperclip,
-  pin: Pin,
-  flag: Flag,
-  tag: Tag,
-  filter: Filter,
-  sort: Sort,
-  grid: Grid,
-  list: List,
-  'bar-chart': BarChart,
-  'pie-chart': PieChart,
-  'trending-up': TrendingUp,
-  'trending-down': TrendingDown,
-  activity: Activity,
-  target: Target,
-  award: Award,
-  trophy: Trophy,
-  medal: Medal,
-  gift: Gift,
-  coffee: Coffee,
-  pizza: Pizza,
-  'gamepad-2': Gamepad2,
-  palette: Palette,
-  brush: Brush,
-  pen: Pen,
-  pencil: Pencil,
-  eraser: Eraser,
-  ruler: Ruler,
-  compass: Compass,
-  calculator: Calculator,
-  book: Book,
-  'book-open': BookOpen,
-  'graduation-cap': GraduationCap
-};
 
 const QuickLinksHorizontal: React.FC = () => {
   const [links, setLinks] = useState<QuickLink[]>([]);
@@ -148,11 +41,6 @@ const QuickLinksHorizontal: React.FC = () => {
     }
   };
 
-  const getIconComponent = (iconName?: string) => {
-    if (!iconName) return ExternalLink;
-    return presetIcons[iconName as keyof typeof presetIcons] || ExternalLink;
-  };
-
   const getDomainFromUrl = (url: string): string => {
     try {
       const domain = new URL(url).hostname;
@@ -160,6 +48,10 @@ const QuickLinksHorizontal: React.FC = () => {
     } catch {
       return url;
     }
+  };
+
+  const isValidImageUrl = (url: string): boolean => {
+    return url && (url.startsWith('http') || url.startsWith('data:image/'));
   };
 
   if (loading) {
@@ -186,7 +78,7 @@ const QuickLinksHorizontal: React.FC = () => {
   return (
     <div className="flex flex-wrap gap-2">
       {links.map((link) => {
-        const IconComponent = getIconComponent(link.icon);
+        const hasCustomLogo = isValidImageUrl(link.icon || '');
         return (
           <a
             key={link.id}
@@ -197,7 +89,19 @@ const QuickLinksHorizontal: React.FC = () => {
             title={link.title || getDomainFromUrl(link.url)}
           >
             <div className="w-8 h-8 flex items-center justify-center text-gray-600 group-hover:text-blue-600 transition-colors duration-150">
-              <IconComponent className="w-5 h-5" />
+              {hasCustomLogo ? (
+                <img
+                  src={link.icon}
+                  alt={link.title || 'Logo'}
+                  className="w-8 h-8 object-cover rounded"
+                  onError={(e) => {
+                    // Fallback to default icon if image fails to load
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+              ) : null}
+              <ExternalLink className={`w-5 h-5 ${hasCustomLogo ? 'hidden' : ''}`} />
             </div>
             <span className="text-xs text-gray-600 group-hover:text-gray-900 mt-1 text-center truncate max-w-[50px]">
               {link.title || getDomainFromUrl(link.url)}
