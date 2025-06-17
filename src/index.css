@@ -337,10 +337,10 @@
 }
 
 /* ========================================
-   🚀 ULTIMATE SIDEBAR FIX - HORIZONTAL LAYOUT
+   🎯 PERFECT SIDEBAR FIX - HORIZONTAL ICON+TEXT, VERTICAL LIST
    ======================================== */
 
-/* FORCE SIDEBAR CONTAINER */
+/* SIDEBAR CONTAINER - VERTICAL LIST */
 .sidebar,
 div.sidebar,
 .fixed.sidebar,
@@ -349,21 +349,21 @@ div.sidebar,
   border-right: 1px solid #e5e7eb !important;
 }
 
-/* FORCE SIDEBAR NAV CONTAINER */
+/* SIDEBAR NAV - VERTICAL LIST OF CATEGORIES */
 .sidebar .sidebar-nav,
 .sidebar nav,
 .sidebar-nav,
 [class*="sidebar-nav"] {
   display: flex !important;
-  flex-direction: column !important;
-  gap: 2px !important; /* MINIMAL gap antar item */
+  flex-direction: column !important; /* VERTICAL - LIST CATEGORY ATAS KE BAWAH */
+  gap: 2px !important; /* MINIMAL gap antar category */
 }
 
 /* ========================================
-   🔥 NUCLEAR SIDEBAR ITEM FIX - HORIZONTAL LAYOUT
+   🔥 SIDEBAR ITEM - HORIZONTAL ICON+TEXT LAYOUT
    ======================================== */
 
-/* TARGET SEMUA KEMUNGKINAN SELECTOR - NUCLEAR APPROACH */
+/* TARGET SEMUA NAVIGATION ITEM */
 .sidebar button,
 .sidebar a,
 .sidebar .sidebar-nav-item,
@@ -374,10 +374,6 @@ a.sidebar-nav-item,
 .sidebar-nav-item,
 .sidebar nav button,
 .sidebar nav a,
-.sidebar [role="button"],
-.sidebar [class*="nav-item"],
-.sidebar [class*="sidebar-nav"],
-.sidebar [class*="menu-item"],
 div.sidebar button,
 div.sidebar a,
 div.sidebar .sidebar-nav-item,
@@ -392,15 +388,15 @@ div.sidebar nav a,
 [class*="sidebar"] a.sidebar-nav-item,
 [class*="sidebar"] nav button,
 [class*="sidebar"] nav a {
-  /* FORCE HORIZONTAL LAYOUT - SAMPING-SAMPINGAN */
+  /* FORCE HORIZONTAL LAYOUT - ICON KIRI, TEXT KANAN */
   display: flex !important;
-  flex-direction: row !important; /* HORIZONTAL - KIRI KANAN */
+  flex-direction: row !important; /* HORIZONTAL - ICON DAN TEXT SAMPING-SAMPINGAN */
   align-items: center !important;
   justify-content: flex-start !important;
   gap: 8px !important; /* JARAK ICON DAN TEXT - DEMPET TAPI ADA SEDIKIT SPACE */
   
   /* FORCE SPACING - COMPACT DENGAN PADDING */
-  padding: 6px 8px !important; /* PADDING KECIL TAPI CUKUP */
+  padding: 8px 12px !important; /* PADDING YANG PAS */
   margin: 0 !important;
   
   /* FORCE TYPOGRAPHY */
@@ -425,15 +421,64 @@ div.sidebar nav a,
   
   /* FORCE DIMENSIONS */
   width: 100% !important;
-  min-height: 28px !important; /* HEIGHT YANG PAS */
+  min-height: 32px !important; /* HEIGHT YANG PAS */
   box-sizing: border-box !important;
 }
 
 /* ========================================
-   💥 FORCE TEXT VISIBILITY - HORIZONTAL
+   💥 FORCE ICON VISIBILITY - KIRI
    ======================================== */
 
-/* TARGET SEMUA KEMUNGKINAN TEXT ELEMENT */
+/* TARGET SEMUA ICON ELEMENT */
+.sidebar button svg,
+.sidebar a svg,
+.sidebar .sidebar-nav-item svg,
+.sidebar button.sidebar-nav-item svg,
+.sidebar a.sidebar-nav-item svg,
+button.sidebar-nav-item svg,
+a.sidebar-nav-item svg,
+.sidebar-nav-item svg,
+.sidebar nav button svg,
+.sidebar nav a svg,
+div.sidebar button svg,
+div.sidebar a svg,
+div.sidebar .sidebar-nav-item svg,
+div.sidebar button.sidebar-nav-item svg,
+div.sidebar a.sidebar-nav-item svg,
+div.sidebar nav button svg,
+div.sidebar nav a svg,
+[class*="sidebar"] button svg,
+[class*="sidebar"] a svg,
+[class*="sidebar"] .sidebar-nav-item svg,
+[class*="sidebar"] button.sidebar-nav-item svg,
+[class*="sidebar"] a.sidebar-nav-item svg,
+[class*="sidebar"] nav button svg,
+[class*="sidebar"] nav a svg {
+  /* FORCE ICON VISIBILITY */
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  
+  /* FORCE ICON PROPERTIES - COMPACT */
+  color: inherit !important;
+  width: 16px !important; /* ICON SIZE YANG PAS */
+  height: 16px !important;
+  flex-shrink: 0 !important;
+  
+  /* FORCE LAYOUT */
+  margin: 0 !important;
+  padding: 0 !important;
+  
+  /* FORCE POSITIONING */
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* ========================================
+   💥 FORCE TEXT VISIBILITY - KANAN
+   ======================================== */
+
+/* TARGET SEMUA TEXT ELEMENT */
 .sidebar button span,
 .sidebar a span,
 .sidebar .sidebar-nav-item span,
@@ -444,20 +489,6 @@ a.sidebar-nav-item span,
 .sidebar-nav-item span,
 .sidebar nav button span,
 .sidebar nav a span,
-.sidebar button > span,
-.sidebar a > span,
-.sidebar .sidebar-nav-item > span,
-.sidebar button.sidebar-nav-item > span,
-.sidebar a.sidebar-nav-item > span,
-button.sidebar-nav-item > span,
-a.sidebar-nav-item > span,
-.sidebar-nav-item > span,
-.sidebar nav button > span,
-.sidebar nav a > span,
-.sidebar [role="button"] span,
-.sidebar [class*="nav-item"] span,
-.sidebar [class*="sidebar-nav"] span,
-.sidebar [class*="menu-item"] span,
 div.sidebar button span,
 div.sidebar a span,
 div.sidebar .sidebar-nav-item span,
@@ -465,27 +496,13 @@ div.sidebar button.sidebar-nav-item span,
 div.sidebar a.sidebar-nav-item span,
 div.sidebar nav button span,
 div.sidebar nav a span,
-div.sidebar button > span,
-div.sidebar a > span,
-div.sidebar .sidebar-nav-item > span,
-div.sidebar button.sidebar-nav-item > span,
-div.sidebar a.sidebar-nav-item > span,
-div.sidebar nav button > span,
-div.sidebar nav a > span,
 [class*="sidebar"] button span,
 [class*="sidebar"] a span,
 [class*="sidebar"] .sidebar-nav-item span,
 [class*="sidebar"] button.sidebar-nav-item span,
 [class*="sidebar"] a.sidebar-nav-item span,
 [class*="sidebar"] nav button span,
-[class*="sidebar"] nav a span,
-[class*="sidebar"] button > span,
-[class*="sidebar"] a > span,
-[class*="sidebar"] .sidebar-nav-item > span,
-[class*="sidebar"] button.sidebar-nav-item > span,
-[class*="sidebar"] a.sidebar-nav-item > span,
-[class*="sidebar"] nav button > span,
-[class*="sidebar"] nav a > span {
+[class*="sidebar"] nav a span {
   /* FORCE TEXT VISIBILITY - NUCLEAR POWER */
   display: inline-block !important;
   visibility: visible !important;
@@ -512,87 +529,10 @@ div.sidebar nav a > span,
 }
 
 /* ========================================
-   🎯 FORCE ICON VISIBILITY - HORIZONTAL
+   🎨 HOVER & ACTIVE STATES
    ======================================== */
 
-/* TARGET SEMUA KEMUNGKINAN ICON ELEMENT */
-.sidebar button svg,
-.sidebar a svg,
-.sidebar .sidebar-nav-item svg,
-.sidebar button.sidebar-nav-item svg,
-.sidebar a.sidebar-nav-item svg,
-button.sidebar-nav-item svg,
-a.sidebar-nav-item svg,
-.sidebar-nav-item svg,
-.sidebar nav button svg,
-.sidebar nav a svg,
-.sidebar button > svg,
-.sidebar a > svg,
-.sidebar .sidebar-nav-item > svg,
-.sidebar button.sidebar-nav-item > svg,
-.sidebar a.sidebar-nav-item > svg,
-button.sidebar-nav-item > svg,
-a.sidebar-nav-item > svg,
-.sidebar-nav-item > svg,
-.sidebar nav button > svg,
-.sidebar nav a > svg,
-.sidebar [role="button"] svg,
-.sidebar [class*="nav-item"] svg,
-.sidebar [class*="sidebar-nav"] svg,
-.sidebar [class*="menu-item"] svg,
-div.sidebar button svg,
-div.sidebar a svg,
-div.sidebar .sidebar-nav-item svg,
-div.sidebar button.sidebar-nav-item svg,
-div.sidebar a.sidebar-nav-item svg,
-div.sidebar nav button svg,
-div.sidebar nav a svg,
-div.sidebar button > svg,
-div.sidebar a > svg,
-div.sidebar .sidebar-nav-item > svg,
-div.sidebar button.sidebar-nav-item > svg,
-div.sidebar a.sidebar-nav-item > svg,
-div.sidebar nav button > svg,
-div.sidebar nav a > svg,
-[class*="sidebar"] button svg,
-[class*="sidebar"] a svg,
-[class*="sidebar"] .sidebar-nav-item svg,
-[class*="sidebar"] button.sidebar-nav-item svg,
-[class*="sidebar"] a.sidebar-nav-item svg,
-[class*="sidebar"] nav button svg,
-[class*="sidebar"] nav a svg,
-[class*="sidebar"] button > svg,
-[class*="sidebar"] a > svg,
-[class*="sidebar"] .sidebar-nav-item > svg,
-[class*="sidebar"] button.sidebar-nav-item > svg,
-[class*="sidebar"] a.sidebar-nav-item > svg,
-[class*="sidebar"] nav button > svg,
-[class*="sidebar"] nav a > svg {
-  /* FORCE ICON VISIBILITY */
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  
-  /* FORCE ICON PROPERTIES - COMPACT */
-  color: inherit !important;
-  width: 14px !important; /* ICON SIZE YANG PAS */
-  height: 14px !important;
-  flex-shrink: 0 !important;
-  
-  /* FORCE LAYOUT */
-  margin: 0 !important;
-  padding: 0 !important;
-  
-  /* FORCE POSITIONING */
-  position: relative !important;
-  z-index: 10 !important;
-}
-
-/* ========================================
-   🎨 HOVER & ACTIVE STATES - HORIZONTAL
-   ======================================== */
-
-/* HOVER STATE - NUCLEAR APPROACH */
+/* HOVER STATE */
 .sidebar button:hover:not(.active),
 .sidebar a:hover:not(.active),
 .sidebar .sidebar-nav-item:hover:not(.active),
@@ -622,7 +562,7 @@ div.sidebar nav a:hover:not(.active),
   transform: translateY(-1px) !important;
 }
 
-/* ACTIVE STATE - NUCLEAR APPROACH */
+/* ACTIVE STATE */
 .sidebar button.active,
 .sidebar a.active,
 .sidebar .sidebar-nav-item.active,
@@ -652,7 +592,7 @@ div.sidebar nav a.active,
   animation: scaleIn 0.2s ease-out !important;
 }
 
-/* FORCE ACTIVE STATE TEXT AND ICONS - NUCLEAR APPROACH */
+/* FORCE ACTIVE STATE TEXT AND ICONS */
 .sidebar button.active span,
 .sidebar a.active span,
 .sidebar .sidebar-nav-item.active span,
@@ -717,7 +657,7 @@ div.sidebar nav a.active svg,
    💣 OVERRIDE CONFLICTING STYLES - NUCLEAR
    ======================================== */
 
-/* FORCE OVERRIDE ANY CONFLICTING STYLES - NUCLEAR APPROACH */
+/* FORCE OVERRIDE ANY CONFLICTING STYLES */
 .sidebar *,
 .sidebar button *,
 .sidebar a *,
@@ -748,123 +688,6 @@ div.sidebar nav a *,
   color: inherit !important;
   opacity: 1 !important;
   visibility: visible !important;
-}
-
-/* FORCE REMOVE ANY HIDDEN CLASSES - NUCLEAR APPROACH */
-.sidebar .hidden,
-.sidebar button.hidden,
-.sidebar a.hidden,
-.sidebar .sidebar-nav-item.hidden,
-.sidebar button.sidebar-nav-item.hidden,
-.sidebar a.sidebar-nav-item.hidden,
-button.sidebar-nav-item.hidden,
-a.sidebar-nav-item.hidden,
-.sidebar-nav-item.hidden,
-.sidebar nav button.hidden,
-.sidebar nav a.hidden,
-div.sidebar .hidden,
-div.sidebar button.hidden,
-div.sidebar a.hidden,
-div.sidebar .sidebar-nav-item.hidden,
-div.sidebar button.sidebar-nav-item.hidden,
-div.sidebar a.sidebar-nav-item.hidden,
-div.sidebar nav button.hidden,
-div.sidebar nav a.hidden,
-[class*="sidebar"] .hidden,
-[class*="sidebar"] button.hidden,
-[class*="sidebar"] a.hidden,
-[class*="sidebar"] .sidebar-nav-item.hidden,
-[class*="sidebar"] button.sidebar-nav-item.hidden,
-[class*="sidebar"] a.sidebar-nav-item.hidden,
-[class*="sidebar"] nav button.hidden,
-[class*="sidebar"] nav a.hidden {
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* FORCE REMOVE ANY OPACITY CLASSES - NUCLEAR APPROACH */
-.sidebar .opacity-0,
-.sidebar button.opacity-0,
-.sidebar a.opacity-0,
-.sidebar .sidebar-nav-item.opacity-0,
-.sidebar button.sidebar-nav-item.opacity-0,
-.sidebar a.sidebar-nav-item.opacity-0,
-button.sidebar-nav-item.opacity-0,
-a.sidebar-nav-item.opacity-0,
-.sidebar-nav-item.opacity-0,
-.sidebar nav button.opacity-0,
-.sidebar nav a.opacity-0,
-div.sidebar .opacity-0,
-div.sidebar button.opacity-0,
-div.sidebar a.opacity-0,
-div.sidebar .sidebar-nav-item.opacity-0,
-div.sidebar button.sidebar-nav-item.opacity-0,
-div.sidebar a.sidebar-nav-item.opacity-0,
-div.sidebar nav button.opacity-0,
-div.sidebar nav a.opacity-0,
-[class*="sidebar"] .opacity-0,
-[class*="sidebar"] button.opacity-0,
-[class*="sidebar"] a.opacity-0,
-[class*="sidebar"] .sidebar-nav-item.opacity-0,
-[class*="sidebar"] button.sidebar-nav-item.opacity-0,
-[class*="sidebar"] a.sidebar-nav-item.opacity-0,
-[class*="sidebar"] nav button.opacity-0,
-[class*="sidebar"] nav a.opacity-0 {
-  opacity: 1 !important;
-}
-
-/* FORCE FOCUS STATES - NUCLEAR APPROACH */
-.sidebar button:focus,
-.sidebar a:focus,
-.sidebar .sidebar-nav-item:focus,
-.sidebar button.sidebar-nav-item:focus,
-.sidebar a.sidebar-nav-item:focus,
-button.sidebar-nav-item:focus,
-a.sidebar-nav-item:focus,
-.sidebar-nav-item:focus,
-.sidebar nav button:focus,
-.sidebar nav a:focus,
-.sidebar button:focus-visible,
-.sidebar a:focus-visible,
-.sidebar .sidebar-nav-item:focus-visible,
-.sidebar button.sidebar-nav-item:focus-visible,
-.sidebar a.sidebar-nav-item:focus-visible,
-button.sidebar-nav-item:focus-visible,
-a.sidebar-nav-item:focus-visible,
-.sidebar-nav-item:focus-visible,
-.sidebar nav button:focus-visible,
-.sidebar nav a:focus-visible,
-div.sidebar button:focus,
-div.sidebar a:focus,
-div.sidebar .sidebar-nav-item:focus,
-div.sidebar button.sidebar-nav-item:focus,
-div.sidebar a.sidebar-nav-item:focus,
-div.sidebar nav button:focus,
-div.sidebar nav a:focus,
-div.sidebar button:focus-visible,
-div.sidebar a:focus-visible,
-div.sidebar .sidebar-nav-item:focus-visible,
-div.sidebar button.sidebar-nav-item:focus-visible,
-div.sidebar a.sidebar-nav-item:focus-visible,
-div.sidebar nav button:focus-visible,
-div.sidebar nav a:focus-visible,
-[class*="sidebar"] button:focus,
-[class*="sidebar"] a:focus,
-[class*="sidebar"] .sidebar-nav-item:focus,
-[class*="sidebar"] button.sidebar-nav-item:focus,
-[class*="sidebar"] a.sidebar-nav-item:focus,
-[class*="sidebar"] nav button:focus,
-[class*="sidebar"] nav a:focus,
-[class*="sidebar"] button:focus-visible,
-[class*="sidebar"] a:focus-visible,
-[class*="sidebar"] .sidebar-nav-item:focus-visible,
-[class*="sidebar"] button.sidebar-nav-item:focus-visible,
-[class*="sidebar"] a.sidebar-nav-item:focus-visible,
-[class*="sidebar"] nav button:focus-visible,
-[class*="sidebar"] nav a:focus-visible {
-  outline: 2px solid #3b82f6 !important;
-  outline-offset: 2px !important;
 }
 
 .search-input {
