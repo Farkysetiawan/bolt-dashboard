@@ -145,19 +145,19 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
 
   if (loading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-5">
         <div className="card animate-fadeIn">
           <div className="animate-pulse">
-            <div className="flex items-center space-x-6 mb-8">
-              <div className="w-20 h-20 bg-gray-100 rounded-full"></div>
-              <div className="space-y-3">
-                <div className="h-6 bg-gray-100 rounded w-48"></div>
+            <div className="flex items-center space-x-4 mb-5">
+              <div className="w-16 h-16 bg-gray-100 rounded-full"></div>
+              <div className="space-y-2">
                 <div className="h-4 bg-gray-100 rounded w-32"></div>
+                <div className="h-3 bg-gray-100 rounded w-24"></div>
               </div>
             </div>
-            <div className="space-y-4">
-              <div className="h-4 bg-gray-100 rounded"></div>
-              <div className="h-4 bg-gray-100 rounded w-3/4"></div>
+            <div className="space-y-3">
+              <div className="h-3 bg-gray-100 rounded"></div>
+              <div className="h-3 bg-gray-100 rounded w-3/4"></div>
             </div>
           </div>
         </div>
@@ -166,7 +166,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {/* Breadcrumbs */}
       <nav className="breadcrumbs">
         <span>Settings</span>
@@ -176,7 +176,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
 
       {/* Tab Navigation */}
       <div className="tab-nav">
-        <nav className="flex space-x-8">
+        <nav className="flex space-x-6">
           {[
             { id: 'general', label: 'General' },
             { id: 'billing', label: 'Billing' },
@@ -205,17 +205,17 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                 onClick={() => setIsEditing(true)}
                 className="btn-secondary"
               >
-                <Edit2 className="w-4 h-4 mr-2" />
+                <Edit2 className="w-3.5 h-3.5 mr-1.5" />
                 Edit Profile
               </button>
             )}
           </div>
 
           {isEditing ? (
-            <form onSubmit={handleSave} className="space-y-8">
+            <form onSubmit={handleSave} className="space-y-5">
               {/* Avatar Section */}
-              <div className="flex items-center space-x-8">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+              <div className="flex items-center space-x-5">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
                   {editForm.avatar_url ? (
                     <img
                       src={editForm.avatar_url}
@@ -227,10 +227,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                       }}
                     />
                   ) : null}
-                  <User className={`w-10 h-10 text-gray-400 ${editForm.avatar_url ? 'hidden' : ''}`} />
+                  <User className={`w-6 h-6 text-gray-400 ${editForm.avatar_url ? 'hidden' : ''}`} />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Avatar URL
                   </label>
                   <input
@@ -246,7 +246,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
               {/* Form Fields */}
               <div className="grid-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Full Name
                   </label>
                   <input
@@ -259,7 +259,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Email
                   </label>
                   <input
@@ -268,33 +268,33 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                     disabled
                     className="input opacity-50 cursor-not-allowed"
                   />
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 mt-1">
                     Email cannot be changed
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Bio
                 </label>
                 <textarea
                   value={editForm.bio}
                   onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                   placeholder="Tell us about yourself..."
-                  rows={4}
+                  rows={3}
                   className="textarea"
                 />
               </div>
 
               {/* Action Buttons */}
-              <div className="flex space-x-3">
+              <div className="flex space-x-2">
                 <button
                   type="submit"
                   disabled={saving}
                   className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className="w-3.5 h-3.5 mr-1.5" />
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button
@@ -302,16 +302,16 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                   onClick={handleCancel}
                   className="btn-secondary"
                 >
-                  <X className="w-4 h-4 mr-2" />
+                  <X className="w-3.5 h-3.5 mr-1.5" />
                   Cancel
                 </button>
               </div>
             </form>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-5">
               {/* Profile Display */}
-              <div className="flex items-center space-x-8">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+              <div className="flex items-center space-x-5">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
                   {profile?.avatar_url ? (
                     <img
                       src={profile.avatar_url}
@@ -323,19 +323,19 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                       }}
                     />
                   ) : null}
-                  <User className={`w-10 h-10 text-gray-400 ${profile?.avatar_url ? 'hidden' : ''}`} />
+                  <User className={`w-6 h-6 text-gray-400 ${profile?.avatar_url ? 'hidden' : ''}`} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900">
                     {profile?.full_name || 'No name set'}
                   </h3>
-                  <p className="text-gray-600 flex items-center mt-2">
-                    <Mail className="w-4 h-4 mr-2" />
+                  <p className="text-gray-600 flex items-center mt-1 text-sm">
+                    <Mail className="w-3.5 h-3.5 mr-1.5" />
                     {profile?.email}
                   </p>
                   {profile?.created_at && (
-                    <p className="text-sm text-gray-500 flex items-center mt-2">
-                      <Calendar className="w-4 h-4 mr-2" />
+                    <p className="text-xs text-gray-500 flex items-center mt-1">
+                      <Calendar className="w-3.5 h-3.5 mr-1.5" />
                       Member since {new Date(profile.created_at).toLocaleDateString()}
                     </p>
                   )}
@@ -345,15 +345,15 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
               {/* Bio */}
               {profile?.bio && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">About</h4>
-                  <p className="text-gray-600 leading-relaxed">{profile.bio}</p>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">About</h4>
+                  <p className="text-gray-600 leading-relaxed text-sm">{profile.bio}</p>
                 </div>
               )}
 
               {!profile?.bio && !profile?.full_name && (
-                <div className="text-center py-12">
-                  <User className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-6">Your profile is incomplete</p>
+                <div className="text-center py-8">
+                  <User className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 mb-4 text-sm">Your profile is incomplete</p>
                   <button
                     onClick={() => setIsEditing(true)}
                     className="btn-primary"
@@ -369,7 +369,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
 
       {/* Billing Tab */}
       {activeTab === 'billing' && (
-        <div className="space-y-8">
+        <div className="space-y-5">
           {/* Current Plan */}
           <div className="card animate-fadeIn">
             <div className="card-header">
@@ -378,30 +378,30 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
             </div>
             
             <div className="grid-3">
-              <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
-                <h3 className="font-semibold text-blue-900">Free Plan</h3>
-                <p className="text-2xl font-bold text-blue-600 mt-3">$0<span className="text-sm font-normal">/month</span></p>
-                <ul className="text-sm text-blue-700 mt-4 space-y-2">
+              <div className="p-4 bg-blue-50 rounded-md border border-blue-200">
+                <h3 className="font-semibold text-blue-900 text-sm">Free Plan</h3>
+                <p className="text-xl font-bold text-blue-600 mt-2">$0<span className="text-sm font-normal">/month</span></p>
+                <ul className="text-sm text-blue-700 mt-3 space-y-1">
                   <li>• Basic task management</li>
                   <li>• Up to 100 tasks</li>
                   <li>• Basic analytics</li>
                 </ul>
               </div>
               
-              <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-gray-900">Pro Plan</h3>
-                <p className="text-2xl font-bold text-gray-600 mt-3">$9<span className="text-sm font-normal">/month</span></p>
-                <ul className="text-sm text-gray-600 mt-4 space-y-2">
+              <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                <h3 className="font-semibold text-gray-900 text-sm">Pro Plan</h3>
+                <p className="text-xl font-bold text-gray-600 mt-2">$9<span className="text-sm font-normal">/month</span></p>
+                <ul className="text-sm text-gray-600 mt-3 space-y-1">
                   <li>• Unlimited tasks</li>
                   <li>• Advanced analytics</li>
                   <li>• Priority support</li>
                 </ul>
               </div>
               
-              <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-gray-900">Team Plan</h3>
-                <p className="text-2xl font-bold text-gray-600 mt-3">$19<span className="text-sm font-normal">/month</span></p>
-                <ul className="text-sm text-gray-600 mt-4 space-y-2">
+              <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                <h3 className="font-semibold text-gray-900 text-sm">Team Plan</h3>
+                <p className="text-xl font-bold text-gray-600 mt-2">$19<span className="text-sm font-normal">/month</span></p>
+                <ul className="text-sm text-gray-600 mt-3 space-y-1">
                   <li>• Everything in Pro</li>
                   <li>• Team collaboration</li>
                   <li>• Admin controls</li>
@@ -421,18 +421,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                 <thead>
                   <tr>
                     <th>Date</th>
-                    <th className="px-6">Description</th>
-                    <th className="px-6">Amount</th>
-                    <th className="px-6">Status</th>
+                    <th className="px-4">Description</th>
+                    <th className="px-4">Amount</th>
+                    <th className="px-4">Status</th>
                     <th className="text-right">Invoice</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td>Jan 15, 2024</td>
-                    <td className="px-6 text-gray-600">Pro Plan - Monthly</td>
-                    <td className="px-6 font-medium">$9.00</td>
-                    <td className="px-6">
+                    <td className="px-4 text-gray-600">Pro Plan - Monthly</td>
+                    <td className="px-4 font-medium">$9.00</td>
+                    <td className="px-4">
                       <span className="badge badge-success">Paid</span>
                     </td>
                     <td className="text-right">
@@ -443,9 +443,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                   </tr>
                   <tr>
                     <td>Dec 15, 2023</td>
-                    <td className="px-6 text-gray-600">Pro Plan - Monthly</td>
-                    <td className="px-6 font-medium">$9.00</td>
-                    <td className="px-6">
+                    <td className="px-4 text-gray-600">Pro Plan - Monthly</td>
+                    <td className="px-4 font-medium">$9.00</td>
+                    <td className="px-4">
                       <span className="badge badge-success">Paid</span>
                     </td>
                     <td className="text-right">
@@ -463,16 +463,16 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
 
       {/* Password Tab */}
       {activeTab === 'password' && (
-        <div className="space-y-8">
+        <div className="space-y-5">
           {/* Change Password */}
           <div className="card animate-fadeIn">
             <div className="card-header">
               <h2 className="card-title">Change Password</h2>
             </div>
             
-            <form className="space-y-6 max-w-md">
+            <form className="space-y-4 max-w-sm">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Current Password
                 </label>
                 <input
@@ -483,7 +483,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   New Password
                 </label>
                 <input
@@ -494,7 +494,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Confirm New Password
                 </label>
                 <input
@@ -515,7 +515,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
             <div className="card-header">
               <h2 className="card-title">Data Export</h2>
               <button className="btn-secondary">
-                <Download className="w-4 h-4 mr-2" />
+                <Download className="w-3.5 h-3.5 mr-1.5" />
                 Export Data
               </button>
             </div>
@@ -525,9 +525,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                 <thead>
                   <tr>
                     <th>Export</th>
-                    <th className="px-6">Date</th>
-                    <th className="px-6">Size</th>
-                    <th className="px-6">Status</th>
+                    <th className="px-4">Date</th>
+                    <th className="px-4">Size</th>
+                    <th className="px-4">Status</th>
                     <th className="text-right">Download</th>
                   </tr>
                 </thead>
@@ -535,17 +535,17 @@ const UserProfile: React.FC<UserProfileProps> = ({ onProfileUpdate }) => {
                   {mockData.map((item) => (
                     <tr key={item.id}>
                       <td className="font-medium">{item.name}</td>
-                      <td className="px-6 text-gray-600">{item.date}</td>
-                      <td className="px-6 text-gray-600">{item.size}</td>
-                      <td className="px-6">
+                      <td className="px-4 text-gray-600">{item.date}</td>
+                      <td className="px-4 text-gray-600">{item.size}</td>
+                      <td className="px-4">
                         <span className={`badge ${getStatusBadge(item.status)}`}>
                           {item.status}
                         </span>
                       </td>
                       <td className="text-right">
                         {item.status === 'completed' ? (
-                          <button className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors duration-150">
-                            <Download className="w-4 h-4" />
+                          <button className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors duration-150">
+                            <Download className="w-3.5 h-3.5" />
                           </button>
                         ) : (
                           <span className="text-gray-400 text-sm">-</span>

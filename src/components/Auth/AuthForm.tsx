@@ -51,27 +51,27 @@ const AuthForm: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-sm w-full space-y-6">
         <div className="text-center">
-          <h2 className="mt-6 text-2xl lg:text-3xl font-semibold text-gray-900">
+          <h2 className="mt-6 text-xl lg:text-2xl font-semibold text-gray-900">
             Welcome to FlexBoard
           </h2>
-          <p className="mt-3 text-gray-600">
+          <p className="mt-2 text-sm text-gray-600">
             {isSignUp ? 'Create your account' : 'Sign in to your account'}
           </p>
         </div>
         
-        <form className="mt-8 space-y-6 bg-white p-8 lg:p-10 rounded-xl shadow-sm border border-gray-200" onSubmit={handleSubmit}>
+        <form className="mt-6 space-y-5 bg-white p-6 lg:p-7 rounded-lg shadow-sm border border-gray-200" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-4 rounded-lg text-sm flex items-start space-x-3">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-3 rounded-md text-sm flex items-start space-x-2">
               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
           
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
                 Email address
               </label>
               <input
@@ -88,7 +88,7 @@ const AuthForm: React.FC = () => {
             </div>
             
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
                 Password
               </label>
               <input
@@ -104,7 +104,7 @@ const AuthForm: React.FC = () => {
                 minLength={6}
               />
               {isSignUp && (
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-1.5 text-xs text-gray-500">
                   Password must be at least 6 characters long
                 </p>
               )}
@@ -114,7 +114,7 @@ const AuthForm: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed py-3"
+            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed py-2.5"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -141,7 +141,7 @@ const AuthForm: React.FC = () => {
 
           {!isSignUp && (
             <div className="text-center">
-              <p className="text-xs text-gray-500 mt-6">
+              <p className="text-xs text-gray-500 mt-4">
                 Having trouble signing in? Make sure you've confirmed your email address if you recently signed up.
               </p>
             </div>
