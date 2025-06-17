@@ -148,7 +148,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="content-area">
+    <div className="min-h-screen bg-gray-50">
       <DashboardHeader 
         onUserClick={handleUserIconClick}
         onAnalyticsClick={handleAnalyticsIconClick}
@@ -156,38 +156,66 @@ const Dashboard: React.FC = () => {
         isAnalyticsActive={activeCategory === 'analytics'}
       />
       
-      {/* Mobile Navigation */}
-      <div className="lg:hidden">
-        {/* Mobile Header */}
-        <div className="sticky top-14 z-30 bg-white border-b border-gray-200 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <h1 className="text-base font-semibold text-gray-900">
-              {activeCategory === 'profile' ? 'Profile' : 
-               activeCategory === 'analytics' ? 'Analytics' :
-               categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
-            </h1>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-150"
-            >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-            </button>
+      {/* Add top padding to account for fixed header */}
+      <div className="pt-14">
+        {/* Mobile Navigation */}
+        <div className="lg:hidden">
+          {/* Mobile Header */}
+          <div className="sticky top-14 z-30 bg-white border-b border-gray-200 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <h1 className="text-base font-semibold text-gray-900">
+                {activeCategory === 'profile' ? 'Profile' : 
+                 activeCategory === 'analytics' ? 'Analytics' :
+                 categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
+              </h1>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-150"
+              >
+                {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <>
+              <div 
+                className="fixed inset-0 bg-black bg-opacity-25 z-40"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <div className="fixed top-24 left-3 right-3 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
+                <div className="p-1">
+                  {categories.map((category) => (
+                    <button
+                      key={category.id}
+                      onClick={() => handleCategorySelect(category.id)}
+                      className={`sidebar-nav-item w-full ${
+                        activeCategory === category.id ? 'active' : ''
+                      }`}
+                    >
+                      <span className="text-gray-400">{category.icon}</span>
+                      <span>{category.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <>
-            <div 
-              className="fixed inset-0 bg-black bg-opacity-25 z-40"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <div className="fixed top-24 left-3 right-3 bg-white rounded-lg shadow-lg z-50 border border-gray-200">
-              <div className="p-1">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block">
+          <div className="fixed top-14 left-0 w-56 h-screen bg-white border-r border-gray-200 overflow-y-auto">
+            <div className="p-5">
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                Navigation
+              </h2>
+              <nav className="sidebar-nav">
                 {categories.map((category) => (
                   <button
                     key={category.id}
-                    onClick={() => handleCategorySelect(category.id)}
+                    onClick={() => setActiveCategory(category.id)}
                     className={`sidebar-nav-item w-full ${
                       activeCategory === category.id ? 'active' : ''
                     }`}
@@ -196,62 +224,37 @@ const Dashboard: React.FC = () => {
                     <span>{category.name}</span>
                   </button>
                 ))}
-              </div>
+              </nav>
             </div>
-          </>
-        )}
-      </div>
-
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <div className="sidebar w-56 fixed top-14 left-0 h-screen overflow-y-auto">
-          <div className="p-5">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-              Navigation
-            </h2>
-            <nav className="sidebar-nav">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
-                  className={`sidebar-nav-item w-full ${
-                    activeCategory === category.id ? 'active' : ''
-                  }`}
-                >
-                  <span className="text-gray-400">{category.icon}</span>
-                  <span>{category.name}</span>
-                </button>
-              ))}
-            </nav>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <main className="lg:ml-56">
-        <div className="max-w-7xl mx-auto px-4 py-5 lg:px-6 lg:py-6">
-          {/* Desktop Page Header */}
-          <div className="page-header hidden lg:block">
-            <h1 className="page-title">
-              {activeCategory === 'profile' ? 'Profile' : 
-               activeCategory === 'analytics' ? 'Analytics' :
-               categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
-            </h1>
-            <p className="page-subtitle">
-              {activeCategory === 'all' 
-                ? 'Overview of all your productivity tools'
-                : activeCategory === 'profile'
-                ? 'Manage your account information and preferences'
-                : activeCategory === 'analytics'
-                ? 'Track your productivity trends and insights'
-                : `Manage your ${categories.find(cat => cat.id === activeCategory)?.name.toLowerCase()}`
-              }
-            </p>
+        {/* Main Content */}
+        <main className="lg:ml-56">
+          <div className="max-w-7xl mx-auto px-4 py-5 lg:px-6 lg:py-6">
+            {/* Desktop Page Header */}
+            <div className="page-header hidden lg:block">
+              <h1 className="page-title">
+                {activeCategory === 'profile' ? 'Profile' : 
+                 activeCategory === 'analytics' ? 'Analytics' :
+                 categories.find(cat => cat.id === activeCategory)?.name || 'Dashboard'}
+              </h1>
+              <p className="page-subtitle">
+                {activeCategory === 'all' 
+                  ? 'Overview of all your productivity tools'
+                  : activeCategory === 'profile'
+                  ? 'Manage your account information and preferences'
+                  : activeCategory === 'analytics'
+                  ? 'Track your productivity trends and insights'
+                  : `Manage your ${categories.find(cat => cat.id === activeCategory)?.name.toLowerCase()}`
+                }
+              </p>
+            </div>
+            
+            {renderContent()}
           </div>
-          
-          {renderContent()}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
