@@ -92,7 +92,7 @@ const QuickLinksManager: React.FC = () => {
     const reader = new FileReader();
     
     reader.onload = (e) => {
-      const img = new Image();
+      const img = new window.Image();
       img.onload = () => {
         // Create canvas to resize image to 500x500
         const canvas = document.createElement('canvas');
