@@ -338,7 +338,7 @@
   }
 }
 
-/* FIXED: Sidebar styles with explicit text visibility */
+/* CRITICAL FIX: Sidebar styles with guaranteed text visibility */
 .sidebar {
   @apply bg-white border-r border-gray-200;
 }
@@ -347,37 +347,43 @@
   @apply space-y-1;
 }
 
-/* Base sidebar navigation item styles */
+/* FIXED: Sidebar navigation item with explicit text colors */
 .sidebar-nav-item {
   @apply flex items-center space-x-2 px-2.5 py-2 text-xs font-medium rounded-lg transition-all duration-200 hover-lift;
-  color: rgb(75 85 99); /* Explicit gray-600 color */
+  /* CRITICAL: Set explicit text color that won't be overridden */
+  color: #6b7280 !important; /* gray-500 */
 }
 
-/* Hover state for non-active items */
+/* FIXED: Hover state with explicit color */
 .sidebar-nav-item:hover:not(.active) {
   @apply bg-gray-50;
-  color: rgb(17 24 39); /* Explicit gray-900 color */
+  color: #374151 !important; /* gray-700 */
 }
 
-/* Active state with explicit colors */
+/* FIXED: Active state with explicit colors and !important */
 .sidebar-nav-item.active {
   @apply bg-blue-50 animate-scaleIn;
-  color: rgb(29 78 216) !important; /* Explicit blue-700 color with !important */
+  color: #1d4ed8 !important; /* blue-700 */
+  background-color: #eff6ff !important; /* blue-50 */
 }
 
-/* CRITICAL FIX: Force text color for all child elements in active state */
-.sidebar-nav-item.active * {
-  color: rgb(29 78 216) !important; /* Force blue-700 for all children */
+/* CRITICAL: Force all child elements to inherit the text color */
+.sidebar-nav-item span {
+  color: inherit !important;
 }
 
-/* CRITICAL FIX: Force icon color in active state */
+/* CRITICAL: Force icon colors to match text */
+.sidebar-nav-item svg {
+  color: inherit !important;
+}
+
+/* CRITICAL: Ensure active state text is always visible */
+.sidebar-nav-item.active span {
+  color: #1d4ed8 !important; /* blue-700 */
+}
+
 .sidebar-nav-item.active svg {
-  color: rgb(37 99 235) !important; /* Force blue-600 for icons */
-}
-
-/* Ensure non-active items have proper text color */
-.sidebar-nav-item:not(.active) * {
-  color: inherit;
+  color: #2563eb !important; /* blue-600 */
 }
 
 .search-input {
