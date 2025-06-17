@@ -395,7 +395,7 @@ const ChannelManager: React.FC = () => {
         </div>
       )}
 
-      {/* Floating Add Button - KEMBALI KE KANAN BAWAH */}
+      {/* Floating Add Button - TETAP DI KANAN BAWAH */}
       <button
         onClick={() => setShowAddModal(true)}
         className="fixed bottom-4 right-4 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-40 hover-lift"
@@ -404,12 +404,12 @@ const ChannelManager: React.FC = () => {
         <Plus className="w-6 h-6" />
       </button>
 
-      {/* Add/Edit Channel Modal */}
+      {/* Add/Edit Channel Modal - DIPERBAIKI POSISI TENGAH */}
       {showAddModal && (
-        <div className="modal-overlay">
-          <div className="modal-content max-h-[90vh] overflow-y-auto">
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scaleIn">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">
                   {selectedChannel ? 'Edit Channel' : 'Add New Channel'}
                 </h3>
@@ -421,10 +421,10 @@ const ChannelManager: React.FC = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Logo Upload */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
                     Channel Logo (Optional)
                   </label>
                   
@@ -455,7 +455,7 @@ const ChannelManager: React.FC = () => {
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed w-full"
                       >
                         <Upload className="w-4 h-4 mr-2" />
                         {uploading ? 'Processing...' : 'Upload Logo'}
@@ -465,22 +465,22 @@ const ChannelManager: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setFormData({ ...formData, logo_url: '' })}
-                          className="ml-2 text-sm text-red-600 hover:text-red-700"
+                          className="mt-2 text-sm text-red-600 hover:text-red-700 w-full"
                         >
-                          Remove
+                          Remove Logo
                         </button>
                       )}
                     </div>
                   </div>
                   
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 mt-2">
                     Upload a PNG or JPG image. It will be automatically resized to 200x200px.
                   </p>
                 </div>
 
                 {/* Channel Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Channel Name *
                   </label>
                   <input
@@ -495,7 +495,7 @@ const ChannelManager: React.FC = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex space-x-2 pt-2">
+                <div className="flex space-x-3 pt-4">
                   <button
                     type="submit"
                     disabled={saving || uploading || !formData.name.trim()}
