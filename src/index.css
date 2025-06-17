@@ -338,7 +338,7 @@
   }
 }
 
-/* FIXED: Compact sidebar styles with proper text visibility */
+/* FIXED: Sidebar styles with explicit text visibility */
 .sidebar {
   @apply bg-white border-r border-gray-200;
 }
@@ -347,30 +347,37 @@
   @apply space-y-1;
 }
 
+/* Base sidebar navigation item styles */
 .sidebar-nav-item {
   @apply flex items-center space-x-2 px-2.5 py-2 text-xs font-medium rounded-lg transition-all duration-200 hover-lift;
+  color: rgb(75 85 99); /* Explicit gray-600 color */
 }
 
-/* FIXED: Ensure text is always visible in active state */
+/* Hover state for non-active items */
+.sidebar-nav-item:hover:not(.active) {
+  @apply bg-gray-50;
+  color: rgb(17 24 39); /* Explicit gray-900 color */
+}
+
+/* Active state with explicit colors */
 .sidebar-nav-item.active {
-  @apply bg-blue-50 text-blue-700 animate-scaleIn;
+  @apply bg-blue-50 animate-scaleIn;
+  color: rgb(29 78 216) !important; /* Explicit blue-700 color with !important */
 }
 
-.sidebar-nav-item.active span {
-  @apply text-blue-700 !important;
+/* CRITICAL FIX: Force text color for all child elements in active state */
+.sidebar-nav-item.active * {
+  color: rgb(29 78 216) !important; /* Force blue-700 for all children */
 }
 
-.sidebar-nav-item:not(.active) {
-  @apply text-gray-600 hover:bg-gray-50 hover:text-gray-900;
+/* CRITICAL FIX: Force icon color in active state */
+.sidebar-nav-item.active svg {
+  color: rgb(37 99 235) !important; /* Force blue-600 for icons */
 }
 
-.sidebar-nav-item:not(.active) span {
-  @apply text-gray-600;
-}
-
-/* FIXED: Ensure icon colors are consistent */
-.sidebar-nav-item.active .text-gray-400 {
-  @apply text-blue-600 !important;
+/* Ensure non-active items have proper text color */
+.sidebar-nav-item:not(.active) * {
+  color: inherit;
 }
 
 .search-input {
