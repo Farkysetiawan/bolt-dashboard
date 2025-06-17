@@ -217,7 +217,7 @@ const Dashboard: React.FC = () => {
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <span className="text-gray-400">{category.icon}</span>
-                      <span>{category.name}</span>
+                      <span className="text-sm text-gray-700 font-medium">{category.name}</span>
                     </button>
                   ))}
                 </div>
@@ -244,7 +244,7 @@ const Dashboard: React.FC = () => {
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <span className="text-gray-400">{category.icon}</span>
-                    <span>{category.name}</span>
+                    <span className="text-sm text-gray-700 font-medium">{category.name}</span>
                   </button>
                 ))}
               </nav>
