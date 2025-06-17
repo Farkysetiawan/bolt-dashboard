@@ -8,8 +8,7 @@ export default defineConfig({
     // Generate service worker and manifest
     rollupOptions: {
       input: {
-        main: './index.html',
-        sw: './public/sw.js'
+        main: './index.html'
       }
     }
   },
