@@ -22,16 +22,35 @@ interface Todo {
   is_timer_active?: boolean;
 }
 
+interface PriorityForm {
+  urgency: number;
+  importance: number;
+  effort: number;
+  impact: number;
+  duration_minutes: number;
+}
+
 interface TodoListProps {
   readOnly?: boolean;
 }
 
 const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [newTodo, setNewTodo] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [priorityForm, setPriorityForm] = useState<PriorityForm>({
+    urgency: 5,
+    importance: 5,
+    effort: 5,
+    impact: 5,
+    duration_minutes: 30
+  });
   const [activeTimer, setActiveTimer] = useState<string | null>(null);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const { user } = useAuth();
@@ -49,7 +68,8 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
         .select('*')
         .eq('user_id', user.id)
         .eq('date', dateStr)
-        .order('priority_score', { ascending: false });
+        .order('priority_score', { ascending: false })
+        .limit(readOnly ? 5 : 50);
 
       if (error) throw error;
       setTodos(data || []);
@@ -58,7 +78,7 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, dateStr]);
+  }, [user?.id, dateStr, readOnly]);
 
   const checkActiveTimer = useCallback(async () => {
     if (!user?.id) return;
@@ -102,6 +122,107 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
     return () => clearInterval(interval);
   }, [activeTimer]);
 
+  const calculatePriorityScore = useCallback((form: PriorityForm): number => {
+    const { urgency, importance, effort, impact } = form;
+    const urgencyScore = urgency * 0.3;
+    const importanceScore = importance * 0.3;
+    const impactScore = impact * 0.3;
+    const effortScore = effort * 0.1;
+    const finalScore = urgencyScore + importanceScore + impactScore + effortScore;
+    const normalizedScore = Math.min(Math.max(finalScore, 0.1), 10.0);
+    return Math.round(normalizedScore * 10) / 10;
+  }, []);
+
+  const addTodo = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTodo.trim() || !user?.id || saving) return;
+
+    try {
+      setSaving(true);
+      const priorityScore = calculatePriorityScore(priorityForm);
+      
+      const { data, error } = await supabase
+        .from('todos')
+        .insert([
+          {
+            title: newTodo.trim(),
+            completed: false,
+            user_id: user.id,
+            date: dateStr,
+            urgency: priorityForm.urgency,
+            importance: priorityForm.importance,
+            effort: priorityForm.effort,
+            impact: priorityForm.impact,
+            duration_minutes: priorityForm.duration_minutes,
+            priority_score: priorityScore,
+            actual_minutes: 0,
+            is_timer_active: false
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+      setTodos(prev => [data, ...prev]);
+      setNewTodo('');
+      setShowAddModal(false);
+      setPriorityForm({
+        urgency: 5,
+        importance: 5,
+        effort: 5,
+        impact: 5,
+        duration_minutes: 30
+      });
+    } catch (error) {
+      console.error('Error adding todo:', error);
+    } finally {
+      setSaving(false);
+    }
+  }, [newTodo, user?.id, dateStr, priorityForm, calculatePriorityScore, saving]);
+
+  const updateTodo = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTodo || !newTodo.trim() || saving) return;
+
+    try {
+      setSaving(true);
+      const priorityScore = calculatePriorityScore(priorityForm);
+      
+      const { data, error } = await supabase
+        .from('todos')
+        .update({
+          title: newTodo.trim(),
+          urgency: priorityForm.urgency,
+          importance: priorityForm.importance,
+          effort: priorityForm.effort,
+          impact: priorityForm.impact,
+          duration_minutes: priorityForm.duration_minutes,
+          priority_score: priorityScore,
+        })
+        .eq('id', editingTodo.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setTodos(prev => prev.map(todo => todo.id === editingTodo.id ? data : todo));
+      setNewTodo('');
+      setEditingTodo(null);
+      setShowAddModal(false);
+      setPriorityForm({
+        urgency: 5,
+        importance: 5,
+        effort: 5,
+        impact: 5,
+        duration_minutes: 30
+      });
+    } catch (error) {
+      console.error('Error updating todo:', error);
+    } finally {
+      setSaving(false);
+    }
+  }, [editingTodo, newTodo, priorityForm, calculatePriorityScore, saving]);
+
   const toggleTodo = useCallback(async (id: string, completed: boolean) => {
     if (readOnly) return;
     
@@ -119,6 +240,20 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
       console.error('Error updating todo:', error);
     }
   }, [readOnly]);
+
+  const deleteTodo = useCallback(async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('todos')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      setTodos(prev => prev.filter(todo => todo.id !== id));
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+    }
+  }, []);
 
   const startTimer = useCallback(async (todoId: string) => {
     if (readOnly) return;
@@ -256,6 +391,32 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
 
   const goToToday = useCallback(() => {
     setSelectedDate(new Date());
+  }, []);
+
+  const openEditModal = useCallback((todo: Todo) => {
+    setEditingTodo(todo);
+    setNewTodo(todo.title);
+    setPriorityForm({
+      urgency: todo.urgency || 5,
+      importance: todo.importance || 5,
+      effort: todo.effort || 5,
+      impact: todo.impact || 5,
+      duration_minutes: todo.duration_minutes || 30
+    });
+    setShowAddModal(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setShowAddModal(false);
+    setEditingTodo(null);
+    setNewTodo('');
+    setPriorityForm({
+      urgency: 5,
+      importance: 5,
+      effort: 5,
+      impact: 5,
+      duration_minutes: 30
+    });
   }, []);
 
   const getMonthlyStats = useCallback(async () => {
@@ -405,303 +566,438 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
   }
 
   return (
-    <div className="card animate-fadeIn">
-      {/* Header */}
-      <div className="card-header">
-        <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center hover-scale">
-            <Clock className="w-3 h-3 text-white" />
+    <>
+      <div className="card animate-fadeIn">
+        {/* Header */}
+        <div className="card-header">
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center hover-scale">
+              <Clock className="w-3 h-3 text-white" />
+            </div>
+            <h2 className="card-title">
+              {readOnly ? "Today's Tasks" : "Tasks"}
+            </h2>
           </div>
-          <h2 className="card-title">
-            {readOnly ? "Today's Tasks" : "Tasks"}
-          </h2>
-        </div>
-        
-        <div className="flex items-center space-x-1">
-          {!readOnly && (
+          
+          <div className="flex items-center space-x-1">
+            {!readOnly && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="btn-icon-primary"
+                title="Add Task"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            )}
             <button
-              onClick={() => window.location.href = '/?category=todos'}
-              className="btn-icon-primary"
-              title="Manage Tasks"
+              onClick={() => setShowStats(!showStats)}
+              className={`btn-icon ${showStats ? 'btn-icon-primary' : 'btn-icon-secondary'}`}
+              title="Stats"
             >
-              <Plus className="w-4 h-4" />
+              <BarChart3 className="w-4 h-4" />
             </button>
+          </div>
+        </div>
+
+        {/* Stats Panel */}
+        {showStats && (
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-slideDown">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">
+              Performance - {format(new Date(), 'MMMM yyyy')}
+            </h3>
+            
+            <div className="grid-4 mb-3">
+              <div className="stat-card">
+                <div className="stat-value text-blue-600">{monthlyStats.totalPoints}</div>
+                <div className="stat-label">Total Points</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value text-green-600">{monthlyStats.totalCompleted}</div>
+                <div className="stat-label">Tasks Done</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value text-purple-600">{monthlyStats.averageScore}</div>
+                <div className="stat-label">Avg Score</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value text-orange-600">
+                  {monthlyStats.timeUsage > 0 ? `${monthlyStats.timeUsage}%` : 'N/A'}
+                </div>
+                <div className="stat-label">Effort Level</div>
+              </div>
+            </div>
+
+            <div className="p-2.5 bg-white rounded-lg border border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Time Spent:</span>
+                  <span className="font-medium text-gray-900">{formatMinutes(monthlyStats.totalActual)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Estimated:</span>
+                  <span className="font-medium text-gray-900">{formatMinutes(monthlyStats.totalEstimated)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Effort Level:</span>
+                  <span className="font-medium text-gray-900">{monthlyStats.usageLabel}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Date Navigation - Only show if not read-only */}
+        {!readOnly && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={() => navigateDate('prev')}
+                  className="btn-icon-secondary"
+                >
+                  <ChevronLeft className="w-3 h-3" />
+                </button>
+                
+                <button
+                  onClick={() => setShowCalendar(!showCalendar)}
+                  className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all duration-200 hover-lift"
+                >
+                  <Calendar className="w-3 h-3" />
+                  <span className="font-medium text-gray-900 text-xs">
+                    {format(selectedDate, 'EEE, MMM d')}
+                  </span>
+                </button>
+                
+                <button
+                  onClick={() => navigateDate('next')}
+                  className="btn-icon-secondary"
+                >
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+              
+              {!isToday(selectedDate) && (
+                <button
+                  onClick={goToToday}
+                  className="btn-secondary text-xs"
+                >
+                  Today
+                </button>
+              )}
+            </div>
+
+            {/* Week Calendar */}
+            {showCalendar && (
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 animate-slideDown">
+                <div className="grid grid-cols-7 gap-1">
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                    <div key={day} className="text-center text-xs font-medium text-gray-500 py-1.5">
+                      {day}
+                    </div>
+                  ))}
+                  {weekDays.map((day, index) => (
+                    <button
+                      key={day.toISOString()}
+                      onClick={() => {
+                        setSelectedDate(day);
+                        setShowCalendar(false);
+                      }}
+                      className={`p-1.5 text-xs rounded-lg transition-all duration-200 hover-lift stagger-item ${
+                        isSameDay(day, selectedDate)
+                          ? 'bg-blue-600 text-white'
+                          : isToday(day)
+                          ? 'bg-blue-50 text-blue-700 font-medium'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      {format(day, 'd')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Date Info */}
+        <div className="mb-4 p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-gray-900 text-xs">
+              {isToday(selectedDate) ? 'Today' : format(selectedDate, 'EEEE, MMMM d')}
+            </span>
+            <span className="text-xs text-gray-500">
+              {todos.length} {todos.length === 1 ? 'task' : 'tasks'}
+            </span>
+          </div>
+        </div>
+
+        {/* Todo List */}
+        <div className="space-y-2.5">
+          {todos.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 animate-fadeIn">
+              <Clock className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+              <p className="text-sm font-medium mb-1">
+                No tasks for {isToday(selectedDate) ? 'today' : format(selectedDate, 'MMM d')}
+              </p>
+              {!readOnly && (
+                <p className="text-xs">Add one above to get started!</p>
+              )}
+            </div>
+          ) : (
+            todos.slice(0, readOnly ? 5 : todos.length).map((todo, index) => (
+              <div
+                key={todo.id}
+                className={`p-3 rounded-lg border transition-all duration-200 hover-lift stagger-item ${
+                  todo.completed
+                    ? 'bg-gray-50 border-gray-200'
+                    : 'bg-white border-gray-200 hover:border-gray-300'
+                }`}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start space-x-2.5 flex-1 min-w-0">
+                    <button
+                      onClick={() => toggleTodo(todo.id, todo.completed)}
+                      disabled={readOnly}
+                      className={`flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 hover-scale ${
+                        todo.completed
+                          ? 'bg-green-600 border-green-600 text-white'
+                          : readOnly
+                          ? 'border-gray-300 cursor-default'
+                          : 'border-gray-300 hover:border-green-500'
+                      }`}
+                    >
+                      {todo.completed && <Check className="w-2.5 h-2.5" />}
+                    </button>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-medium mb-1.5 text-xs ${
+                        todo.completed
+                          ? 'text-gray-500 line-through'
+                          : 'text-gray-900'
+                      }`}>
+                        {todo.title}
+                      </h3>
+                      
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {todo.duration_minutes && (
+                          <span className="text-xs text-gray-500">
+                            Est: {formatMinutes(todo.duration_minutes)}
+                          </span>
+                        )}
+                        
+                        <span className={getStatusBadge(getTaskStatus(todo))}>
+                          {getTaskStatus(todo)}
+                        </span>
+                        
+                        {todo.priority_score && (
+                          <span className={`badge ${getPriorityBadge(todo.priority_score)}`}>
+                            {getPriorityLabel(todo.priority_score)} ({todo.priority_score.toFixed(1)})
+                          </span>
+                        )}
+                      </div>
+                      
+                      {activeTimer === todo.id && (
+                        <div className="mt-1.5 text-blue-600 font-medium text-xs animate-pulse">
+                          ⏱️ {formatTime(timerSeconds)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons - Only show if not read-only */}
+                  {!readOnly && (
+                    <div className="flex items-center space-x-0.5 flex-shrink-0">
+                      {!todo.completed && (
+                        <>
+                          {activeTimer === todo.id ? (
+                            <>
+                              <button
+                                onClick={() => pauseTimer(todo.id)}
+                                className="p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-200 hover-scale"
+                                title="Pause timer"
+                              >
+                                <Pause className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => finishTask(todo.id)}
+                                className="p-1.5 text-green-500 hover:bg-green-50 rounded-lg transition-all duration-200 hover-scale"
+                                title="Finish task"
+                              >
+                                <Square className="w-3 h-3" />
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => startTimer(todo.id)}
+                              className="p-1.5 text-green-500 hover:bg-green-50 rounded-lg transition-all duration-200 hover-scale"
+                              title="Start timer"
+                            >
+                              <Play className="w-3 h-3" />
+                            </button>
+                          )}
+                        </>
+                      )}
+                      
+                      <button
+                        onClick={() => openEditModal(todo)}
+                        className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200 hover-scale"
+                        title="Edit task"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                      </button>
+                      
+                      <button
+                        onClick={() => deleteTodo(todo.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 hover-scale"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
           )}
-          <button
-            onClick={() => setShowStats(!showStats)}
-            className={`btn-icon ${showStats ? 'btn-icon-primary' : 'btn-icon-secondary'}`}
-            title="Stats"
-          >
-            <BarChart3 className="w-4 h-4" />
-          </button>
+          
+          {/* Show more link for read-only mode */}
+          {readOnly && todos.length > 5 && (
+            <div className="text-center py-2">
+              <button 
+                onClick={() => window.location.href = '/?category=todos'}
+                className="text-blue-600 hover:text-blue-700 text-xs"
+              >
+                View all {todos.length} tasks →
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Stats Panel */}
-      {showStats && (
-        <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-slideDown">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">
-            Performance - {format(new Date(), 'MMMM yyyy')}
-          </h3>
-          
-          <div className="grid-4 mb-3">
-            <div className="stat-card">
-              <div className="stat-value text-blue-600">{monthlyStats.totalPoints}</div>
-              <div className="stat-label">Total Points</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value text-green-600">{monthlyStats.totalCompleted}</div>
-              <div className="stat-label">Tasks Done</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value text-purple-600">{monthlyStats.averageScore}</div>
-              <div className="stat-label">Avg Score</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value text-orange-600">
-                {monthlyStats.timeUsage > 0 ? `${monthlyStats.timeUsage}%` : 'N/A'}
+      {/* Add/Edit Task Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-3 z-50 modal-overlay">
+          <div className="modal-content max-h-[90vh] overflow-y-auto border border-gray-200">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  {editingTodo ? 'Edit Task' : 'Add New Task'}
+                </h3>
+                <button
+                  onClick={closeModal}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-all duration-200 hover-scale"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <div className="stat-label">Effort Level</div>
-            </div>
-          </div>
 
-          <div className="p-2.5 bg-white rounded-lg border border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Time Spent:</span>
-                <span className="font-medium text-gray-900">{formatMinutes(monthlyStats.totalActual)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Estimated:</span>
-                <span className="font-medium text-gray-900">{formatMinutes(monthlyStats.totalEstimated)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Effort Level:</span>
-                <span className="font-medium text-gray-900">{monthlyStats.usageLabel}</span>
-              </div>
+              <form onSubmit={editingTodo ? updateTodo : addTodo} className="space-y-3">
+                {/* Task Name */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Task Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newTodo}
+                    onChange={(e) => setNewTodo(e.target.value)}
+                    placeholder="Enter task name..."
+                    className="input"
+                    required
+                    disabled={saving}
+                  />
+                </div>
+
+                {/* Priority Settings */}
+                <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <h4 className="font-medium text-gray-900 text-xs">Priority & Duration</h4>
+                  
+                  {[
+                    { key: 'urgency', label: 'Urgency' },
+                    { key: 'importance', label: 'Importance' },
+                    { key: 'effort', label: 'Effort' },
+                    { key: 'impact', label: 'Impact' }
+                  ].map(({ key, label }) => (
+                    <div key={key}>
+                      <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                        {label}
+                      </label>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        step="1"
+                        value={priorityForm[key as keyof PriorityForm]}
+                        onChange={(e) => setPriorityForm({...priorityForm, [key]: parseInt(e.target.value)})}
+                        className="w-full"
+                        disabled={saving}
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Low</span>
+                        <span className="font-medium">{priorityForm[key as keyof PriorityForm]}</span>
+                        <span>High</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Duration */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                      Estimated Duration
+                    </label>
+                    <input
+                      type="range"
+                      min="5"
+                      max="480"
+                      step="5"
+                      value={priorityForm.duration_minutes}
+                      onChange={(e) => setPriorityForm({...priorityForm, duration_minutes: parseInt(e.target.value)})}
+                      className="w-full"
+                      disabled={saving}
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>5m</span>
+                      <span className="font-medium">{formatMinutes(priorityForm.duration_minutes)}</span>
+                      <span>8h</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Priority Score */}
+                <div className="p-2.5 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-blue-700">Priority Score:</span>
+                    <span className="text-sm font-semibold text-blue-600">
+                      {calculatePriorityScore(priorityForm).toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex space-x-2 pt-2">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {saving ? 'Saving...' : editingTodo ? 'Update Task' : 'Add Task'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="btn-secondary"
+                    disabled={saving}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       )}
-
-      {/* Date Navigation */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-1">
-            <button
-              onClick={() => navigateDate('prev')}
-              className="btn-icon-secondary"
-            >
-              <ChevronLeft className="w-3 h-3" />
-            </button>
-            
-            <button
-              onClick={() => setShowCalendar(!showCalendar)}
-              className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all duration-200 hover-lift"
-            >
-              <Calendar className="w-3 h-3" />
-              <span className="font-medium text-gray-900 text-xs">
-                {format(selectedDate, 'EEE, MMM d')}
-              </span>
-            </button>
-            
-            <button
-              onClick={() => navigateDate('next')}
-              className="btn-icon-secondary"
-            >
-              <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
-          
-          {!isToday(selectedDate) && (
-            <button
-              onClick={goToToday}
-              className="btn-secondary text-xs"
-            >
-              Today
-            </button>
-          )}
-        </div>
-
-        {/* Week Calendar */}
-        {showCalendar && (
-          <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 animate-slideDown">
-            <div className="grid grid-cols-7 gap-1">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                <div key={day} className="text-center text-xs font-medium text-gray-500 py-1.5">
-                  {day}
-                </div>
-              ))}
-              {weekDays.map((day, index) => (
-                <button
-                  key={day.toISOString()}
-                  onClick={() => {
-                    setSelectedDate(day);
-                    setShowCalendar(false);
-                  }}
-                  className={`p-1.5 text-xs rounded-lg transition-all duration-200 hover-lift stagger-item ${
-                    isSameDay(day, selectedDate)
-                      ? 'bg-blue-600 text-white'
-                      : isToday(day)
-                      ? 'bg-blue-50 text-blue-700 font-medium'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  {format(day, 'd')}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Date Info */}
-      <div className="mb-4 p-2.5 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="flex items-center justify-between">
-          <span className="font-medium text-gray-900 text-xs">
-            {isToday(selectedDate) ? 'Today' : format(selectedDate, 'EEEE, MMMM d')}
-          </span>
-          <span className="text-xs text-gray-500">
-            {todos.length} {todos.length === 1 ? 'task' : 'tasks'}
-          </span>
-        </div>
-      </div>
-
-      {/* Todo List */}
-      <div className="space-y-2.5">
-        {todos.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 animate-fadeIn">
-            <Clock className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-            <p className="text-sm font-medium mb-1">
-              No tasks for {isToday(selectedDate) ? 'today' : format(selectedDate, 'MMM d')}
-            </p>
-            {!readOnly && (
-              <p className="text-xs">
-                <button 
-                  onClick={() => window.location.href = '/?category=todos'}
-                  className="text-blue-600 hover:text-blue-700"
-                >
-                  Add one here
-                </button>
-              </p>
-            )}
-          </div>
-        ) : (
-          todos.slice(0, readOnly ? 5 : todos.length).map((todo, index) => (
-            <div
-              key={todo.id}
-              className={`p-3 rounded-lg border transition-all duration-200 hover-lift stagger-item ${
-                todo.completed
-                  ? 'bg-gray-50 border-gray-200'
-                  : 'bg-white border-gray-200 hover:border-gray-300'
-              }`}
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-start space-x-2.5 flex-1 min-w-0">
-                  <button
-                    onClick={() => toggleTodo(todo.id, todo.completed)}
-                    disabled={readOnly}
-                    className={`flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-all duration-200 hover-scale ${
-                      todo.completed
-                        ? 'bg-green-600 border-green-600 text-white'
-                        : readOnly
-                        ? 'border-gray-300 cursor-default'
-                        : 'border-gray-300 hover:border-green-500'
-                    }`}
-                  >
-                    {todo.completed && <Check className="w-2.5 h-2.5" />}
-                  </button>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className={`font-medium mb-1.5 text-xs ${
-                      todo.completed
-                        ? 'text-gray-500 line-through'
-                        : 'text-gray-900'
-                    }`}>
-                      {todo.title}
-                    </h3>
-                    
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {todo.duration_minutes && (
-                        <span className="text-xs text-gray-500">
-                          Est: {formatMinutes(todo.duration_minutes)}
-                        </span>
-                      )}
-                      
-                      <span className={getStatusBadge(getTaskStatus(todo))}>
-                        {getTaskStatus(todo)}
-                      </span>
-                      
-                      {todo.priority_score && (
-                        <span className={`badge ${getPriorityBadge(todo.priority_score)}`}>
-                          {getPriorityLabel(todo.priority_score)} ({todo.priority_score.toFixed(1)})
-                        </span>
-                      )}
-                    </div>
-                    
-                    {activeTimer === todo.id && (
-                      <div className="mt-1.5 text-blue-600 font-medium text-xs animate-pulse">
-                        ⏱️ {formatTime(timerSeconds)}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons - Only show if not read-only */}
-                {!readOnly && (
-                  <div className="flex items-center space-x-0.5 flex-shrink-0">
-                    {!todo.completed && (
-                      <>
-                        {activeTimer === todo.id ? (
-                          <>
-                            <button
-                              onClick={() => pauseTimer(todo.id)}
-                              className="p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-200 hover-scale"
-                              title="Pause timer"
-                            >
-                              <Pause className="w-3 h-3" />
-                            </button>
-                            <button
-                              onClick={() => finishTask(todo.id)}
-                              className="p-1.5 text-green-500 hover:bg-green-50 rounded-lg transition-all duration-200 hover-scale"
-                              title="Finish task"
-                            >
-                              <Square className="w-3 h-3" />
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            onClick={() => startTimer(todo.id)}
-                            className="p-1.5 text-green-500 hover:bg-green-50 rounded-lg transition-all duration-200 hover-scale"
-                            title="Start timer"
-                          >
-                            <Play className="w-3 h-3" />
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))
-        )}
-        
-        {/* Show more link for read-only mode */}
-        {readOnly && todos.length > 5 && (
-          <div className="text-center py-2">
-            <button 
-              onClick={() => window.location.href = '/?category=todos'}
-              className="text-blue-600 hover:text-blue-700 text-xs"
-            >
-              View all {todos.length} tasks →
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 

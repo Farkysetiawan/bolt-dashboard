@@ -393,7 +393,7 @@ div.sidebar nav a,
   flex-direction: row !important; /* HORIZONTAL - ICON DAN TEXT SAMPING-SAMPINGAN */
   align-items: center !important;
   justify-content: flex-start !important;
-  gap: 8px !important; /* JARAK ICON DAN TEXT - DEMPET TAPI ADA SEDIKIT SPACE */
+  gap: 6px !important; /* JARAK ICON DAN TEXT - LEBIH DEMPET */
   
   /* FORCE SPACING - COMPACT DENGAN PADDING */
   padding: 8px 12px !important; /* PADDING YANG PAS */
