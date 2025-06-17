@@ -198,15 +198,15 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Menu */}
+          {/* Mobile Menu - FIXED STRUCTURE */}
           {mobileMenuOpen && (
             <>
               <div 
                 className="fixed inset-0 bg-black bg-opacity-25 z-40 animate-fadeIn"
                 onClick={() => setMobileMenuOpen(false)}
               />
-              <div className="fixed top-20 left-2 right-2 bg-white rounded-xl shadow-lg z-50 border border-gray-200 animate-scaleIn">
-                <div className="p-1">
+              <div className="fixed top-20 left-2 right-2 bg-white rounded-xl shadow-lg z-50 border border-gray-200 animate-scaleIn sidebar">
+                <div className="p-1 sidebar-nav">
                   {categories.map((category, index) => (
                     <button
                       key={category.id}
@@ -216,10 +216,8 @@ const Dashboard: React.FC = () => {
                       }`}
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
-                      <span className="flex items-center gap-2">
-                      <span className="text-gray-400">{category.icon}</span>
-                      <span className="text-gray-800 text-sm">{category.name}</span>
-                      </span>
+                      {category.icon}
+                      <span>{category.name}</span>
                     </button>
                   ))}
                 </div>
@@ -228,7 +226,7 @@ const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Desktop Sidebar */}
+        {/* Desktop Sidebar - FIXED STRUCTURE */}
         <div className="hidden lg:block">
           <div className="fixed top-12 left-0 w-52 h-screen bg-white border-r border-gray-200 overflow-y-auto animate-slideIn sidebar">
             <div className="p-4">
@@ -245,10 +243,8 @@ const Dashboard: React.FC = () => {
                     }`}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <span className="flex items-center gap-2">
-                    <span className="text-gray-400">{category.icon}</span>
-                    <span className="text-gray-800 text-sm">{category.name}</span>
-                    </span>
+                    {category.icon}
+                    <span>{category.name}</span>
                   </button>
                 ))}
               </nav>
