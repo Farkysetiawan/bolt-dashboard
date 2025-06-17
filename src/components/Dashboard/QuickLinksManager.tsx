@@ -10,7 +10,7 @@ interface QuickLink {
   icon?: string;
   user_id: string;
   order_index?: number;
-  open_in_app?: boolean; // New field for app integration
+  open_in_app?: boolean;
 }
 
 const QuickLinksManager: React.FC = () => {
@@ -111,7 +111,7 @@ const QuickLinksManager: React.FC = () => {
     const reader = new FileReader();
     
     reader.onload = (e) => {
-      const img = new window.Image();
+      const img = document.createElement('img');
       img.onload = () => {
         // Create canvas to resize image to 500x500
         const canvas = document.createElement('canvas');
@@ -214,9 +214,11 @@ const QuickLinksManager: React.FC = () => {
 
   const handleEdit = (link: QuickLink) => {
     setEditingLink(link);
+    // Remove https:// for editing to show clean URL
+    const cleanUrl = link.url.replace(/^https?:\/\//, '');
     setFormData({
       title: link.title,
-      url: link.url,
+      url: cleanUrl,
       icon: link.icon || '',
       open_in_app: link.open_in_app || false
     });
@@ -337,8 +339,8 @@ const QuickLinksManager: React.FC = () => {
 
         {/* Add/Edit Form */}
         {showAddForm && (
-          <div className="mb-6 p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
-            <h3 className="font-medium text-gray-900 dark:text-slate-100 mb-4">
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 className="font-medium text-gray-900 mb-4">
               {editingLink ? 'Edit Link' : 'Add New Link'}
             </h3>
             
@@ -352,7 +354,7 @@ const QuickLinksManager: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Logo Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Logo (PNG, 500x500px recommended)
                 </label>
                 
@@ -412,7 +414,7 @@ const QuickLinksManager: React.FC = () => {
 
               {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Title
                 </label>
                 <input
@@ -429,7 +431,7 @@ const QuickLinksManager: React.FC = () => {
 
               {/* URL */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   URL
                 </label>
                 <div className="relative">
@@ -438,7 +440,7 @@ const QuickLinksManager: React.FC = () => {
                   </span>
                   <input
                     type="text"
-                    value={formData.url.replace(/^https?:\/\//, '')}
+                    value={formData.url}
                     onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                     placeholder="example.com"
                     className={`input pl-16 ${errors.url ? 'border-red-300 focus:ring-red-500' : ''}`}
@@ -463,7 +465,7 @@ const QuickLinksManager: React.FC = () => {
                   />
                   <div className="flex items-center space-x-2">
                     <Smartphone className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                    <span className="text-sm font-medium text-gray-700">
                       Try to open in app (if available)
                     </span>
                   </div>
@@ -475,10 +477,10 @@ const QuickLinksManager: React.FC = () => {
 
               {/* Preview */}
               {formData.title && formData.url && (
-                <div className="p-3 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-md">
-                  <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Preview:</p>
-                  <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-slate-800 rounded-md">
-                    <div className="w-8 h-8 flex items-center justify-center text-gray-600 dark:text-slate-400 bg-white rounded overflow-hidden">
+                <div className="p-3 bg-white border border-gray-200 rounded-md">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
+                  <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded-md">
+                    <div className="w-8 h-8 flex items-center justify-center text-gray-600 bg-white rounded overflow-hidden">
                       {formData.icon && isValidImageUrl(formData.icon) ? (
                         <img
                           src={formData.icon}
@@ -490,8 +492,8 @@ const QuickLinksManager: React.FC = () => {
                       )}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{formData.title}</p>
-                      <p className="text-xs text-gray-500 dark:text-slate-400">{getDomainFromUrl(normalizeUrl(formData.url))}</p>
+                      <p className="text-sm font-medium text-gray-900">{formData.title}</p>
+                      <p className="text-xs text-gray-500">{getDomainFromUrl(normalizeUrl(formData.url))}</p>
                     </div>
                     <div className="flex items-center space-x-1">
                       {formData.open_in_app ? (
@@ -529,8 +531,8 @@ const QuickLinksManager: React.FC = () => {
         {/* Links List */}
         <div className="space-y-3">
           {links.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-slate-400">
-              <Link className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-slate-600" />
+            <div className="text-center py-8 text-gray-500">
+              <Link className="w-12 h-12 mx-auto mb-4 text-gray-300" />
               <p>No quick links yet. Add some above!</p>
             </div>
           ) : (
@@ -540,10 +542,10 @@ const QuickLinksManager: React.FC = () => {
               return (
                 <div
                   key={link.id}
-                  className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:border-gray-300 dark:hover:border-slate-600 transition-colors"
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
                 >
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    <div className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-slate-800 rounded-lg overflow-hidden">
+                    <div className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden">
                       {hasCustomLogo ? (
                         <img
                           src={link.icon}
@@ -555,11 +557,11 @@ const QuickLinksManager: React.FC = () => {
                           }}
                         />
                       ) : null}
-                      <ExternalLink className={`w-5 h-5 text-gray-600 dark:text-slate-400 ${hasCustomLogo ? 'hidden' : ''}`} />
+                      <ExternalLink className={`w-5 h-5 text-gray-600 ${hasCustomLogo ? 'hidden' : ''}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2">
-                        <h3 className="font-medium text-gray-900 dark:text-slate-100 truncate">
+                        <h3 className="font-medium text-gray-900 truncate">
                           {link.title}
                         </h3>
                         {link.open_in_app ? (
@@ -568,7 +570,7 @@ const QuickLinksManager: React.FC = () => {
                           <Globe className="w-4 h-4 text-gray-600 flex-shrink-0" title="Opens in browser" />
                         )}
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-slate-400 truncate">
+                      <p className="text-sm text-gray-500 truncate">
                         {domain}
                       </p>
                     </div>
@@ -600,7 +602,7 @@ const QuickLinksManager: React.FC = () => {
                       href={link.open_in_app ? getAppUrl(link.url, domain) : link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                      className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                       title={`Visit ${link.open_in_app ? 'in app' : 'in browser'}`}
                     >
                       {link.open_in_app ? (
@@ -613,7 +615,7 @@ const QuickLinksManager: React.FC = () => {
                     {/* Edit */}
                     <button
                       onClick={() => handleEdit(link)}
-                      className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                      className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                       title="Edit link"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -622,7 +624,7 @@ const QuickLinksManager: React.FC = () => {
                     {/* Delete */}
                     <button
                       onClick={() => handleDelete(link.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete link"
                     >
                       <X className="w-4 h-4" />
