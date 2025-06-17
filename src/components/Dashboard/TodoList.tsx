@@ -549,17 +549,21 @@ const TodoList: React.FC = () => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowAddModal(true)}
-              className="btn-primary"
+              className="flex items-center justify-center w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-150"
+              title="Add Task"
             >
-              <Plus className="w-3.5 h-3.5 mr-1.5" />
-              Add Task
+              <Plus className="w-4 h-4" />
             </button>
             <button
               onClick={() => setShowStats(!showStats)}
-              className={showStats ? 'btn-primary' : 'btn-secondary'}
+              className={`flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-150 ${
+                showStats 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200'
+              }`}
+              title="Stats"
             >
-              <BarChart3 className="w-3.5 h-3.5 mr-1.5" />
-              Stats
+              <BarChart3 className="w-4 h-4" />
             </button>
           </div>
         </div>
