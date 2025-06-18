@@ -476,11 +476,11 @@ const ChannelManager: React.FC = () => {
 
   const getStatusBadge = (status: ContentItem['status']) => {
     switch (status) {
-      case 'planned': return 'bg-gray-100 text-gray-700 border border-gray-200';
-      case 'watching': return 'bg-blue-100 text-blue-700 border border-blue-200';
-      case 'completed': return 'bg-orange-100 text-orange-700 border border-orange-200';
-      case 'published': return 'bg-green-100 text-green-700 border border-green-200';
-      default: return 'bg-gray-100 text-gray-700 border border-gray-200';
+      case 'planned': return 'badge badge-gray';
+      case 'watching': return 'badge badge-info';
+      case 'completed': return 'badge bg-orange-100 text-orange-700 border border-orange-200';
+      case 'published': return 'badge badge-success';
+      default: return 'badge badge-gray';
     }
   };
 
@@ -666,7 +666,7 @@ const ChannelManager: React.FC = () => {
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">{selectedContent.title}</h4>
                 <div className="flex items-center space-x-3 text-sm text-gray-600">
-                  <span className={`badge ${getStatusBadge(selectedContent.status)}`}>
+                  <span className={getStatusBadge(selectedContent.status)}>
                     {getStatusLabel(selectedContent.status)}
                   </span>
                   <span>Type: {selectedContent.type}</span>
@@ -791,7 +791,7 @@ const ChannelManager: React.FC = () => {
           </div>
         </div>
 
-        {/* 🎯 MAIN CONTENT SECTION - OPTIMIZED HORIZONTAL CARDS */}
+        {/* 🎯 MAIN CONTENT SECTION - VERTICAL LIST LIKE TASKS */}
         <div className="card animate-fadeIn">
           <div className="card-header">
             <h3 className="card-title">Channel Content</h3>
@@ -815,165 +815,141 @@ const ChannelManager: React.FC = () => {
             </div>
           </div>
           
-          {contentLoading ? (
-            /* Loading State - Horizontal Cards */
-            <div className="overflow-x-auto pb-4">
-              <div className="flex space-x-4 min-w-max">
+          {/* 📋 VERTICAL LIST CONTENT - LIKE TASKS */}
+          <div className="space-y-2.5">
+            {contentLoading ? (
+              /* Loading State */
+              <div className="animate-pulse space-y-3">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="w-72 h-80 bg-gray-100 rounded-xl animate-pulse flex-shrink-0"></div>
+                  <div key={i} className="h-16 bg-gray-100 rounded-lg"></div>
                 ))}
               </div>
-            </div>
-          ) : channelContent.length === 0 ? (
-            /* Empty State */
-            <div className="text-center py-16 text-gray-500">
-              <Play className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No content added yet</h3>
-              <p className="text-sm mb-6">Start creating content for your channel</p>
-              <div className="flex items-center justify-center space-x-3">
-                <button
-                  onClick={addSampleContent}
-                  className="btn-secondary"
-                >
-                  Add Sample Content
-                </button>
-                <button
-                  onClick={openAddContentForm}
-                  className="btn-primary"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add your first content
-                </button>
+            ) : channelContent.length === 0 ? (
+              /* Empty State */
+              <div className="text-center py-8 text-gray-500 animate-fadeIn">
+                <Play className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <p className="text-sm mb-2">No content added yet</p>
+                <div className="flex items-center justify-center space-x-3">
+                  <button
+                    onClick={addSampleContent}
+                    className="btn-secondary text-xs"
+                  >
+                    Add Sample Content
+                  </button>
+                  <button
+                    onClick={openAddContentForm}
+                    className="text-blue-600 hover:text-blue-700 text-xs"
+                  >
+                    Add your first content
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            /* 🚀 OPTIMIZED HORIZONTAL SCROLLABLE CONTAINER */
-            <div className="overflow-x-auto pb-4 scrollbar-hide">
-              <div className="flex space-x-4 min-w-max px-1">
-                {channelContent.map((item, index) => {
-                  const contentData = parseContentNotes(item.notes);
-                  const sceneCount = contentData?.totalScene || 0;
-                  const hasVoiceOver = contentData?.useVoiceOver || false;
-                  
-                  return (
-                    /* 🃏 OPTIMIZED CONTENT CARD - BETTER PROPORTIONS */
-                    <div
-                      key={item.id}
-                      className="w-72 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 hover-lift flex-shrink-0 flex flex-col stagger-item"
-                      style={{ 
-                        animationDelay: `${index * 0.1}s`
-                      }}
-                    >
-                      {/* 📋 HEADER SECTION - COMPACT */}
-                      <div className="p-4 border-b border-gray-100">
-                        <div className="flex items-center space-x-3 mb-2">
-                          {/* Channel Logo */}
-                          <div className="w-6 h-6 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden flex-shrink-0">
-                            {selectedChannel.logo_url && isValidImageUrl(selectedChannel.logo_url) ? (
-                              <img
-                                src={selectedChannel.logo_url}
-                                alt={selectedChannel.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <Play className="w-3 h-3 text-gray-400" />
-                            )}
-                          </div>
-                          
-                          {/* Content Type Icon */}
-                          <div className="text-gray-600">
-                            {getTypeIcon(item.type)}
-                          </div>
-                          
-                          {/* Title */}
-                          <h4 className="font-semibold text-gray-900 text-sm leading-tight flex-1 min-w-0 line-clamp-2" title={item.title}>
-                            {item.title}
-                          </h4>
+            ) : (
+              /* 🚀 VERTICAL LIST - EXACTLY LIKE TASKS */
+              channelContent.map((item, index) => {
+                const contentData = parseContentNotes(item.notes);
+                const sceneCount = contentData?.totalScene || 0;
+                const hasVoiceOver = contentData?.useVoiceOver || false;
+                
+                return (
+                  <div
+                    key={item.id}
+                    className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 hover-lift stagger-item"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-start space-x-2.5 min-w-0 flex-1">
+                        {/* Type Icon */}
+                        <div className="text-gray-600 mt-0.5">
+                          {getTypeIcon(item.type)}
                         </div>
                         
-                        {/* Description */}
-                        {contentData?.description && (
-                          <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mt-2">
-                            {contentData.description}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* 🏷️ CONTENT SECTION - COMPACT */}
-                      <div className="p-4 flex-1 flex flex-col justify-between">
-                        {/* Scene & Voice Over Badges */}
-                        <div className="space-y-3">
-                          <div className="flex items-center space-x-2 flex-wrap gap-1">
+                        <div className="flex-1 min-w-0">
+                          {/* Title */}
+                          <h4 className="font-medium text-gray-900 truncate text-xs mb-1">
+                            {item.title}
+                          </h4>
+                          
+                          {/* Description */}
+                          {contentData?.description && (
+                            <p className="text-xs text-gray-500 mb-1.5 line-clamp-2">
+                              {contentData.description}
+                            </p>
+                          )}
+                          
+                          {/* Meta Info */}
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {/* Status Badge */}
+                            <span className={getStatusBadge(item.status)}>
+                              {getStatusLabel(item.status)}
+                            </span>
+                            
+                            {/* Scene Count */}
                             {sceneCount > 0 && (
-                              <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full font-medium">
+                              <span className="text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded-full">
                                 {sceneCount} scene{sceneCount > 1 ? 's' : ''}
                               </span>
                             )}
+                            
+                            {/* Voice Over Badge */}
                             {hasVoiceOver && (
-                              <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full font-medium">
+                              <span className="text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
                                 ✅ Voice Over
                               </span>
                             )}
-                          </div>
-
-                          {/* Created Date */}
-                          <div className="text-xs text-gray-500">
-                            Created: {new Date(item.created_at).toLocaleDateString()}
-                          </div>
-                        </div>
-
-                        {/* ⚡ BOTTOM SECTION - Status & Actions */}
-                        <div className="space-y-3 mt-4">
-                          {/* Status Dropdown */}
-                          <div className="relative">
-                            <select
-                              value={item.status}
-                              onChange={(e) => updateContentStatus(item.id, e.target.value as ContentItem['status'])}
-                              className={`w-full text-xs font-medium px-3 py-2 rounded-lg border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${getStatusBadge(item.status)}`}
-                            >
-                              <option value="planned">Planned</option>
-                              <option value="watching">On Progress</option>
-                              <option value="completed">Ready to Post</option>
-                              <option value="published">Published</option>
-                            </select>
-                            <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
-                          </div>
-                          
-                          {/* 🔥 ACTION BUTTONS - HORIZONTAL LAYOUT (MENYAMPING) */}
-                          <div className="flex items-center space-x-1 pt-2 border-t border-gray-100">
-                            <button
-                              onClick={() => openEditContentForm(item)}
-                              className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 text-xs font-medium"
-                              title="Edit"
-                            >
-                              <Edit2 className="w-3 h-3" />
-                              <span>Edit</span>
-                            </button>
-                            <button
-                              onClick={() => openContentDetail(item)}
-                              className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 text-xs font-medium"
-                              title="View"
-                            >
-                              <Eye className="w-3 h-3" />
-                              <span>View</span>
-                            </button>
-                            <button
-                              onClick={() => deleteContent(item.id)}
-                              className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 text-xs font-medium"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                              <span>Delete</span>
-                            </button>
+                            
+                            {/* Created Date */}
+                            <span className="text-xs text-gray-500">
+                              {new Date(item.created_at).toLocaleDateString()}
+                            </span>
                           </div>
                         </div>
                       </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center space-x-0.5 flex-shrink-0">
+                        <button
+                          onClick={() => openContentDetail(item)}
+                          className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200 hover-scale"
+                          title="View Details"
+                        >
+                          <Eye className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => openEditContentForm(item)}
+                          className="p-1.5 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-all duration-200 hover-scale"
+                          title="Edit"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => deleteContent(item.id)}
+                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 hover-scale"
+                          title="Delete"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+
+                    {/* Status Dropdown */}
+                    <div className="mt-2">
+                      <select
+                        value={item.status}
+                        onChange={(e) => updateContentStatus(item.id, e.target.value as ContentItem['status'])}
+                        className="text-xs px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                      >
+                        <option value="planned">Planned</option>
+                        <option value="watching">On Progress</option>
+                        <option value="completed">Ready to Post</option>
+                        <option value="published">Published</option>
+                      </select>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
 
         {/* Channel Statistics */}
