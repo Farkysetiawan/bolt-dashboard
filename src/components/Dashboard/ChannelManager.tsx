@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Plus, X, Upload, Image, Settings, Edit2, Trash2, ArrowLeft, BookOpen, Video, Headphones, FileText, Link, Calendar, Clock, Star, Tag, Eye, MoreVertical } from 'lucide-react';
+import { Play, Plus, X, Upload, Image, Settings, Edit2, Trash2, ArrowLeft, BookOpen, Video, Headphones, FileText, Link, Calendar, Clock, Star, Tag, Eye, MoreVertical, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import AddContentForm from './AddContentForm';
@@ -16,7 +16,7 @@ interface ContentItem {
   id: string;
   title: string;
   type: 'video' | 'article' | 'book' | 'podcast' | 'course' | 'tutorial' | 'documentary' | 'webinar';
-  status: 'planned' | 'watching' | 'completed';
+  status: 'planned' | 'watching' | 'completed' | 'published';
   progress: number;
   user_id: string;
   channel_id?: string;
@@ -476,19 +476,31 @@ const ChannelManager: React.FC = () => {
 
   const getStatusBadge = (status: ContentItem['status']) => {
     switch (status) {
-      case 'completed': return 'badge badge-success';
-      case 'watching': return 'badge badge-warning';
-      case 'planned': return 'badge badge-gray';
-      default: return 'badge badge-gray';
+      case 'planned': return 'bg-gray-100 text-gray-700 border border-gray-200';
+      case 'watching': return 'bg-blue-100 text-blue-700 border border-blue-200';
+      case 'completed': return 'bg-green-100 text-green-700 border border-green-200';
+      case 'published': return 'bg-purple-100 text-purple-700 border border-purple-200';
+      default: return 'bg-gray-100 text-gray-700 border border-gray-200';
     }
   };
 
   const getStatusLabel = (status: ContentItem['status']) => {
     switch (status) {
-      case 'completed': return 'Completed';
-      case 'watching': return 'In Progress';
       case 'planned': return 'Planned';
+      case 'watching': return 'On Progress';
+      case 'completed': return 'Ready to Post';
+      case 'published': return 'Published';
       default: return 'Planned';
+    }
+  };
+
+  const getTypeIcon = (type: ContentItem['type']) => {
+    switch (type) {
+      case 'video': return <Video className="w-4 h-4" />;
+      case 'article': return <FileText className="w-4 h-4" />;
+      case 'book': return <BookOpen className="w-4 h-4" />;
+      case 'podcast': return <Headphones className="w-4 h-4" />;
+      default: return <FileText className="w-4 h-4" />;
     }
   };
 
@@ -503,11 +515,12 @@ const ChannelManager: React.FC = () => {
 
   const getChannelStats = () => {
     const total = channelContent.length;
-    const completed = channelContent.filter(item => item.status === 'completed').length;
-    const watching = channelContent.filter(item => item.status === 'watching').length;
     const planned = channelContent.filter(item => item.status === 'planned').length;
+    const watching = channelContent.filter(item => item.status === 'watching').length;
+    const completed = channelContent.filter(item => item.status === 'completed').length;
+    const published = channelContent.filter(item => item.status === 'published').length;
     
-    return { total, completed, watching, planned };
+    return { total, planned, watching, completed, published };
   };
 
   if (loading) {
@@ -585,7 +598,7 @@ const ChannelManager: React.FC = () => {
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">{selectedContent.title}</h4>
                 <div className="flex items-center space-x-3 text-sm text-gray-600">
-                  <span className={getStatusBadge(selectedContent.status)}>
+                  <span className={`badge ${getStatusBadge(selectedContent.status)}`}>
                     {getStatusLabel(selectedContent.status)}
                   </span>
                   <span>Type: {selectedContent.type}</span>
@@ -718,30 +731,32 @@ const ChannelManager: React.FC = () => {
               onClick={openAddContentForm}
               className="btn-primary"
             >
-              <Plus className="w-3 h-3 mr-1.5" />
+              <Plus className="w-4 h-4 mr-2" />
               Add Content
             </button>
           </div>
           
           {contentLoading ? (
-            <div className="animate-pulse space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-20 bg-gray-100 rounded-lg"></div>
+            <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-48 bg-gray-100 rounded-lg"></div>
               ))}
             </div>
           ) : channelContent.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <Play className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-              <p className="text-sm mb-2">No content added yet</p>
+            <div className="text-center py-16 text-gray-500">
+              <Play className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No content added yet</h3>
+              <p className="text-sm mb-6">Start creating content for your channel</p>
               <button
                 onClick={openAddContentForm}
-                className="text-blue-600 hover:text-blue-700 text-xs"
+                className="btn-primary"
               >
+                <Plus className="w-4 h-4 mr-2" />
                 Add your first content
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {channelContent.map((item, index) => {
                 const contentData = parseContentNotes(item.notes);
                 const sceneCount = contentData?.totalScene || 0;
@@ -750,67 +765,102 @@ const ChannelManager: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 hover-lift stagger-item"
+                    className="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 hover:shadow-md transition-all duration-200 hover-lift stagger-item"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        {/* Title */}
-                        <h4 className="font-semibold text-gray-900 text-sm mb-2 truncate">
-                          {item.title}
-                        </h4>
+                    {/* Card Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        {/* Channel Logo */}
+                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {selectedChannel.logo_url && isValidImageUrl(selectedChannel.logo_url) ? (
+                            <img
+                              src={selectedChannel.logo_url}
+                              alt={selectedChannel.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="text-gray-600">{getTypeIcon(item.type)}</div>
+                          )}
+                        </div>
                         
-                        {/* Scene count and Voice Over indicator */}
-                        <div className="flex items-center space-x-3 mb-3">
+                        {/* Title */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-900 text-sm mb-1 truncate" title={item.title}>
+                            {item.title}
+                          </h4>
+                          <p className="text-xs text-gray-500">{selectedChannel.name}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Action Menu */}
+                      <div className="relative">
+                        <div className="flex items-center space-x-1">
+                          <button
+                            onClick={() => openEditContentForm(item)}
+                            className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Edit content"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => openContentDetail(item)}
+                            className="p-1.5 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+                            title="View details"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => deleteContent(item.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete content"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content Details */}
+                    <div className="space-y-3">
+                      {/* Scene count and Voice Over indicator */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
                           {sceneCount > 0 && (
-                            <span className="text-xs text-gray-600">
+                            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
                               {sceneCount} scene{sceneCount > 1 ? 's' : ''}
                             </span>
                           )}
                           {hasVoiceOver && (
-                            <span className="text-xs text-green-600 flex items-center">
+                            <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md flex items-center">
                               ✅ Voice Over
                             </span>
                           )}
                         </div>
-                        
-                        {/* Status Dropdown */}
-                        <div className="mb-3">
+                      </div>
+                      
+                      {/* Description Preview */}
+                      {contentData?.description && (
+                        <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                          {contentData.description}
+                        </p>
+                      )}
+                      
+                      {/* Status Badge Selector */}
+                      <div className="pt-2 border-t border-gray-100">
+                        <div className="relative">
                           <select
                             value={item.status}
                             onChange={(e) => updateContentStatus(item.id, e.target.value as ContentItem['status'])}
-                            className="text-xs border border-gray-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className={`w-full text-xs font-medium px-3 py-2 rounded-lg border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${getStatusBadge(item.status)}`}
                           >
                             <option value="planned">Planned</option>
-                            <option value="watching">In Progress</option>
-                            <option value="completed">Completed</option>
+                            <option value="watching">On Progress</option>
+                            <option value="completed">Ready to Post</option>
+                            <option value="published">Published</option>
                           </select>
+                          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
                         </div>
-                      </div>
-                      
-                      {/* Action Buttons */}
-                      <div className="flex items-center space-x-1 flex-shrink-0 ml-4">
-                        <button
-                          onClick={() => openEditContentForm(item)}
-                          className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors"
-                          title="Edit content"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => openContentDetail(item)}
-                          className="p-1.5 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded transition-colors"
-                          title="View details"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => deleteContent(item.id)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                          title="Delete content"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -825,22 +875,26 @@ const ChannelManager: React.FC = () => {
           <div className="card-header">
             <h3 className="card-title">Channel Statistics</h3>
           </div>
-          <div className="grid-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             <div className="stat-card">
               <div className="stat-value text-blue-600">{stats.total}</div>
               <div className="stat-label">Total Content</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value text-green-600">{stats.completed}</div>
-              <div className="stat-label">Completed</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value text-orange-600">{stats.watching}</div>
-              <div className="stat-label">In Progress</div>
-            </div>
-            <div className="stat-card">
               <div className="stat-value text-gray-600">{stats.planned}</div>
               <div className="stat-label">Planned</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value text-blue-600">{stats.watching}</div>
+              <div className="stat-label">On Progress</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value text-orange-600">{stats.completed}</div>
+              <div className="stat-label">Ready to Post</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value text-green-600">{stats.published}</div>
+              <div className="stat-label">Published</div>
             </div>
           </div>
         </div>
