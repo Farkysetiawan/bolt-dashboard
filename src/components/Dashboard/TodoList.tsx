@@ -63,9 +63,15 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
     
     try {
       setLoading(true);
+      
+      // Optimized query with minimal data for read-only mode
+      const selectFields = readOnly 
+        ? 'id, title, completed, priority_score, date'
+        : '*';
+      
       const { data, error } = await supabase
         .from('todos')
-        .select('*')
+        .select(selectFields)
         .eq('user_id', user.id)
         .eq('date', dateStr)
         .order('priority_score', { ascending: false })
@@ -81,12 +87,12 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
   }, [user?.id, dateStr, readOnly]);
 
   const checkActiveTimer = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id || readOnly) return;
     
     try {
       const { data, error } = await supabase
         .from('todos')
-        .select('*')
+        .select('id, timer_start_time')
         .eq('user_id', user.id)
         .eq('is_timer_active', true)
         .maybeSingle();
@@ -103,24 +109,26 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
     } catch (error) {
       console.error('Error checking active timer:', error);
     }
-  }, [user?.id]);
+  }, [user?.id, readOnly]);
 
   useEffect(() => {
     if (user) {
       fetchTodos();
-      checkActiveTimer();
+      if (!readOnly) {
+        checkActiveTimer();
+      }
     }
   }, [fetchTodos, checkActiveTimer]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (activeTimer) {
+    if (activeTimer && !readOnly) {
       interval = setInterval(() => {
         setTimerSeconds(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [activeTimer]);
+  }, [activeTimer, readOnly]);
 
   const calculatePriorityScore = useCallback((form: PriorityForm): number => {
     const { urgency, importance, effort, impact } = form;
@@ -436,7 +444,7 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
 
       const { data, error } = await supabase
         .from('todos')
-        .select('*')
+        .select('priority_score, duration_minutes, actual_minutes')
         .eq('user_id', user.id)
         .gte('date', format(monthStart, 'yyyy-MM-dd'))
         .lte('date', format(monthEnd, 'yyyy-MM-dd'))
@@ -516,10 +524,10 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
   });
 
   useEffect(() => {
-    if (user && showStats) {
+    if (user && showStats && !readOnly) {
       getMonthlyStats().then(setMonthlyStats);
     }
-  }, [user, showStats, todos, getMonthlyStats]);
+  }, [user, showStats, todos, getMonthlyStats, readOnly]);
 
   const getTaskStatus = useCallback((todo: Todo) => {
     if (todo.completed) return 'Completed';
@@ -552,7 +560,7 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
 
   if (loading) {
     return (
-      <div className="card animate-fadeIn">
+      <div className="card">
         <div className="animate-pulse">
           <div className="h-4 bg-gray-100 rounded w-1/4 mb-4"></div>
           <div className="space-y-3">
@@ -567,7 +575,7 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
 
   return (
     <>
-      <div className="card animate-fadeIn">
+      <div className="card">
         {/* Header */}
         <div className="card-header">
           <div className="flex items-center space-x-2">
@@ -589,19 +597,21 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
                 <Plus className="w-4 h-4" />
               </button>
             )}
-            <button
-              onClick={() => setShowStats(!showStats)}
-              className={`btn-icon ${showStats ? 'btn-icon-primary' : 'btn-icon-secondary'}`}
-              title="Stats"
-            >
-              <BarChart3 className="w-4 h-4" />
-            </button>
+            {!readOnly && (
+              <button
+                onClick={() => setShowStats(!showStats)}
+                className={`btn-icon ${showStats ? 'btn-icon-primary' : 'btn-icon-secondary'}`}
+                title="Stats"
+              >
+                <BarChart3 className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
         {/* Stats Panel */}
-        {showStats && (
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-slideDown">
+        {showStats && !readOnly && (
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
             <h3 className="text-sm font-semibold text-gray-900 mb-3">
               Performance - {format(new Date(), 'MMMM yyyy')}
             </h3>
@@ -688,7 +698,7 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
 
             {/* Week Calendar */}
             {showCalendar && (
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 animate-slideDown">
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="grid grid-cols-7 gap-1">
                   {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
                     <div key={day} className="text-center text-xs font-medium text-gray-500 py-1.5">
@@ -702,14 +712,13 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
                         setSelectedDate(day);
                         setShowCalendar(false);
                       }}
-                      className={`p-1.5 text-xs rounded-lg transition-all duration-200 hover-lift stagger-item ${
+                      className={`p-1.5 text-xs rounded-lg transition-all duration-200 hover-lift ${
                         isSameDay(day, selectedDate)
                           ? 'bg-blue-600 text-white'
                           : isToday(day)
                           ? 'bg-blue-50 text-blue-700 font-medium'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
-                      style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       {format(day, 'd')}
                     </button>
@@ -735,7 +744,7 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
         {/* Todo List */}
         <div className="space-y-2.5">
           {todos.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 animate-fadeIn">
+            <div className="text-center py-8 text-gray-500">
               <Clock className="w-8 h-8 mx-auto mb-2 text-gray-300" />
               <p className="text-sm font-medium mb-1">
                 No tasks for {isToday(selectedDate) ? 'today' : format(selectedDate, 'MMM d')}
@@ -748,12 +757,11 @@ const TodoList: React.FC<TodoListProps> = ({ readOnly = false }) => {
             todos.slice(0, readOnly ? 5 : todos.length).map((todo, index) => (
               <div
                 key={todo.id}
-                className={`p-3 rounded-lg border transition-all duration-200 hover-lift stagger-item ${
+                className={`p-3 rounded-lg border transition-all duration-200 hover-lift ${
                   todo.completed
                     ? 'bg-gray-50 border-gray-200'
                     : 'bg-white border-gray-200 hover:border-gray-300'
                 }`}
-                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-start space-x-2.5 flex-1 min-w-0">

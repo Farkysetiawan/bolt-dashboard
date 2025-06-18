@@ -150,7 +150,7 @@ const BodyTracker: React.FC = () => {
     const workout = workouts.find(w => w.id === id);
     if (!workout) return;
 
-    const confirmed = await showConfirmation(
+    showConfirmation(
       'Hapus Workout',
       `Apakah Anda yakin ingin menghapus "${workout.name}"?`,
       () => {
@@ -214,7 +214,7 @@ const BodyTracker: React.FC = () => {
     const meal = caloriesIn.find(m => m.id === id);
     if (!meal) return;
 
-    const confirmed = await showConfirmation(
+    showConfirmation(
       'Hapus Makanan',
       `Apakah Anda yakin ingin menghapus "${meal.description}" dari ${meal.category}?`,
       () => {
@@ -278,7 +278,7 @@ const BodyTracker: React.FC = () => {
     const weight = weightEntries.find(w => w.id === id);
     if (!weight) return;
 
-    const confirmed = await showConfirmation(
+    showConfirmation(
       'Hapus Data Berat',
       `Apakah Anda yakin ingin menghapus data berat ${weight.weight} kg pada ${new Date(weight.date).toLocaleDateString()}?`,
       () => {
@@ -341,7 +341,7 @@ const BodyTracker: React.FC = () => {
       </nav>
 
       {/* 💪 1. WORKOUT CHECKLIST */}
-      <div className="card animate-fadeIn">
+      <div className="card">
         <div className="card-header">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-500 rounded-xl flex items-center justify-center">
@@ -380,12 +380,11 @@ const BodyTracker: React.FC = () => {
           {workouts.map((workout, index) => (
             <div
               key={workout.id}
-              className={`p-3 border rounded-xl transition-all duration-200 hover-lift stagger-item ${
+              className={`p-3 border rounded-xl transition-all duration-200 hover-lift ${
                 workout.completed
                   ? 'bg-green-50 border-green-200'
                   : 'bg-white border-gray-200 hover:border-gray-300'
               }`}
-              style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3 flex-1">
@@ -429,8 +428,8 @@ const BodyTracker: React.FC = () => {
 
         {/* Add/Edit Workout Modal */}
         {showAddWorkout && (
-          <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn">
+          <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {editingWorkout ? 'Edit Workout' : 'Add New Workout'}
@@ -462,7 +461,7 @@ const BodyTracker: React.FC = () => {
       </div>
 
       {/* 🍎 2. CALORIE TRACKER */}
-      <div className="card animate-fadeIn">
+      <div className="card">
         <div className="card-header">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-green-500 rounded-xl flex items-center justify-center">
@@ -556,8 +555,8 @@ const BodyTracker: React.FC = () => {
 
         {/* Add/Edit Meal Modal */}
         {showAddMeal && (
-          <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn">
+          <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {editingMeal ? 'Edit Meal' : 'Add Meal'}
@@ -607,7 +606,7 @@ const BodyTracker: React.FC = () => {
       </div>
 
       {/* ⚖️ 3. BODY PROGRESS CHART */}
-      <div className="card animate-fadeIn">
+      <div className="card">
         <div className="card-header">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-purple-500 rounded-xl flex items-center justify-center">
@@ -687,8 +686,8 @@ const BodyTracker: React.FC = () => {
 
         {/* Add/Edit Weight Modal */}
         {showAddWeight && (
-          <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn">
+          <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {editingWeight ? 'Edit Weight Entry' : 'Add Weight Entry'}
@@ -731,7 +730,7 @@ const BodyTracker: React.FC = () => {
       </div>
 
       {/* 🎯 4. FITNESS GOAL SUMMARY */}
-      <div className="card animate-fadeIn">
+      <div className="card">
         <div className="card-header">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-orange-500 rounded-xl flex items-center justify-center">
@@ -771,8 +770,8 @@ const BodyTracker: React.FC = () => {
 
         {/* Edit Goal Modal */}
         {showEditGoal && (
-          <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn">
+          <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit Fitness Goal</h3>
                 <div className="space-y-3">
@@ -810,7 +809,7 @@ const BodyTracker: React.FC = () => {
       </div>
 
       {/* 📊 STATISTICS RING */}
-      <div className="card animate-fadeIn">
+      <div className="card">
         <div className="card-header">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-indigo-500 rounded-xl flex items-center justify-center">
