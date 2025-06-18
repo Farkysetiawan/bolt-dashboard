@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, X, Plus, Minus } from 'lucide-react';
 
 interface SceneData {
@@ -20,21 +20,34 @@ interface AddContentFormProps {
   onSubmit: (data: ContentFormData) => void;
   onCancel: () => void;
   loading?: boolean;
+  initialData?: ContentFormData;
+  isEditing?: boolean;
 }
 
 const AddContentForm: React.FC<AddContentFormProps> = ({ 
   onSubmit, 
   onCancel, 
-  loading = false 
+  loading = false,
+  initialData,
+  isEditing = false
 }) => {
-  const [formData, setFormData] = useState<ContentFormData>({
-    title: '',
-    contentType: 'Video',
-    totalScene: 1,
-    description: '',
-    scenes: [{ title: '', type: 'Visual' }],
-    useVoiceOver: false
-  });
+  const [formData, setFormData] = useState<ContentFormData>(
+    initialData || {
+      title: '',
+      contentType: 'Video',
+      totalScene: 1,
+      description: '',
+      scenes: [{ title: '', type: 'Visual' }],
+      useVoiceOver: false
+    }
+  );
+
+  // Update form data when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const handleTotalSceneChange = (value: number) => {
     const newTotal = Math.max(1, value);
@@ -96,7 +109,7 @@ const AddContentForm: React.FC<AddContentFormProps> = ({
   return (
     <div className="card animate-fadeIn max-w-4xl mx-auto">
       <div className="card-header">
-        <h2 className="card-title">Add New Content</h2>
+        <h2 className="card-title">{isEditing ? 'Edit Content' : 'Add New Content'}</h2>
         <button
           onClick={onCancel}
           className="btn-icon-secondary"
@@ -319,7 +332,7 @@ const AddContentForm: React.FC<AddContentFormProps> = ({
               className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="w-4 h-4 mr-2" />
-              {loading ? 'Saving...' : 'Save Content'}
+              {loading ? 'Saving...' : isEditing ? 'Update Content' : 'Save Content'}
             </button>
           </div>
         </div>

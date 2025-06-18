@@ -51,7 +51,10 @@ const ChannelManager: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showContentModal, setShowContentModal] = useState(false);
   const [showContentForm, setShowContentForm] = useState(false);
+  const [showEditContentForm, setShowEditContentForm] = useState(false);
+  const [showContentDetail, setShowContentDetail] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     logo_url: ''
@@ -318,6 +321,59 @@ const ChannelManager: React.FC = () => {
     }
   };
 
+  const handleEditContentFormSubmit = async (contentData: ContentFormData) => {
+    if (!selectedContent || !user?.id) {
+      alert('Missing required data. Please try again.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // Map content type to database enum values
+      const typeMapping: { [key: string]: ContentItem['type'] } = {
+        'Video': 'video',
+        'Artikel': 'article', 
+        'Thread': 'article'
+      };
+
+      const mappedType = typeMapping[contentData.contentType] || 'article';
+
+      // Update content item
+      const { data, error } = await supabase
+        .from('content_items')
+        .update({
+          title: contentData.title.trim(),
+          type: mappedType,
+          notes: JSON.stringify({
+            description: contentData.description,
+            totalScene: contentData.totalScene,
+            scenes: contentData.scenes,
+            useVoiceOver: contentData.useVoiceOver,
+            contentType: contentData.contentType
+          })
+        })
+        .eq('id', selectedContent.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Update local state
+      setChannelContent(channelContent.map(item => 
+        item.id === selectedContent.id ? data : item
+      ));
+      setShowEditContentForm(false);
+      setSelectedContent(null);
+      
+      alert('Content updated successfully!');
+    } catch (error) {
+      console.error('Error updating content:', error);
+      alert('Failed to update content. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const updateContentStatus = async (id: string, status: ContentItem['status']) => {
     try {
       const { error } = await supabase
@@ -394,6 +450,26 @@ const ChannelManager: React.FC = () => {
     setShowContentForm(false);
   };
 
+  const openEditContentForm = (content: ContentItem) => {
+    setSelectedContent(content);
+    setShowEditContentForm(true);
+  };
+
+  const closeEditContentForm = () => {
+    setShowEditContentForm(false);
+    setSelectedContent(null);
+  };
+
+  const openContentDetail = (content: ContentItem) => {
+    setSelectedContent(content);
+    setShowContentDetail(true);
+  };
+
+  const closeContentDetail = () => {
+    setShowContentDetail(false);
+    setSelectedContent(null);
+  };
+
   const isValidImageUrl = (url: string): boolean => {
     return url && (url.startsWith('http') || url.startsWith('data:image/'));
   };
@@ -457,6 +533,130 @@ const ChannelManager: React.FC = () => {
           onCancel={closeContentForm}
           loading={saving}
         />
+      </div>
+    );
+  }
+
+  // Show Edit Content Form
+  if (showEditContentForm && selectedContent) {
+    const contentData = parseContentNotes(selectedContent.notes);
+    const initialData = {
+      title: selectedContent.title,
+      contentType: (contentData?.contentType || 'Video') as 'Video' | 'Artikel' | 'Thread',
+      totalScene: contentData?.totalScene || 1,
+      description: contentData?.description || '',
+      scenes: contentData?.scenes || [{ title: '', type: 'Visual' as const }],
+      useVoiceOver: contentData?.useVoiceOver || false
+    };
+
+    return (
+      <div className="space-y-6">
+        <AddContentForm
+          onSubmit={handleEditContentFormSubmit}
+          onCancel={closeEditContentForm}
+          loading={saving}
+          initialData={initialData}
+          isEditing={true}
+        />
+      </div>
+    );
+  }
+
+  // Show Content Detail Modal
+  if (showContentDetail && selectedContent) {
+    const contentData = parseContentNotes(selectedContent.notes);
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
+        <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Content Details</h3>
+              <button
+                onClick={closeContentDetail}
+                className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-all duration-200 hover-scale"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Basic Info */}
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">{selectedContent.title}</h4>
+                <div className="flex items-center space-x-3 text-sm text-gray-600">
+                  <span className={getStatusBadge(selectedContent.status)}>
+                    {getStatusLabel(selectedContent.status)}
+                  </span>
+                  <span>Type: {selectedContent.type}</span>
+                  <span>Created: {new Date(selectedContent.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+
+              {/* Description */}
+              {contentData?.description && (
+                <div>
+                  <h5 className="font-medium text-gray-700 mb-2">Description</h5>
+                  <p className="text-gray-600 text-sm leading-relaxed">{contentData.description}</p>
+                </div>
+              )}
+
+              {/* Scene Information */}
+              {contentData?.totalScene && (
+                <div>
+                  <h5 className="font-medium text-gray-700 mb-2">Scene Information</h5>
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">Total Scenes: {contentData.totalScene}</span>
+                      {contentData.useVoiceOver && (
+                        <span className="text-sm text-green-600 flex items-center">
+                          ✅ Voice Over Enabled
+                        </span>
+                      )}
+                    </div>
+                    
+                    {contentData.scenes && contentData.scenes.length > 0 && (
+                      <div className="space-y-2 mt-3">
+                        <h6 className="text-xs font-medium text-gray-700">Scenes:</h6>
+                        {contentData.scenes.map((scene: any, index: number) => (
+                          <div key={index} className="bg-white rounded p-2 border border-gray-200">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium text-gray-900">Scene {index + 1}: {scene.title}</span>
+                              <span className="text-xs text-gray-500">{scene.type}</span>
+                            </div>
+                            {scene.voiceOver && (
+                              <p className="text-xs text-gray-600 mt-1">{scene.voiceOver}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex space-x-3 pt-6 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  closeContentDetail();
+                  openEditContentForm(selectedContent);
+                }}
+                className="btn-primary"
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit Content
+              </button>
+              <button
+                onClick={closeContentDetail}
+                className="btn-secondary"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -591,12 +791,14 @@ const ChannelManager: React.FC = () => {
                       {/* Action Buttons */}
                       <div className="flex items-center space-x-1 flex-shrink-0 ml-4">
                         <button
+                          onClick={() => openEditContentForm(item)}
                           className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors"
                           title="Edit content"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
+                          onClick={() => openContentDetail(item)}
                           className="p-1.5 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded transition-colors"
                           title="View details"
                         >
