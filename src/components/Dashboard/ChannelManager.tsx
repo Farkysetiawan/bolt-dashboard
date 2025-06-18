@@ -791,7 +791,7 @@ const ChannelManager: React.FC = () => {
           </div>
         </div>
 
-        {/* 🎯 MAIN CONTENT SECTION - HORIZONTAL SCROLLABLE CARDS */}
+        {/* 🎯 MAIN CONTENT SECTION - OPTIMIZED HORIZONTAL CARDS */}
         <div className="card animate-fadeIn">
           <div className="card-header">
             <h3 className="card-title">Channel Content</h3>
@@ -820,7 +820,7 @@ const ChannelManager: React.FC = () => {
             <div className="overflow-x-auto pb-4">
               <div className="flex space-x-4 min-w-max">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="w-80 h-96 bg-gray-100 rounded-xl animate-pulse flex-shrink-0"></div>
+                  <div key={i} className="w-72 h-80 bg-gray-100 rounded-xl animate-pulse flex-shrink-0"></div>
                 ))}
               </div>
             </div>
@@ -847,28 +847,28 @@ const ChannelManager: React.FC = () => {
               </div>
             </div>
           ) : (
-            /* 🚀 HORIZONTAL SCROLLABLE CONTAINER - MAIN LAYOUT */
+            /* 🚀 OPTIMIZED HORIZONTAL SCROLLABLE CONTAINER */
             <div className="overflow-x-auto pb-4 scrollbar-hide">
-              <div className="flex space-x-6 min-w-max px-1">
+              <div className="flex space-x-4 min-w-max px-1">
                 {channelContent.map((item, index) => {
                   const contentData = parseContentNotes(item.notes);
                   const sceneCount = contentData?.totalScene || 0;
                   const hasVoiceOver = contentData?.useVoiceOver || false;
                   
                   return (
-                    /* 🃏 INDIVIDUAL CONTENT CARD - FIXED WIDTH, SIDE BY SIDE */
+                    /* 🃏 OPTIMIZED CONTENT CARD - BETTER PROPORTIONS */
                     <div
                       key={item.id}
-                      className="w-80 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-300 hover-lift flex-shrink-0 flex flex-col stagger-item"
+                      className="w-72 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 hover-lift flex-shrink-0 flex flex-col stagger-item"
                       style={{ 
                         animationDelay: `${index * 0.1}s`
                       }}
                     >
-                      {/* 📋 HEADER SECTION */}
-                      <div className="p-5 border-b border-gray-100">
-                        <div className="flex items-center space-x-3 mb-3">
+                      {/* 📋 HEADER SECTION - COMPACT */}
+                      <div className="p-4 border-b border-gray-100">
+                        <div className="flex items-center space-x-3 mb-2">
                           {/* Channel Logo */}
-                          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                          <div className="w-6 h-6 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden flex-shrink-0">
                             {selectedChannel.logo_url && isValidImageUrl(selectedChannel.logo_url) ? (
                               <img
                                 src={selectedChannel.logo_url}
@@ -876,7 +876,7 @@ const ChannelManager: React.FC = () => {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <Play className="w-4 h-4 text-gray-400" />
+                              <Play className="w-3 h-3 text-gray-400" />
                             )}
                           </div>
                           
@@ -886,24 +886,24 @@ const ChannelManager: React.FC = () => {
                           </div>
                           
                           {/* Title */}
-                          <h4 className="font-semibold text-gray-900 text-sm leading-tight flex-1 min-w-0" title={item.title}>
+                          <h4 className="font-semibold text-gray-900 text-sm leading-tight flex-1 min-w-0 line-clamp-2" title={item.title}>
                             {item.title}
                           </h4>
                         </div>
                         
                         {/* Description */}
                         {contentData?.description && (
-                          <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mt-2">
                             {contentData.description}
                           </p>
                         )}
                       </div>
 
-                      {/* 🏷️ CONTENT SECTION */}
-                      <div className="p-5 flex-1 flex flex-col justify-between">
+                      {/* 🏷️ CONTENT SECTION - COMPACT */}
+                      <div className="p-4 flex-1 flex flex-col justify-between">
                         {/* Scene & Voice Over Badges */}
                         <div className="space-y-3">
-                          <div className="flex items-center space-x-2 flex-wrap gap-2">
+                          <div className="flex items-center space-x-2 flex-wrap gap-1">
                             {sceneCount > 0 && (
                               <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full font-medium">
                                 {sceneCount} scene{sceneCount > 1 ? 's' : ''}
