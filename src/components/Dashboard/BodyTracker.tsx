@@ -16,6 +16,7 @@ import {
   Save,
   Trash2
 } from 'lucide-react';
+import { useNotifications } from '../../hooks/useNotifications';
 
 interface WorkoutItem {
   id: string;
@@ -48,6 +49,8 @@ interface FitnessGoal {
 }
 
 const BodyTracker: React.FC = () => {
+  const { showSuccess, showError, showConfirmation } = useNotifications();
+  
   const [workouts, setWorkouts] = useState<WorkoutItem[]>([
     { id: '1', name: 'Push-up 3x15', completed: true, date: '2024-01-15' },
     { id: '2', name: 'Jogging 20 menit', completed: true, date: '2024-01-15' },
@@ -111,24 +114,16 @@ const BodyTracker: React.FC = () => {
 
   // Handle functions
   const toggleWorkout = (id: string) => {
-    setWorkouts(workouts.map(workout => 
-      workout.id === id ? { ...workout, completed: !workout.completed } : workout
-    ));
-  };
+    const workout = workouts.find(w => w.id === id);
+    if (!workout) return;
 
-  const addWorkout = () => {
-    if (!newWorkout.trim()) return;
-    
-    const workout: WorkoutItem = {
-      id: Date.now().toString(),
-      name: newWorkout.trim(),
-      completed: false,
-      date: new Date().toISOString().split('T')[0]
-    };
-    
-    setWorkouts([...workouts, workout]);
-    setNewWorkout('');
-    setShowAddWorkout(false);
+    setWorkouts(workouts.map(w => 
+      w.id === id ? { ...w, completed: !w.completed } : w
+    ));
+
+    if (!workout.completed) {
+      showSuccess('Workout Selesai! 💪', `${workout.name} berhasil diselesaikan!`);
+    }
   };
 
   const editWorkout = (workout: WorkoutItem) => {
@@ -148,29 +143,42 @@ const BodyTracker: React.FC = () => {
     setEditingWorkout(null);
     setNewWorkout('');
     setShowAddWorkout(false);
+    showSuccess('Workout Diperbarui', 'Workout berhasil diperbarui!');
   };
 
-  const deleteWorkout = (id: string) => {
-    if (confirm('Hapus workout ini?')) {
-      setWorkouts(workouts.filter(workout => workout.id !== id));
-    }
+  const deleteWorkout = async (id: string) => {
+    const workout = workouts.find(w => w.id === id);
+    if (!workout) return;
+
+    const confirmed = await showConfirmation(
+      'Hapus Workout',
+      `Apakah Anda yakin ingin menghapus "${workout.name}"?`,
+      () => {
+        setWorkouts(workouts.filter(w => w.id !== id));
+        showSuccess('Workout Dihapus', 'Workout berhasil dihapus dari daftar');
+      },
+      {
+        confirmText: 'Hapus',
+        cancelText: 'Batal',
+        type: 'danger'
+      }
+    );
   };
 
-  const addMeal = () => {
-    if (!newMeal.description.trim() || !newMeal.amount) return;
+  const addWorkout = () => {
+    if (!newWorkout.trim()) return;
     
-    const meal: CalorieEntry = {
+    const workout: WorkoutItem = {
       id: Date.now().toString(),
-      type: 'in',
-      category: newMeal.category,
-      amount: parseInt(newMeal.amount),
-      description: newMeal.description.trim(),
+      name: newWorkout.trim(),
+      completed: false,
       date: new Date().toISOString().split('T')[0]
     };
     
-    setCaloriesIn([...caloriesIn, meal]);
-    setNewMeal({ category: 'Sarapan', amount: '', description: '' });
-    setShowAddMeal(false);
+    setWorkouts([...workouts, workout]);
+    setNewWorkout('');
+    setShowAddWorkout(false);
+    showSuccess('Workout Ditambahkan', `${workout.name} berhasil ditambahkan ke daftar!`);
   };
 
   const editMeal = (meal: CalorieEntry) => {
@@ -199,27 +207,44 @@ const BodyTracker: React.FC = () => {
     setEditingMeal(null);
     setNewMeal({ category: 'Sarapan', amount: '', description: '' });
     setShowAddMeal(false);
+    showSuccess('Makanan Diperbarui', 'Data makanan berhasil diperbarui!');
   };
 
-  const deleteMeal = (id: string) => {
-    if (confirm('Hapus makanan ini?')) {
-      setCaloriesIn(caloriesIn.filter(meal => meal.id !== id));
-    }
+  const deleteMeal = async (id: string) => {
+    const meal = caloriesIn.find(m => m.id === id);
+    if (!meal) return;
+
+    const confirmed = await showConfirmation(
+      'Hapus Makanan',
+      `Apakah Anda yakin ingin menghapus "${meal.description}" dari ${meal.category}?`,
+      () => {
+        setCaloriesIn(caloriesIn.filter(m => m.id !== id));
+        showSuccess('Makanan Dihapus', 'Data makanan berhasil dihapus');
+      },
+      {
+        confirmText: 'Hapus',
+        cancelText: 'Batal',
+        type: 'danger'
+      }
+    );
   };
 
-  const addWeight = () => {
-    if (!newWeight.weight) return;
+  const addMeal = () => {
+    if (!newMeal.description.trim() || !newMeal.amount) return;
     
-    const weight: WeightEntry = {
+    const meal: CalorieEntry = {
       id: Date.now().toString(),
-      weight: parseFloat(newWeight.weight),
-      bodyFat: newWeight.bodyFat ? parseFloat(newWeight.bodyFat) : undefined,
+      type: 'in',
+      category: newMeal.category,
+      amount: parseInt(newMeal.amount),
+      description: newMeal.description.trim(),
       date: new Date().toISOString().split('T')[0]
     };
     
-    setWeightEntries([weight, ...weightEntries]);
-    setNewWeight({ weight: '', bodyFat: '' });
-    setShowAddWeight(false);
+    setCaloriesIn([...caloriesIn, meal]);
+    setNewMeal({ category: 'Sarapan', amount: '', description: '' });
+    setShowAddMeal(false);
+    showSuccess('Makanan Ditambahkan', `${meal.description} (${meal.amount} kcal) berhasil ditambahkan!`);
   };
 
   const editWeight = (weight: WeightEntry) => {
@@ -246,12 +271,42 @@ const BodyTracker: React.FC = () => {
     setEditingWeight(null);
     setNewWeight({ weight: '', bodyFat: '' });
     setShowAddWeight(false);
+    showSuccess('Data Berat Diperbarui', 'Data berat badan berhasil diperbarui!');
   };
 
-  const deleteWeight = (id: string) => {
-    if (confirm('Hapus data berat ini?')) {
-      setWeightEntries(weightEntries.filter(weight => weight.id !== id));
-    }
+  const deleteWeight = async (id: string) => {
+    const weight = weightEntries.find(w => w.id === id);
+    if (!weight) return;
+
+    const confirmed = await showConfirmation(
+      'Hapus Data Berat',
+      `Apakah Anda yakin ingin menghapus data berat ${weight.weight} kg pada ${new Date(weight.date).toLocaleDateString()}?`,
+      () => {
+        setWeightEntries(weightEntries.filter(w => w.id !== id));
+        showSuccess('Data Berat Dihapus', 'Data berat badan berhasil dihapus');
+      },
+      {
+        confirmText: 'Hapus',
+        cancelText: 'Batal',
+        type: 'danger'
+      }
+    );
+  };
+
+  const addWeight = () => {
+    if (!newWeight.weight) return;
+    
+    const weight: WeightEntry = {
+      id: Date.now().toString(),
+      weight: parseFloat(newWeight.weight),
+      bodyFat: newWeight.bodyFat ? parseFloat(newWeight.bodyFat) : undefined,
+      date: new Date().toISOString().split('T')[0]
+    };
+    
+    setWeightEntries([weight, ...weightEntries]);
+    setNewWeight({ weight: '', bodyFat: '' });
+    setShowAddWeight(false);
+    showSuccess('Data Berat Ditambahkan', `Berat ${weight.weight} kg berhasil dicatat!`);
   };
 
   const updateGoal = () => {
@@ -261,6 +316,7 @@ const BodyTracker: React.FC = () => {
       lastUpdate: new Date().toISOString().split('T')[0]
     });
     setShowEditGoal(false);
+    showSuccess('Goal Diperbarui', 'Target fitness Anda berhasil diperbarui!');
   };
 
   const cancelEdit = () => {
