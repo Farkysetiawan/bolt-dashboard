@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link, Plus, ExternalLink, ChevronLeft, ChevronRight, Smartphone, Globe } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
@@ -22,6 +22,7 @@ const QuickLinksHorizontal: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
+  // Memoize fetch function to prevent unnecessary re-renders
   const fetchLinks = useCallback(async () => {
     if (!user?.id) {
       setLoading(false);
@@ -30,38 +31,28 @@ const QuickLinksHorizontal: React.FC = () => {
 
     try {
       setError(null);
-      setLoading(true);
       
-      console.log('Fetching quick links for user:', user.id);
-      
+      // Optimized query with minimal data
       const { data, error } = await supabase
         .from('quick_links')
-        .select('*')
+        .select('id, title, url, icon, open_in_app')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true })
         .limit(10);
 
       if (error) {
-        console.error('Supabase error fetching quick links:', error);
         throw new Error(`Database error: ${error.message}`);
       }
       
-      console.log('Quick links fetched successfully:', data?.length || 0, 'items');
       setLinks(data || []);
     } catch (error: any) {
       console.error('Error fetching quick links:', error);
       
-      // Provide more specific error messages
       let errorMessage = 'Failed to load quick links';
-      
       if (error.name === 'AbortError') {
-        errorMessage = 'Request timed out. Please check your connection.';
+        errorMessage = 'Request timed out';
       } else if (error.message?.includes('Failed to fetch')) {
-        errorMessage = 'Unable to connect to database. Please check your internet connection.';
-      } else if (error.message?.includes('Database error')) {
-        errorMessage = error.message;
-      } else if (error.message) {
-        errorMessage = error.message;
+        errorMessage = 'Connection error';
       }
       
       setError(errorMessage);
@@ -71,14 +62,12 @@ const QuickLinksHorizontal: React.FC = () => {
     }
   }, [user?.id]);
 
+  // Use effect with dependency array to prevent unnecessary calls
   useEffect(() => {
     fetchLinks();
   }, [fetchLinks]);
 
-  useEffect(() => {
-    checkScrollability();
-  }, [links]);
-
+  // Memoize scroll check function
   const checkScrollability = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -87,6 +76,10 @@ const QuickLinksHorizontal: React.FC = () => {
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
   }, []);
+
+  useEffect(() => {
+    checkScrollability();
+  }, [links, checkScrollability]);
 
   const scroll = useCallback((direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;
@@ -103,6 +96,7 @@ const QuickLinksHorizontal: React.FC = () => {
     });
   }, []);
 
+  // Memoize utility functions
   const getDomainFromUrl = useCallback((url: string): string => {
     try {
       const domain = new URL(url).hostname;
@@ -123,27 +117,16 @@ const QuickLinksHorizontal: React.FC = () => {
       'instagram.com': url.replace('https://www.instagram.com', 'instagram://').replace('https://instagram.com', 'instagram://'),
       'twitter.com': url.replace('https://twitter.com', 'twitter://').replace('https://www.twitter.com', 'twitter://'),
       'x.com': url.replace('https://x.com', 'twitter://').replace('https://www.x.com', 'twitter://'),
-      'facebook.com': url.replace('https://www.facebook.com', 'fb://').replace('https://facebook.com', 'fb://'),
-      'tiktok.com': url.replace('https://www.tiktok.com', 'tiktok://').replace('https://tiktok.com', 'tiktok://'),
-      'linkedin.com': url.replace('https://www.linkedin.com', 'linkedin://').replace('https://linkedin.com', 'linkedin://'),
-      'spotify.com': url.replace('https://open.spotify.com', 'spotify:'),
-      'discord.com': url.replace('https://discord.com', 'discord://').replace('https://www.discord.com', 'discord://'),
-      'telegram.org': url.replace('https://t.me', 'tg://').replace('https://telegram.me', 'tg://'),
-      'whatsapp.com': url.replace('https://wa.me', 'whatsapp://send?phone=').replace('https://web.whatsapp.com', 'whatsapp://'),
-      'reddit.com': url.replace('https://www.reddit.com', 'reddit://').replace('https://reddit.com', 'reddit://'),
-      'pinterest.com': url.replace('https://www.pinterest.com', 'pinterest://').replace('https://pinterest.com', 'pinterest://'),
-      'twitch.tv': url.replace('https://www.twitch.tv', 'twitch://').replace('https://twitch.tv', 'twitch://'),
-      'github.com': url.replace('https://github.com', 'github://'),
-      'zoom.us': url.replace('https://zoom.us/j/', 'zoomus://zoom.us/join?confno='),
     };
 
     return appSchemes[domain] || url;
   }, []);
 
+  // Optimized loading state
   if (loading) {
     return (
       <div className="flex space-x-2 overflow-x-auto pb-2">
-        {[...Array(5)].map((_, i) => (
+        {[...Array(3)].map((_, i) => (
           <div key={i} className="w-12 h-12 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
         ))}
       </div>
@@ -152,7 +135,7 @@ const QuickLinksHorizontal: React.FC = () => {
 
   if (error) {
     return (
-      <div className="text-center py-3 animate-fadeIn">
+      <div className="text-center py-3">
         <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2">
           <ExternalLink className="w-5 h-5 text-red-400" />
         </div>
@@ -161,7 +144,7 @@ const QuickLinksHorizontal: React.FC = () => {
           onClick={fetchLinks}
           className="text-xs text-blue-600 hover:text-blue-700"
         >
-          Try again
+          Retry
         </button>
       </div>
     );
@@ -169,7 +152,7 @@ const QuickLinksHorizontal: React.FC = () => {
 
   if (links.length === 0) {
     return (
-      <div className="text-center py-3 animate-fadeIn">
+      <div className="text-center py-3">
         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
           <Link className="w-5 h-5 text-gray-400" />
         </div>
@@ -180,23 +163,20 @@ const QuickLinksHorizontal: React.FC = () => {
 
   return (
     <div className="relative">
-      {/* Left scroll indicator */}
+      {/* Scroll indicators */}
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-6 h-6 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-all duration-200 hover-scale"
-          aria-label="Scroll left"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-6 h-6 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-all duration-200"
         >
           <ChevronLeft className="w-3 h-3 text-gray-600" />
         </button>
       )}
 
-      {/* Right scroll indicator */}
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-6 h-6 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-all duration-200 hover-scale"
-          aria-label="Scroll right"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-6 h-6 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-all duration-200"
         >
           <ChevronRight className="w-3 h-3 text-gray-600" />
         </button>
@@ -223,19 +203,17 @@ const QuickLinksHorizontal: React.FC = () => {
               href={finalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col items-center flex-shrink-0 relative stagger-item hover-lift"
+              className="group flex flex-col items-center flex-shrink-0 relative hover-lift"
               title={link.title || getDomainFromUrl(link.url)}
-              style={{ 
-                scrollSnapAlign: 'start',
-                animationDelay: `${index * 0.1}s`
-              }}
+              style={{ scrollSnapAlign: 'start' }}
             >
-              <div className="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:border-gray-300 hover:shadow-sm transition-all duration-200 mb-1.5 relative hover-scale">
+              <div className="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center hover:border-gray-300 hover:shadow-sm transition-all duration-200 mb-1.5 relative">
                 {hasCustomLogo ? (
                   <img
                     src={link.icon}
                     alt={link.title || 'Logo'}
                     className="w-10 h-10 object-cover rounded"
+                    loading="lazy"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
@@ -260,19 +238,6 @@ const QuickLinksHorizontal: React.FC = () => {
           );
         })}
       </div>
-
-      {/* Scroll dots indicator (mobile only) */}
-      {links.length > 4 && (
-        <div className="flex justify-center mt-2 space-x-1 md:hidden">
-          {Array.from({ length: Math.ceil(links.length / 4) }).map((_, index) => (
-            <div
-              key={index}
-              className="w-1 h-1 rounded-full bg-gray-300 animate-pulse"
-              style={{ animationDelay: `${index * 0.2}s` }}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

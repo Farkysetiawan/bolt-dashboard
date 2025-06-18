@@ -3,37 +3,21 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Debug logging for environment variables
-console.log('Supabase URL:', supabaseUrl ? 'Set' : 'Missing');
-console.log('Supabase Anon Key:', supabaseAnonKey ? 'Set' : 'Missing');
-
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables:', {
-    url: supabaseUrl,
-    key: supabaseAnonKey ? 'Present' : 'Missing'
-  });
-  throw new Error('Missing Supabase environment variables. Please check your .env file.');
+  throw new Error('Missing Supabase environment variables');
 }
 
-// Validate URL format
-try {
-  new URL(supabaseUrl);
-} catch (error) {
-  console.error('Invalid Supabase URL format:', supabaseUrl);
-  throw new Error('Invalid Supabase URL format. Please check your VITE_SUPABASE_URL in .env file.');
-}
-
-// Create Supabase client with optimized configuration
+// Optimized Supabase client configuration for faster loading
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    detectSessionInUrl: false, // Faster initial load
     flowType: 'pkce'
   },
   realtime: {
     params: {
-      eventsPerSecond: 5
+      eventsPerSecond: 2 // Reduced for better performance
     }
   },
   global: {
@@ -41,13 +25,16 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       'x-client-info': 'flexboard-app'
     },
     fetch: (url, options = {}) => {
-      // Add timeout and better error handling
+      // Optimized fetch with shorter timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // Reduced to 5 seconds
       
       return fetch(url, {
         ...options,
-        signal: controller.signal
+        signal: controller.signal,
+        // Add performance optimizations
+        keepalive: true,
+        cache: 'no-cache'
       }).finally(() => {
         clearTimeout(timeoutId);
       });
@@ -57,19 +44,3 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     schema: 'public'
   }
 });
-
-// Test connection function
-export const testSupabaseConnection = async () => {
-  try {
-    const { data, error } = await supabase.from('profiles').select('count').limit(1);
-    if (error) {
-      console.error('Supabase connection test failed:', error);
-      return false;
-    }
-    console.log('Supabase connection test successful');
-    return true;
-  } catch (error) {
-    console.error('Supabase connection test error:', error);
-    return false;
-  }
-};

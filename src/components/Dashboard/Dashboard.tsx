@@ -1,15 +1,11 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, Suspense, lazy } from 'react';
 import DashboardHeader from './DashboardHeader';
 import TodoList from './TodoList';
 import DailyJournal from './DailyJournal';
-import ChannelManager from './ChannelManager';
 import LearningTracker from './LearningTracker';
 import QuickAccessLinks from './QuickAccessLinks';
-import QuickLinksManager from './QuickLinksManager';
 import PromptBank from './PromptBank';
 import UserProfile from './UserProfile';
-import AnalyticsDashboard from './AnalyticsDashboard';
-import BodyTracker from './BodyTracker';
 import { 
   CheckSquare, 
   BookOpen, 
@@ -23,6 +19,12 @@ import {
   BarChart3,
   Dumbbell
 } from 'lucide-react';
+
+// Lazy load heavy components
+const ChannelManager = lazy(() => import('./ChannelManager'));
+const QuickLinksManager = lazy(() => import('./QuickLinksManager'));
+const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
+const BodyTracker = lazy(() => import('./BodyTracker'));
 
 type CategoryType = 'all' | 'todos' | 'journal' | 'content' | 'learning' | 'links' | 'prompts' | 'body' | 'profile' | 'analytics';
 
@@ -75,6 +77,13 @@ const categories: Category[] = [
   }
 ];
 
+// Loading component for lazy loaded components
+const ComponentLoader = () => (
+  <div className="flex items-center justify-center py-8">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  </div>
+);
+
 const Dashboard: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('all');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -121,23 +130,39 @@ const Dashboard: React.FC = () => {
     };
   }, [activeCategory]);
 
-  // Lazy render content to improve performance
+  // Optimized content rendering with lazy loading
   const renderContent = useCallback(() => {
     switch (activeCategory) {
       case 'analytics':
-        return <AnalyticsDashboard />;
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <AnalyticsDashboard />
+          </Suspense>
+        );
       case 'todos':
         return <TodoList readOnly={false} />;
       case 'journal':
         return <DailyJournal readOnly={false} />;
       case 'content':
-        return <ChannelManager />;
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <ChannelManager />
+          </Suspense>
+        );
       case 'learning':
         return <LearningTracker readOnly={false} />;
       case 'body':
-        return <BodyTracker />;
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <BodyTracker />
+          </Suspense>
+        );
       case 'links':
-        return <QuickLinksManager />;
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <QuickLinksManager />
+          </Suspense>
+        );
       case 'prompts':
         return <PromptBank readOnly={false} />;
       case 'profile':
@@ -192,29 +217,28 @@ const Dashboard: React.FC = () => {
         {/* Mobile Navigation */}
         <div className="lg:hidden">
           {/* Mobile Header */}
-          <div className="sticky top-12 z-30 bg-white border-b border-gray-200 px-3 py-2 animate-slideDown">
+          <div className="sticky top-12 z-30 bg-white border-b border-gray-200 px-3 py-2">
             <div className="flex items-center justify-between">
               <h1 className="text-sm font-semibold text-gray-900">
                 {pageInfo.title}
               </h1>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="btn-icon-secondary micro-bounce"
-                aria-label="Toggle menu"
+                className="btn-icon-secondary"
               >
                 {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Mobile Menu - FIXED STRUCTURE */}
+          {/* Mobile Menu */}
           {mobileMenuOpen && (
             <>
               <div 
-                className="fixed inset-0 bg-black bg-opacity-25 z-40 animate-fadeIn"
+                className="fixed inset-0 bg-black bg-opacity-25 z-40"
                 onClick={() => setMobileMenuOpen(false)}
               />
-              <div className="fixed top-20 left-2 right-2 bg-white rounded-xl shadow-lg z-50 border border-gray-200 animate-scaleIn sidebar">
+              <div className="fixed top-20 left-2 right-2 bg-white rounded-xl shadow-lg z-50 border border-gray-200 sidebar">
                 <div className="p-1 sidebar-nav">
                   {categories.map((category, index) => (
                     <button
@@ -235,9 +259,9 @@ const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Desktop Sidebar - FIXED STRUCTURE */}
+        {/* Desktop Sidebar */}
         <div className="hidden lg:block">
-          <div className="fixed top-12 left-0 w-52 h-screen bg-white border-r border-gray-200 overflow-y-auto animate-slideIn sidebar">
+          <div className="fixed top-12 left-0 w-52 h-screen bg-white border-r border-gray-200 overflow-y-auto sidebar">
             <div className="p-4">
               <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
                 Navigation
@@ -265,7 +289,7 @@ const Dashboard: React.FC = () => {
         <main className="lg:ml-52">
           <div className="max-w-7xl mx-auto px-3 py-4 lg:px-4 lg:py-5">
             {/* Desktop Page Header */}
-            <div className="page-header hidden lg:block animate-fadeIn">
+            <div className="page-header hidden lg:block">
               <h1 className="page-title">
                 {pageInfo.title}
               </h1>
@@ -274,14 +298,8 @@ const Dashboard: React.FC = () => {
               </p>
             </div>
             
-            {/* Render content with error boundary */}
-            <React.Suspense fallback={
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            }>
-              {renderContent()}
-            </React.Suspense>
+            {/* Render content */}
+            {renderContent()}
           </div>
         </main>
       </div>
