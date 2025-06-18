@@ -478,8 +478,8 @@ const ChannelManager: React.FC = () => {
     switch (status) {
       case 'planned': return 'bg-gray-100 text-gray-700 border border-gray-200';
       case 'watching': return 'bg-blue-100 text-blue-700 border border-blue-200';
-      case 'completed': return 'bg-green-100 text-green-700 border border-green-200';
-      case 'published': return 'bg-purple-100 text-purple-700 border border-purple-200';
+      case 'completed': return 'bg-orange-100 text-orange-700 border border-orange-200';
+      case 'published': return 'bg-green-100 text-green-700 border border-green-200';
       default: return 'bg-gray-100 text-gray-700 border border-gray-200';
     }
   };
@@ -723,7 +723,7 @@ const ChannelManager: React.FC = () => {
           </div>
         </div>
 
-        {/* Channel Content Section */}
+        {/* Channel Content Section - Horizontal Scrollable */}
         <div className="card animate-fadeIn">
           <div className="card-header">
             <h3 className="card-title">Channel Content</h3>
@@ -737,9 +737,9 @@ const ChannelManager: React.FC = () => {
           </div>
           
           {contentLoading ? (
-            <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-48 bg-gray-100 rounded-lg"></div>
+            <div className="flex space-x-4 overflow-x-auto pb-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="min-w-[280px] h-48 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
               ))}
             </div>
           ) : channelContent.length === 0 ? (
@@ -756,7 +756,7 @@ const ChannelManager: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
               {channelContent.map((item, index) => {
                 const contentData = parseContentNotes(item.notes);
                 const sceneCount = contentData?.totalScene || 0;
@@ -765,101 +765,77 @@ const ChannelManager: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    className="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 hover:shadow-md transition-all duration-200 hover-lift stagger-item"
+                    className="min-w-[280px] bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 hover-lift flex-shrink-0 stagger-item"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    {/* Card Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-3 flex-1 min-w-0">
-                        {/* Channel Logo */}
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {selectedChannel.logo_url && isValidImageUrl(selectedChannel.logo_url) ? (
-                            <img
-                              src={selectedChannel.logo_url}
-                              alt={selectedChannel.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="text-gray-600">{getTypeIcon(item.type)}</div>
-                          )}
-                        </div>
-                        
-                        {/* Title */}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 text-sm mb-1 truncate" title={item.title}>
-                            {item.title}
-                          </h4>
-                          <p className="text-xs text-gray-500">{selectedChannel.name}</p>
-                        </div>
+                    {/* Card Content - Vertical Layout */}
+                    <div className="p-4 space-y-3">
+                      {/* Baris Atas: Title & Description */}
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-gray-900 text-sm leading-tight" title={item.title}>
+                          {item.title}
+                        </h4>
+                        {contentData?.description && (
+                          <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                            {contentData.description}
+                          </p>
+                        )}
                       </div>
                       
-                      {/* Action Menu */}
-                      <div className="relative">
-                        <div className="flex items-center space-x-1">
-                          <button
-                            onClick={() => openEditContentForm(item)}
-                            className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Edit content"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => openContentDetail(item)}
-                            className="p-1.5 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
-                            title="View details"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => deleteContent(item.id)}
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete content"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Content Details */}
-                    <div className="space-y-3">
-                      {/* Scene count and Voice Over indicator */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          {sceneCount > 0 && (
-                            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
-                              {sceneCount} scene{sceneCount > 1 ? 's' : ''}
-                            </span>
-                          )}
-                          {hasVoiceOver && (
-                            <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md flex items-center">
-                              ✅ Voice Over
-                            </span>
-                          )}
-                        </div>
+                      {/* Baris Tengah: Scene Count & Voice Over Badge */}
+                      <div className="flex items-center space-x-2">
+                        {sceneCount > 0 && (
+                          <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+                            {sceneCount} scene{sceneCount > 1 ? 's' : ''}
+                          </span>
+                        )}
+                        {hasVoiceOver && (
+                          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md">
+                            ✅ Voice Over
+                          </span>
+                        )}
                       </div>
                       
-                      {/* Description Preview */}
-                      {contentData?.description && (
-                        <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                          {contentData.description}
-                        </p>
-                      )}
-                      
-                      {/* Status Badge Selector */}
-                      <div className="pt-2 border-t border-gray-100">
-                        <div className="relative">
+                      {/* Baris Bawah: Status Dropdown & Action Icons */}
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                        {/* Status Dropdown */}
+                        <div className="relative flex-1 mr-3">
                           <select
                             value={item.status}
                             onChange={(e) => updateContentStatus(item.id, e.target.value as ContentItem['status'])}
-                            className={`w-full text-xs font-medium px-3 py-2 rounded-lg border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${getStatusBadge(item.status)}`}
+                            className={`w-full text-xs font-medium px-2 py-1.5 rounded-md border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${getStatusBadge(item.status)}`}
                           >
                             <option value="planned">Planned</option>
                             <option value="watching">On Progress</option>
                             <option value="completed">Ready to Post</option>
                             <option value="published">Published</option>
                           </select>
-                          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
+                          <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
+                        </div>
+                        
+                        {/* Action Icons */}
+                        <div className="flex items-center space-x-1">
+                          <button
+                            onClick={() => openEditContentForm(item)}
+                            className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
+                            title="Edit ✏️"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => openContentDetail(item)}
+                            className="p-1.5 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-md transition-colors"
+                            title="Preview 👁️"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => deleteContent(item.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                            title="Delete 🗑️"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
                     </div>
