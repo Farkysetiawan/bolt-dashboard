@@ -523,6 +523,74 @@ const ChannelManager: React.FC = () => {
     return { total, planned, watching, completed, published };
   };
 
+  // Function to add sample content for testing
+  const addSampleContent = async () => {
+    if (!selectedChannel || !user?.id) return;
+
+    const sampleContents = [
+      {
+        title: "Tutorial React Hooks",
+        type: "video",
+        description: "Panduan lengkap menggunakan React Hooks untuk pemula",
+        totalScene: 5,
+        useVoiceOver: true
+      },
+      {
+        title: "Tips JavaScript ES6",
+        type: "article", 
+        description: "Fitur-fitur terbaru JavaScript ES6 yang wajib dikuasai",
+        totalScene: 3,
+        useVoiceOver: false
+      },
+      {
+        title: "Setup Development Environment",
+        type: "video",
+        description: "Cara setup environment development yang optimal",
+        totalScene: 4,
+        useVoiceOver: true
+      },
+      {
+        title: "Best Practices CSS",
+        type: "article",
+        description: "Praktik terbaik dalam menulis CSS yang maintainable",
+        totalScene: 6,
+        useVoiceOver: false
+      }
+    ];
+
+    try {
+      for (const content of sampleContents) {
+        const contentItem = {
+          title: content.title,
+          type: content.type as ContentItem['type'],
+          status: 'planned' as ContentItem['status'],
+          progress: 0,
+          user_id: user.id,
+          channel_id: selectedChannel.id,
+          notes: JSON.stringify({
+            description: content.description,
+            totalScene: content.totalScene,
+            scenes: Array.from({ length: content.totalScene }, (_, i) => ({
+              title: `Scene ${i + 1}`,
+              type: 'Visual',
+              voiceOver: content.useVoiceOver ? `Voice over for scene ${i + 1}` : undefined
+            })),
+            useVoiceOver: content.useVoiceOver,
+            contentType: content.type === 'video' ? 'Video' : 'Artikel'
+          })
+        };
+
+        await supabase.from('content_items').insert([contentItem]);
+      }
+      
+      // Refresh content list
+      fetchChannelContent();
+      alert('Sample content added successfully!');
+    } catch (error) {
+      console.error('Error adding sample content:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -727,21 +795,34 @@ const ChannelManager: React.FC = () => {
         <div className="card animate-fadeIn">
           <div className="card-header">
             <h3 className="card-title">Channel Content</h3>
-            <button 
-              onClick={openAddContentForm}
-              className="btn-primary"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Content
-            </button>
+            <div className="flex items-center space-x-2">
+              {/* Add Sample Content Button for Testing */}
+              {channelContent.length === 0 && (
+                <button 
+                  onClick={addSampleContent}
+                  className="btn-secondary text-xs"
+                >
+                  Add Sample
+                </button>
+              )}
+              <button 
+                onClick={openAddContentForm}
+                className="btn-primary"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Content
+              </button>
+            </div>
           </div>
           
           {contentLoading ? (
             /* Loading State - Horizontal Cards */
-            <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="min-w-[280px] h-80 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
-              ))}
+            <div className="overflow-x-auto pb-4">
+              <div className="flex space-x-4 min-w-max">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="w-80 h-96 bg-gray-100 rounded-xl animate-pulse flex-shrink-0"></div>
+                ))}
+              </div>
             </div>
           ) : channelContent.length === 0 ? (
             /* Empty State */
@@ -749,18 +830,26 @@ const ChannelManager: React.FC = () => {
               <Play className="w-16 h-16 mx-auto mb-4 text-gray-300" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No content added yet</h3>
               <p className="text-sm mb-6">Start creating content for your channel</p>
-              <button
-                onClick={openAddContentForm}
-                className="btn-primary"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add your first content
-              </button>
+              <div className="flex items-center justify-center space-x-3">
+                <button
+                  onClick={addSampleContent}
+                  className="btn-secondary"
+                >
+                  Add Sample Content
+                </button>
+                <button
+                  onClick={openAddContentForm}
+                  className="btn-primary"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add your first content
+                </button>
+              </div>
             </div>
           ) : (
             /* 🚀 HORIZONTAL SCROLLABLE CONTAINER - MAIN LAYOUT */
-            <div className="overflow-x-auto pb-4">
-              <div className="flex space-x-4 min-w-max">
+            <div className="overflow-x-auto pb-4 scrollbar-hide">
+              <div className="flex space-x-6 min-w-max px-1">
                 {channelContent.map((item, index) => {
                   const contentData = parseContentNotes(item.notes);
                   const sceneCount = contentData?.totalScene || 0;
