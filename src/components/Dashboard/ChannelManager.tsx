@@ -723,7 +723,7 @@ const ChannelManager: React.FC = () => {
           </div>
         </div>
 
-        {/* Channel Content Section - HORIZONTAL SCROLLABLE CARDS */}
+        {/* 🎯 MAIN CONTENT SECTION - HORIZONTAL SCROLLABLE CARDS */}
         <div className="card animate-fadeIn">
           <div className="card-header">
             <h3 className="card-title">Channel Content</h3>
@@ -737,12 +737,14 @@ const ChannelManager: React.FC = () => {
           </div>
           
           {contentLoading ? (
+            /* Loading State - Horizontal Cards */
             <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="min-w-[280px] h-80 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
               ))}
             </div>
           ) : channelContent.length === 0 ? (
+            /* Empty State */
             <div className="text-center py-16 text-gray-500">
               <Play className="w-16 h-16 mx-auto mb-4 text-gray-300" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No content added yet</h3>
@@ -756,7 +758,7 @@ const ChannelManager: React.FC = () => {
               </button>
             </div>
           ) : (
-            /* HORIZONTAL SCROLLABLE CONTAINER */
+            /* 🚀 HORIZONTAL SCROLLABLE CONTAINER - MAIN LAYOUT */
             <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
               {channelContent.map((item, index) => {
                 const contentData = parseContentNotes(item.notes);
@@ -764,13 +766,13 @@ const ChannelManager: React.FC = () => {
                 const hasVoiceOver = contentData?.useVoiceOver || false;
                 
                 return (
-                  /* INDIVIDUAL CONTENT CARD - FIXED WIDTH, VERTICAL LAYOUT */
+                  /* 🃏 INDIVIDUAL CONTENT CARD - FIXED WIDTH, VERTICAL LAYOUT */
                   <div
                     key={item.id}
                     className="min-w-[280px] h-80 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 hover-lift flex-shrink-0 flex flex-col stagger-item"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    {/* Header Section - Fixed Height */}
+                    {/* 📋 HEADER SECTION - Fixed Height */}
                     <div className="p-4 border-b border-gray-100">
                       <div className="flex items-center space-x-3 mb-3">
                         {/* Channel Logo */}
@@ -800,7 +802,7 @@ const ChannelManager: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Content Section - Flexible Height */}
+                    {/* 🏷️ CONTENT SECTION - Flexible Height */}
                     <div className="p-4 flex-1 flex flex-col justify-between">
                       {/* Scene & Voice Over Badges */}
                       <div className="space-y-3">
@@ -818,7 +820,7 @@ const ChannelManager: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Bottom Section - Status & Actions */}
+                      {/* ⚡ BOTTOM SECTION - Status & Actions */}
                       <div className="space-y-3 mt-4">
                         {/* Status Dropdown - Full Width */}
                         <div className="relative">
@@ -835,7 +837,7 @@ const ChannelManager: React.FC = () => {
                           <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
                         </div>
                         
-                        {/* Action Buttons - HORIZONTAL LAYOUT */}
+                        {/* 🔥 ACTION BUTTONS - HORIZONTAL LAYOUT (MENYAMPING) */}
                         <div className="flex items-center space-x-2 pt-2 border-t border-gray-100">
                           <button
                             onClick={() => openEditContentForm(item)}
