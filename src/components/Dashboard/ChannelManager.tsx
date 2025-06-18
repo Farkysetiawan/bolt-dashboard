@@ -16,7 +16,7 @@ interface ContentItem {
   id: string;
   title: string;
   type: 'video' | 'article' | 'book' | 'podcast' | 'course' | 'tutorial' | 'documentary' | 'webinar';
-  status: 'planned' | 'on_progress' | 'ready_to_post' | 'published';
+  status: 'planned' | 'watching' | 'completed';
   progress: number;
   user_id: string;
   channel_id?: string;
@@ -400,9 +400,8 @@ const ChannelManager: React.FC = () => {
 
   const getStatusBadge = (status: ContentItem['status']) => {
     switch (status) {
-      case 'published': return 'badge badge-success';
-      case 'ready_to_post': return 'badge bg-blue-50 text-blue-700 border border-blue-200';
-      case 'on_progress': return 'badge badge-warning';
+      case 'completed': return 'badge badge-success';
+      case 'watching': return 'badge badge-warning';
       case 'planned': return 'badge badge-gray';
       default: return 'badge badge-gray';
     }
@@ -410,9 +409,8 @@ const ChannelManager: React.FC = () => {
 
   const getStatusLabel = (status: ContentItem['status']) => {
     switch (status) {
-      case 'published': return 'Published';
-      case 'ready_to_post': return 'Ready to Post';
-      case 'on_progress': return 'On Progress';
+      case 'completed': return 'Completed';
+      case 'watching': return 'In Progress';
       case 'planned': return 'Planned';
       default: return 'Planned';
     }
@@ -429,12 +427,11 @@ const ChannelManager: React.FC = () => {
 
   const getChannelStats = () => {
     const total = channelContent.length;
-    const published = channelContent.filter(item => item.status === 'published').length;
-    const ready = channelContent.filter(item => item.status === 'ready_to_post').length;
-    const inProgress = channelContent.filter(item => item.status === 'on_progress').length;
+    const completed = channelContent.filter(item => item.status === 'completed').length;
+    const watching = channelContent.filter(item => item.status === 'watching').length;
     const planned = channelContent.filter(item => item.status === 'planned').length;
     
-    return { total, published, ready, inProgress, planned };
+    return { total, completed, watching, planned };
   };
 
   if (loading) {
@@ -585,9 +582,8 @@ const ChannelManager: React.FC = () => {
                             className="text-xs border border-gray-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             <option value="planned">Planned</option>
-                            <option value="on_progress">On Progress</option>
-                            <option value="ready_to_post">Ready to Post</option>
-                            <option value="published">Published</option>
+                            <option value="watching">In Progress</option>
+                            <option value="completed">Completed</option>
                           </select>
                         </div>
                       </div>
@@ -633,16 +629,16 @@ const ChannelManager: React.FC = () => {
               <div className="stat-label">Total Content</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value text-green-600">{stats.published}</div>
-              <div className="stat-label">Published</div>
+              <div className="stat-value text-green-600">{stats.completed}</div>
+              <div className="stat-label">Completed</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value text-blue-600">{stats.ready}</div>
-              <div className="stat-label">Ready to Post</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value text-orange-600">{stats.inProgress}</div>
+              <div className="stat-value text-orange-600">{stats.watching}</div>
               <div className="stat-label">In Progress</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value text-gray-600">{stats.planned}</div>
+              <div className="stat-label">Planned</div>
             </div>
           </div>
         </div>
