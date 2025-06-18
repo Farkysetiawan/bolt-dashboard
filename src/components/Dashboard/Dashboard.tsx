@@ -9,6 +9,7 @@ import QuickLinksManager from './QuickLinksManager';
 import PromptBank from './PromptBank';
 import UserProfile from './UserProfile';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import BodyTracker from './BodyTracker';
 import { 
   CheckSquare, 
   BookOpen, 
@@ -19,10 +20,11 @@ import {
   LayoutDashboard,
   Menu,
   X,
-  BarChart3
+  BarChart3,
+  Dumbbell
 } from 'lucide-react';
 
-type CategoryType = 'all' | 'todos' | 'journal' | 'content' | 'learning' | 'links' | 'prompts' | 'profile' | 'analytics';
+type CategoryType = 'all' | 'todos' | 'journal' | 'content' | 'learning' | 'links' | 'prompts' | 'body' | 'profile' | 'analytics';
 
 interface Category {
   id: CategoryType;
@@ -55,6 +57,11 @@ const categories: Category[] = [
     id: 'learning',
     name: 'Goals',
     icon: <GraduationCap className="w-4 h-4" />
+  },
+  {
+    id: 'body',
+    name: 'Body',
+    icon: <Dumbbell className="w-4 h-4" />
   },
   {
     id: 'links',
@@ -108,6 +115,8 @@ const Dashboard: React.FC = () => {
       title: category?.name || 'Dashboard',
       subtitle: activeCategory === 'all' 
         ? 'Overview of all your productivity tools'
+        : activeCategory === 'body'
+        ? 'Track your fitness journey and health goals'
         : `Manage your ${category?.name.toLowerCase()}`
     };
   }, [activeCategory]);
@@ -125,6 +134,8 @@ const Dashboard: React.FC = () => {
         return <ChannelManager />;
       case 'learning':
         return <LearningTracker readOnly={false} />;
+      case 'body':
+        return <BodyTracker />;
       case 'links':
         return <QuickLinksManager />;
       case 'prompts':
