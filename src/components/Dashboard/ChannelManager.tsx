@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Plus, X, Upload, Image, Settings, Edit2, Trash2, ArrowLeft, BookOpen, Video, Headphones, FileText, Link, Calendar, Clock, Star, Tag } from 'lucide-react';
+import { Play, Plus, X, Upload, Image, Settings, Edit2, Trash2, ArrowLeft, BookOpen, Video, Headphones, FileText, Link, Calendar, Clock, Star, Tag, Eye, MoreVertical } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import AddContentForm from './AddContentForm';
@@ -16,7 +16,7 @@ interface ContentItem {
   id: string;
   title: string;
   type: 'video' | 'article' | 'book' | 'podcast' | 'course' | 'tutorial' | 'documentary' | 'webinar';
-  status: 'watching' | 'completed' | 'planned' | 'paused' | 'dropped';
+  status: 'planned' | 'on_progress' | 'ready_to_post' | 'published';
   progress: number;
   user_id: string;
   channel_id?: string;
@@ -318,21 +318,20 @@ const ChannelManager: React.FC = () => {
     }
   };
 
-  const updateContentProgress = async (id: string, progress: number) => {
+  const updateContentStatus = async (id: string, status: ContentItem['status']) => {
     try {
-      const status = progress >= 100 ? 'completed' : progress > 0 ? 'watching' : 'planned';
       const { error } = await supabase
         .from('content_items')
-        .update({ progress, status })
+        .update({ status })
         .eq('id', id);
 
       if (error) throw error;
       
       setChannelContent(channelContent.map(item => 
-        item.id === id ? { ...item, progress, status } : item
+        item.id === id ? { ...item, status } : item
       ));
     } catch (error) {
-      console.error('Error updating progress:', error);
+      console.error('Error updating status:', error);
     }
   };
 
@@ -399,38 +398,43 @@ const ChannelManager: React.FC = () => {
     return url && (url.startsWith('http') || url.startsWith('data:image/'));
   };
 
-  const getTypeIcon = (type: ContentItem['type']) => {
-    switch (type) {
-      case 'video': return <Video className="w-4 h-4" />;
-      case 'article': return <FileText className="w-4 h-4" />;
-      case 'book': return <BookOpen className="w-4 h-4" />;
-      case 'podcast': return <Headphones className="w-4 h-4" />;
-      case 'course': return <BookOpen className="w-4 h-4" />;
-      case 'tutorial': return <Play className="w-4 h-4" />;
-      case 'documentary': return <Video className="w-4 h-4" />;
-      case 'webinar': return <Video className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
+  const getStatusBadge = (status: ContentItem['status']) => {
+    switch (status) {
+      case 'published': return 'badge badge-success';
+      case 'ready_to_post': return 'badge bg-blue-50 text-blue-700 border border-blue-200';
+      case 'on_progress': return 'badge badge-warning';
+      case 'planned': return 'badge badge-gray';
+      default: return 'badge badge-gray';
     }
   };
 
-  const getStatusBadge = (status: ContentItem['status']) => {
+  const getStatusLabel = (status: ContentItem['status']) => {
     switch (status) {
-      case 'completed': return 'badge badge-success';
-      case 'watching': return 'badge badge-info';
-      case 'planned': return 'badge badge-gray';
-      case 'paused': return 'badge bg-yellow-100 text-yellow-800';
-      case 'dropped': return 'badge bg-red-100 text-red-800';
-      default: return 'badge badge-gray';
+      case 'published': return 'Published';
+      case 'ready_to_post': return 'Ready to Post';
+      case 'on_progress': return 'On Progress';
+      case 'planned': return 'Planned';
+      default: return 'Planned';
+    }
+  };
+
+  const parseContentNotes = (notes: string | null) => {
+    if (!notes) return null;
+    try {
+      return JSON.parse(notes);
+    } catch {
+      return null;
     }
   };
 
   const getChannelStats = () => {
     const total = channelContent.length;
-    const completed = channelContent.filter(item => item.status === 'completed').length;
-    const inProgress = channelContent.filter(item => item.status === 'watching').length;
+    const published = channelContent.filter(item => item.status === 'published').length;
+    const ready = channelContent.filter(item => item.status === 'ready_to_post').length;
+    const inProgress = channelContent.filter(item => item.status === 'on_progress').length;
     const planned = channelContent.filter(item => item.status === 'planned').length;
     
-    return { total, completed, inProgress, planned };
+    return { total, published, ready, inProgress, planned };
   };
 
   if (loading) {
@@ -509,125 +513,136 @@ const ChannelManager: React.FC = () => {
           </div>
         </div>
 
-        {/* Channel Content Management */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Content List */}
-          <div className="card animate-fadeIn">
-            <div className="card-header">
-              <h3 className="card-title">Channel Content</h3>
-              <button 
+        {/* Channel Content Section */}
+        <div className="card animate-fadeIn">
+          <div className="card-header">
+            <h3 className="card-title">Channel Content</h3>
+            <button 
+              onClick={openAddContentForm}
+              className="btn-primary"
+            >
+              <Plus className="w-3 h-3 mr-1.5" />
+              Add Content
+            </button>
+          </div>
+          
+          {contentLoading ? (
+            <div className="animate-pulse space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-20 bg-gray-100 rounded-lg"></div>
+              ))}
+            </div>
+          ) : channelContent.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <Play className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <p className="text-sm mb-2">No content added yet</p>
+              <button
                 onClick={openAddContentForm}
-                className="btn-primary"
+                className="text-blue-600 hover:text-blue-700 text-xs"
               >
-                <Plus className="w-3 h-3 mr-1.5" />
-                Add Content
+                Add your first content
               </button>
             </div>
-            
-            {contentLoading ? (
-              <div className="animate-pulse space-y-3">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-16 bg-gray-100 rounded-lg"></div>
-                ))}
-              </div>
-            ) : channelContent.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Play className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                <p className="text-sm mb-2">No content added yet</p>
-                <button
-                  onClick={openAddContentForm}
-                  className="text-blue-600 hover:text-blue-700 text-xs"
-                >
-                  Add your first content
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {channelContent.map((item, index) => (
+          ) : (
+            <div className="space-y-3">
+              {channelContent.map((item, index) => {
+                const contentData = parseContentNotes(item.notes);
+                const sceneCount = contentData?.totalScene || 0;
+                const hasVoiceOver = contentData?.useVoiceOver || false;
+                
+                return (
                   <div
                     key={item.id}
-                    className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 hover-lift stagger-item"
+                    className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 hover-lift stagger-item"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center space-x-2.5 min-w-0 flex-1">
-                        <div className="text-gray-600">{getTypeIcon(item.type)}</div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 truncate text-xs">{item.title}</h4>
-                          {item.notes && (
-                            <p className="text-xs text-gray-500 mt-1 truncate">
-                              {(() => {
-                                try {
-                                  const parsed = JSON.parse(item.notes);
-                                  return parsed.description || 'No description';
-                                } catch {
-                                  return item.notes.substring(0, 50) + '...';
-                                }
-                              })()}
-                            </p>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        {/* Title */}
+                        <h4 className="font-semibold text-gray-900 text-sm mb-2 truncate">
+                          {item.title}
+                        </h4>
+                        
+                        {/* Scene count and Voice Over indicator */}
+                        <div className="flex items-center space-x-3 mb-3">
+                          {sceneCount > 0 && (
+                            <span className="text-xs text-gray-600">
+                              {sceneCount} scene{sceneCount > 1 ? 's' : ''}
+                            </span>
                           )}
+                          {hasVoiceOver && (
+                            <span className="text-xs text-green-600 flex items-center">
+                              ✅ Voice Over
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Status Dropdown */}
+                        <div className="mb-3">
+                          <select
+                            value={item.status}
+                            onChange={(e) => updateContentStatus(item.id, e.target.value as ContentItem['status'])}
+                            className="text-xs border border-gray-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="planned">Planned</option>
+                            <option value="on_progress">On Progress</option>
+                            <option value="ready_to_post">Ready to Post</option>
+                            <option value="published">Published</option>
+                          </select>
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-1.5 flex-shrink-0">
-                        <span className={getStatusBadge(item.status)}>
-                          {item.status}
-                        </span>
+                      {/* Action Buttons */}
+                      <div className="flex items-center space-x-1 flex-shrink-0 ml-4">
+                        <button
+                          className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors"
+                          title="Edit content"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          className="p-1.5 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded transition-colors"
+                          title="View details"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           onClick={() => deleteContent(item.id)}
-                          className="p-1 text-gray-400 hover:text-red-500 transition-colors hover-scale"
+                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                          title="Delete content"
                         >
-                          <X className="w-3 h-3" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
-                    
-                    {/* Progress Bar */}
-                    <div className="flex items-center space-x-2">
-                      <div className="flex-1 progress-bar">
-                        <div
-                          className="progress-fill"
-                          style={{ width: `${item.progress}%` }}
-                        ></div>
-                      </div>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={item.progress}
-                        onChange={(e) => updateContentProgress(item.id, parseInt(e.target.value) || 0)}
-                        className="w-12 px-1.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                      />
-                      <span className="text-xs text-gray-500">%</span>
-                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Channel Statistics */}
-          <div className="card animate-fadeIn">
-            <div className="card-header">
-              <h3 className="card-title">Channel Statistics</h3>
+                );
+              })}
             </div>
-            <div className="grid-2">
-              <div className="stat-card">
-                <div className="stat-value text-blue-600">{stats.total}</div>
-                <div className="stat-label">Total Content</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value text-green-600">{stats.completed}</div>
-                <div className="stat-label">Completed</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value text-orange-600">{stats.inProgress}</div>
-                <div className="stat-label">In Progress</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value text-gray-600">{stats.planned}</div>
-                <div className="stat-label">Planned</div>
-              </div>
+          )}
+        </div>
+
+        {/* Channel Statistics */}
+        <div className="card animate-fadeIn">
+          <div className="card-header">
+            <h3 className="card-title">Channel Statistics</h3>
+          </div>
+          <div className="grid-4">
+            <div className="stat-card">
+              <div className="stat-value text-blue-600">{stats.total}</div>
+              <div className="stat-label">Total Content</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value text-green-600">{stats.published}</div>
+              <div className="stat-label">Published</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value text-blue-600">{stats.ready}</div>
+              <div className="stat-label">Ready to Post</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value text-orange-600">{stats.inProgress}</div>
+              <div className="stat-label">In Progress</div>
             </div>
           </div>
         </div>
