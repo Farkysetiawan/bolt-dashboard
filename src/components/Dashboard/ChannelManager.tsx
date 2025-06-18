@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Plus, X, Upload, Image, Settings, Edit2, Trash2, ArrowLeft, BookOpen, Video, Headphones, FileText, Link, Calendar, Clock, Star, Tag, Eye, MoreVertical, ChevronDown } from 'lucide-react';
+import { Play, Plus, X, Upload, Image, Settings, Edit2, Trash2, ArrowLeft, BookOpen, Video, Headphones, FileText, Link, Calendar, Clock, Star, Tag, Eye, MoreVertical, ChevronDown, Filter } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import AddContentForm from './AddContentForm';
@@ -46,6 +46,7 @@ interface ContentFormData {
 const ChannelManager: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [channelContent, setChannelContent] = useState<ContentItem[]>([]);
+  const [filteredContent, setFilteredContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [contentLoading, setContentLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -55,6 +56,7 @@ const ChannelManager: React.FC = () => {
   const [showContentDetail, setShowContentDetail] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'planned' | 'watching' | 'completed' | 'published'>('all');
   const [formData, setFormData] = useState({
     name: '',
     logo_url: ''
@@ -75,6 +77,15 @@ const ChannelManager: React.FC = () => {
       fetchChannelContent();
     }
   }, [selectedChannel]);
+
+  // Filter content based on status
+  useEffect(() => {
+    if (statusFilter === 'all') {
+      setFilteredContent(channelContent);
+    } else {
+      setFilteredContent(channelContent.filter(item => item.status === statusFilter));
+    }
+  }, [channelContent, statusFilter]);
 
   const fetchChannels = async () => {
     try {
@@ -104,7 +115,7 @@ const ChannelManager: React.FC = () => {
         .select('*')
         .eq('user_id', user?.id)
         .eq('channel_id', selectedChannel.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true }); // Order by created_at ASC for numbering
 
       // If no content found or channel_id doesn't exist, get all user content
       if (!data || data.length === 0) {
@@ -112,7 +123,7 @@ const ChannelManager: React.FC = () => {
           .from('content_items')
           .select('*')
           .eq('user_id', user?.id)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: true }); // Order by created_at ASC for numbering
         
         if (allError) throw allError;
         data = allContent || [];
@@ -301,7 +312,7 @@ const ChannelManager: React.FC = () => {
       console.log('Content saved successfully:', data);
       
       // Update local state
-      setChannelContent([data, ...channelContent]);
+      setChannelContent([...channelContent, data]); // Add to end to maintain order
       setShowContentForm(false);
       
       alert('Content added successfully!');
@@ -519,6 +530,16 @@ const ChannelManager: React.FC = () => {
     const watching = channelContent.filter(item => item.status === 'watching').length;
     const completed = channelContent.filter(item => item.status === 'completed').length;
     const published = channelContent.filter(item => item.status === 'published').length;
+    
+    return { total, planned, watching, completed, published };
+  };
+
+  const getFilteredStats = () => {
+    const total = filteredContent.length;
+    const planned = filteredContent.filter(item => item.status === 'planned').length;
+    const watching = filteredContent.filter(item => item.status === 'watching').length;
+    const completed = filteredContent.filter(item => item.status === 'completed').length;
+    const published = filteredContent.filter(item => item.status === 'published').length;
     
     return { total, planned, watching, completed, published };
   };
@@ -745,6 +766,7 @@ const ChannelManager: React.FC = () => {
   // If a channel is selected, show channel management
   if (selectedChannel && !showAddModal) {
     const stats = getChannelStats();
+    const filteredStats = getFilteredStats();
     
     return (
       <div className="space-y-6">
@@ -815,6 +837,31 @@ const ChannelManager: React.FC = () => {
             </div>
           </div>
           
+          {/* 🔍 FILTER/SORT SECTION */}
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Filter className="w-4 h-4 text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">Filter by Status:</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  className="text-xs px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                >
+                  <option value="all">All ({stats.total})</option>
+                  <option value="planned">Planned ({stats.planned})</option>
+                  <option value="watching">On Progress ({stats.watching})</option>
+                  <option value="completed">Ready to Post ({stats.completed})</option>
+                  <option value="published">Published ({stats.published})</option>
+                </select>
+              </div>
+              
+              <div className="text-xs text-gray-500">
+                Showing {filteredStats.total} of {stats.total} content{stats.total !== 1 ? 's' : ''}
+              </div>
+            </div>
+          </div>
+          
           {/* 📋 VERTICAL LIST CONTENT - LIKE TASKS */}
           <div className="space-y-2.5">
             {contentLoading ? (
@@ -824,32 +871,50 @@ const ChannelManager: React.FC = () => {
                   <div key={i} className="h-16 bg-gray-100 rounded-lg"></div>
                 ))}
               </div>
-            ) : channelContent.length === 0 ? (
+            ) : filteredContent.length === 0 ? (
               /* Empty State */
               <div className="text-center py-8 text-gray-500 animate-fadeIn">
                 <Play className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                <p className="text-sm mb-2">No content added yet</p>
-                <div className="flex items-center justify-center space-x-3">
-                  <button
-                    onClick={addSampleContent}
-                    className="btn-secondary text-xs"
-                  >
-                    Add Sample Content
-                  </button>
-                  <button
-                    onClick={openAddContentForm}
-                    className="text-blue-600 hover:text-blue-700 text-xs"
-                  >
-                    Add your first content
-                  </button>
-                </div>
+                {statusFilter === 'all' ? (
+                  <>
+                    <p className="text-sm mb-2">No content added yet</p>
+                    <div className="flex items-center justify-center space-x-3">
+                      <button
+                        onClick={addSampleContent}
+                        className="btn-secondary text-xs"
+                      >
+                        Add Sample Content
+                      </button>
+                      <button
+                        onClick={openAddContentForm}
+                        className="text-blue-600 hover:text-blue-700 text-xs"
+                      >
+                        Add your first content
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm mb-2">No {statusFilter} content found</p>
+                    <button
+                      onClick={() => setStatusFilter('all')}
+                      className="text-blue-600 hover:text-blue-700 text-xs"
+                    >
+                      Show all content
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
-              /* 🚀 VERTICAL LIST - EXACTLY LIKE TASKS */
-              channelContent.map((item, index) => {
+              /* 🚀 VERTICAL LIST - EXACTLY LIKE TASKS WITH NUMBERING */
+              filteredContent.map((item, index) => {
                 const contentData = parseContentNotes(item.notes);
                 const sceneCount = contentData?.totalScene || 0;
                 const hasVoiceOver = contentData?.useVoiceOver || false;
+                
+                // Calculate the actual number based on original order in channelContent
+                const originalIndex = channelContent.findIndex(content => content.id === item.id);
+                const contentNumber = originalIndex + 1;
                 
                 return (
                   <div
@@ -859,6 +924,11 @@ const ChannelManager: React.FC = () => {
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-start space-x-2.5 min-w-0 flex-1">
+                        {/* 🔢 CONTENT NUMBER */}
+                        <div className="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">
+                          {contentNumber}
+                        </div>
+                        
                         {/* Type Icon */}
                         <div className="text-gray-600 mt-0.5">
                           {getTypeIcon(item.type)}
@@ -877,13 +947,8 @@ const ChannelManager: React.FC = () => {
                             </p>
                           )}
                           
-                          {/* Meta Info */}
+                          {/* 🏷️ META INFO - HORIZONTAL LAYOUT */}
                           <div className="flex flex-wrap items-center gap-1.5">
-                            {/* Status Badge */}
-                            <span className={getStatusBadge(item.status)}>
-                              {getStatusLabel(item.status)}
-                            </span>
-                            
                             {/* Scene Count */}
                             {sceneCount > 0 && (
                               <span className="text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded-full">
@@ -897,6 +962,18 @@ const ChannelManager: React.FC = () => {
                                 ✅ Voice Over
                               </span>
                             )}
+                            
+                            {/* 📅 STATUS DROPDOWN - SEJAJAR DENGAN BADGES */}
+                            <select
+                              value={item.status}
+                              onChange={(e) => updateContentStatus(item.id, e.target.value as ContentItem['status'])}
+                              className="text-xs px-1.5 py-0.5 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                            >
+                              <option value="planned">Planned</option>
+                              <option value="watching">On Progress</option>
+                              <option value="completed">Ready to Post</option>
+                              <option value="published">Published</option>
+                            </select>
                             
                             {/* Created Date */}
                             <span className="text-xs text-gray-500">
@@ -930,20 +1007,6 @@ const ChannelManager: React.FC = () => {
                           <X className="w-3 h-3" />
                         </button>
                       </div>
-                    </div>
-
-                    {/* Status Dropdown */}
-                    <div className="mt-2">
-                      <select
-                        value={item.status}
-                        onChange={(e) => updateContentStatus(item.id, e.target.value as ContentItem['status'])}
-                        className="text-xs px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                      >
-                        <option value="planned">Planned</option>
-                        <option value="watching">On Progress</option>
-                        <option value="completed">Ready to Post</option>
-                        <option value="published">Published</option>
-                      </select>
                     </div>
                   </div>
                 );
