@@ -740,7 +740,7 @@ const ChannelManager: React.FC = () => {
             /* Loading State - Horizontal Cards */
             <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="min-w-[280px] h-80 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
+                <div key={i} className="min-w-[320px] h-96 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
               ))}
             </div>
           ) : channelContent.length === 0 ? (
@@ -759,7 +759,7 @@ const ChannelManager: React.FC = () => {
             </div>
           ) : (
             /* 🚀 HORIZONTAL SCROLLABLE CONTAINER - MAIN LAYOUT */
-            <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
+            <div className="flex space-x-6 overflow-x-auto pb-6 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
               {channelContent.map((item, index) => {
                 const contentData = parseContentNotes(item.notes);
                 const sceneCount = contentData?.totalScene || 0;
@@ -769,14 +769,17 @@ const ChannelManager: React.FC = () => {
                   /* 🃏 INDIVIDUAL CONTENT CARD - FIXED WIDTH, VERTICAL LAYOUT */
                   <div
                     key={item.id}
-                    className="min-w-[280px] h-80 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 hover-lift flex-shrink-0 flex flex-col stagger-item"
-                    style={{ animationDelay: `${index * 0.1}s` }}
+                    className="min-w-[320px] max-w-[320px] h-auto bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-300 hover-lift flex-shrink-0 flex flex-col stagger-item"
+                    style={{ 
+                      animationDelay: `${index * 0.1}s`,
+                      scrollSnapAlign: 'start'
+                    }}
                   >
                     {/* 📋 HEADER SECTION - Fixed Height */}
-                    <div className="p-4 border-b border-gray-100">
-                      <div className="flex items-center space-x-3 mb-3">
+                    <div className="p-5 border-b border-gray-100">
+                      <div className="flex items-center space-x-3 mb-4">
                         {/* Channel Logo */}
-                        <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                           {selectedChannel.logo_url && isValidImageUrl(selectedChannel.logo_url) ? (
                             <img
                               src={selectedChannel.logo_url}
@@ -784,8 +787,13 @@ const ChannelManager: React.FC = () => {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <Play className="w-4 h-4 text-gray-400" />
+                            <Play className="w-5 h-5 text-gray-400" />
                           )}
+                        </div>
+                        
+                        {/* Content Type Icon */}
+                        <div className="text-gray-600">
+                          {getTypeIcon(item.type)}
                         </div>
                         
                         {/* Title */}
@@ -796,71 +804,76 @@ const ChannelManager: React.FC = () => {
                       
                       {/* Description */}
                       {contentData?.description && (
-                        <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-gray-600 line-clamp-3 leading-relaxed">
                           {contentData.description}
                         </p>
                       )}
                     </div>
 
                     {/* 🏷️ CONTENT SECTION - Flexible Height */}
-                    <div className="p-4 flex-1 flex flex-col justify-between">
+                    <div className="p-5 flex-1 flex flex-col justify-between">
                       {/* Scene & Voice Over Badges */}
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-2 flex-wrap gap-2">
                           {sceneCount > 0 && (
-                            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+                            <span className="text-xs text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full font-medium">
                               {sceneCount} scene{sceneCount > 1 ? 's' : ''}
                             </span>
                           )}
                           {hasVoiceOver && (
-                            <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md">
+                            <span className="text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-full font-medium">
                               ✅ Voice Over
                             </span>
                           )}
                         </div>
+
+                        {/* Created Date */}
+                        <div className="text-xs text-gray-500">
+                          Created: {new Date(item.created_at).toLocaleDateString()}
+                        </div>
                       </div>
 
                       {/* ⚡ BOTTOM SECTION - Status & Actions */}
-                      <div className="space-y-3 mt-4">
+                      <div className="space-y-4 mt-6">
                         {/* Status Dropdown - Full Width */}
                         <div className="relative">
                           <select
                             value={item.status}
                             onChange={(e) => updateContentStatus(item.id, e.target.value as ContentItem['status'])}
-                            className={`w-full text-xs font-medium px-3 py-2 rounded-md border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${getStatusBadge(item.status)}`}
+                            className={`w-full text-sm font-medium px-4 py-3 rounded-lg border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${getStatusBadge(item.status)}`}
                           >
                             <option value="planned">Planned</option>
                             <option value="watching">On Progress</option>
                             <option value="completed">Ready to Post</option>
                             <option value="published">Published</option>
                           </select>
-                          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
+                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
                         </div>
                         
                         {/* 🔥 ACTION BUTTONS - HORIZONTAL LAYOUT (MENYAMPING) */}
-                        <div className="flex items-center space-x-2 pt-2 border-t border-gray-100">
+                        <div className="flex items-center space-x-2 pt-3 border-t border-gray-100">
                           <button
                             onClick={() => openEditContentForm(item)}
-                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors text-xs"
+                            className="flex-1 flex items-center justify-center space-x-2 p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 text-sm font-medium"
                             title="Edit"
                           >
-                            <Edit2 className="w-3 h-3" />
+                            <Edit2 className="w-4 h-4" />
                             <span>Edit</span>
                           </button>
                           <button
                             onClick={() => openContentDetail(item)}
-                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-md transition-colors text-xs"
+                            className="flex-1 flex items-center justify-center space-x-2 p-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 text-sm font-medium"
                             title="View"
                           >
-                            <Eye className="w-3 h-3" />
+                            <Eye className="w-4 h-4" />
                             <span>View</span>
                           </button>
                           <button
                             onClick={() => deleteContent(item.id)}
-                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors text-xs"
+                            className="flex-1 flex items-center justify-center space-x-2 p-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 text-sm font-medium"
                             title="Delete"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-4 h-4" />
                             <span>Delete</span>
                           </button>
                         </div>
