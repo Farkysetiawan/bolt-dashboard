@@ -32,6 +32,8 @@ const QuickLinksHorizontal: React.FC = () => {
       setError(null);
       setLoading(true);
       
+      console.log('Fetching quick links for user:', user.id);
+      
       const { data, error } = await supabase
         .from('quick_links')
         .select('*')
@@ -40,14 +42,29 @@ const QuickLinksHorizontal: React.FC = () => {
         .limit(10);
 
       if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+        console.error('Supabase error fetching quick links:', error);
+        throw new Error(`Database error: ${error.message}`);
       }
       
+      console.log('Quick links fetched successfully:', data?.length || 0, 'items');
       setLinks(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching quick links:', error);
-      setError('Failed to load quick links');
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to load quick links';
+      
+      if (error.name === 'AbortError') {
+        errorMessage = 'Request timed out. Please check your connection.';
+      } else if (error.message?.includes('Failed to fetch')) {
+        errorMessage = 'Unable to connect to database. Please check your internet connection.';
+      } else if (error.message?.includes('Database error')) {
+        errorMessage = error.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
       setLinks([]);
     } finally {
       setLoading(false);

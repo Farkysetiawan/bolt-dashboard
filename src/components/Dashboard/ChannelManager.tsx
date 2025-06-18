@@ -63,6 +63,7 @@ const ChannelManager: React.FC = () => {
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
 
@@ -89,16 +90,40 @@ const ChannelManager: React.FC = () => {
 
   const fetchChannels = async () => {
     try {
+      setError(null);
+      console.log('Fetching channels for user:', user?.id);
+      
       const { data, error } = await supabase
         .from('channels')
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error fetching channels:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
+      console.log('Channels fetched successfully:', data?.length || 0, 'items');
       setChannels(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching channels:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to load channels';
+      
+      if (error.name === 'AbortError') {
+        errorMessage = 'Request timed out. Please check your connection.';
+      } else if (error.message?.includes('Failed to fetch')) {
+        errorMessage = 'Unable to connect to database. Please check your internet connection.';
+      } else if (error.message?.includes('Database error')) {
+        errorMessage = error.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
+      setChannels([]);
     } finally {
       setLoading(false);
     }
@@ -109,6 +134,9 @@ const ChannelManager: React.FC = () => {
     
     setContentLoading(true);
     try {
+      setError(null);
+      console.log('Fetching content for channel:', selectedChannel.id);
+      
       // First, try to get content with channel_id
       let { data, error } = await supabase
         .from('content_items')
@@ -125,14 +153,37 @@ const ChannelManager: React.FC = () => {
           .eq('user_id', user?.id)
           .order('created_at', { ascending: true }); // Order by created_at ASC for numbering
         
-        if (allError) throw allError;
+        if (allError) {
+          console.error('Supabase error fetching all content:', allError);
+          throw new Error(`Database error: ${allError.message}`);
+        }
         data = allContent || [];
       }
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error fetching channel content:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
+      console.log('Channel content fetched successfully:', data?.length || 0, 'items');
       setChannelContent(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching channel content:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to load channel content';
+      
+      if (error.name === 'AbortError') {
+        errorMessage = 'Request timed out. Please check your connection.';
+      } else if (error.message?.includes('Failed to fetch')) {
+        errorMessage = 'Unable to connect to database. Please check your internet connection.';
+      } else if (error.message?.includes('Database error')) {
+        errorMessage = error.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
       setChannelContent([]);
     } finally {
       setContentLoading(false);
@@ -626,6 +677,27 @@ const ChannelManager: React.FC = () => {
     );
   }
 
+  // Show error state if there's an error
+  if (error && !selectedChannel) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-16 animate-fadeIn">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Play className="w-8 h-8 text-red-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Connection Error</h3>
+          <p className="text-red-600 mb-6">{error}</p>
+          <button
+            onClick={fetchChannels}
+            className="btn-primary"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Show Content Form
   if (showContentForm && selectedChannel) {
     return (
@@ -813,13 +885,31 @@ const ChannelManager: React.FC = () => {
           </div>
         </div>
 
+        {/* Show error state for content if there's an error */}
+        {error && (
+          <div className="card animate-fadeIn">
+            <div className="text-center py-8">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Play className="w-6 h-6 text-red-400" />
+              </div>
+              <p className="text-red-600 mb-4">{error}</p>
+              <button
+                onClick={fetchChannelContent}
+                className="btn-primary"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* 🎯 MAIN CONTENT SECTION - VERTICAL LIST LIKE TASKS */}
         <div className="card animate-fadeIn">
           <div className="card-header">
             <h3 className="card-title">Channel Content</h3>
             <div className="flex items-center space-x-2">
               {/* Add Sample Content Button for Testing */}
-              {channelContent.length === 0 && (
+              {channelContent.length === 0 && !error && (
                 <button 
                   onClick={addSampleContent}
                   className="btn-secondary text-xs"
@@ -871,7 +961,7 @@ const ChannelManager: React.FC = () => {
                   <div key={i} className="h-16 bg-gray-100 rounded-lg"></div>
                 ))}
               </div>
-            ) : filteredContent.length === 0 ? (
+            ) : filteredContent.length === 0 && !error ? (
               /* Empty State */
               <div className="text-center py-8 text-gray-500 animate-fadeIn">
                 <Play className="w-8 h-8 mx-auto mb-2 text-gray-300" />
