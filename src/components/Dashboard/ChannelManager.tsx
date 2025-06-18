@@ -723,7 +723,7 @@ const ChannelManager: React.FC = () => {
           </div>
         </div>
 
-        {/* Channel Content Section - Horizontal Scrollable with Vertical Cards */}
+        {/* Channel Content Section - HORIZONTAL SCROLLABLE CARDS */}
         <div className="card animate-fadeIn">
           <div className="card-header">
             <h3 className="card-title">Channel Content</h3>
@@ -737,7 +737,7 @@ const ChannelManager: React.FC = () => {
           </div>
           
           {contentLoading ? (
-            <div className="flex space-x-4 overflow-x-auto pb-2">
+            <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="min-w-[280px] h-80 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
               ))}
@@ -756,6 +756,7 @@ const ChannelManager: React.FC = () => {
               </button>
             </div>
           ) : (
+            /* HORIZONTAL SCROLLABLE CONTAINER */
             <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
               {channelContent.map((item, index) => {
                 const contentData = parseContentNotes(item.notes);
@@ -763,6 +764,7 @@ const ChannelManager: React.FC = () => {
                 const hasVoiceOver = contentData?.useVoiceOver || false;
                 
                 return (
+                  /* INDIVIDUAL CONTENT CARD - FIXED WIDTH, VERTICAL LAYOUT */
                   <div
                     key={item.id}
                     className="min-w-[280px] h-80 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 hover-lift flex-shrink-0 flex flex-col stagger-item"
@@ -816,7 +818,7 @@ const ChannelManager: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Bottom Section - Status & Actions HORIZONTAL */}
+                      {/* Bottom Section - Status & Actions */}
                       <div className="space-y-3 mt-4">
                         {/* Status Dropdown - Full Width */}
                         <div className="relative">
