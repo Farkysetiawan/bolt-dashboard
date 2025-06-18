@@ -765,11 +765,11 @@ const ChannelManager: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    className="min-w-[280px] bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 hover-lift flex-shrink-0 stagger-item"
+                    className="min-w-[280px] bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 hover-lift flex-shrink-0 flex flex-col justify-between stagger-item"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     {/* Card Content - Vertical Layout */}
-                    <div className="p-4 space-y-3">
+                    <div className="p-4 space-y-3 flex-1">
                       {/* Baris Atas: Title & Description */}
                       <div className="space-y-2">
                         <h4 className="font-semibold text-gray-900 text-sm leading-tight" title={item.title}>
@@ -795,8 +795,10 @@ const ChannelManager: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      
-                      {/* Baris Bawah: Status Dropdown & Action Icons */}
+                    </div>
+                    
+                    {/* Baris Bawah: Status Dropdown & Action Icons */}
+                    <div className="p-4 pt-0">
                       <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                         {/* Status Dropdown */}
                         <div className="relative flex-1 mr-3">
