@@ -13,7 +13,8 @@ import {
   Calendar,
   Clock,
   Edit2,
-  Save
+  Save,
+  Trash2
 } from 'lucide-react';
 
 interface WorkoutItem {
@@ -86,6 +87,9 @@ const BodyTracker: React.FC = () => {
   const [showAddMeal, setShowAddMeal] = useState(false);
   const [showAddWeight, setShowAddWeight] = useState(false);
   const [showEditGoal, setShowEditGoal] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState<WorkoutItem | null>(null);
+  const [editingMeal, setEditingMeal] = useState<CalorieEntry | null>(null);
+  const [editingWeight, setEditingWeight] = useState<WeightEntry | null>(null);
   const [newWorkout, setNewWorkout] = useState('');
   const [newMeal, setNewMeal] = useState({ category: 'Sarapan', amount: '', description: '' });
   const [newWeight, setNewWeight] = useState({ weight: '', bodyFat: '' });
@@ -127,6 +131,31 @@ const BodyTracker: React.FC = () => {
     setShowAddWorkout(false);
   };
 
+  const editWorkout = (workout: WorkoutItem) => {
+    setEditingWorkout(workout);
+    setNewWorkout(workout.name);
+    setShowAddWorkout(true);
+  };
+
+  const updateWorkout = () => {
+    if (!editingWorkout || !newWorkout.trim()) return;
+    
+    setWorkouts(workouts.map(workout => 
+      workout.id === editingWorkout.id 
+        ? { ...workout, name: newWorkout.trim() }
+        : workout
+    ));
+    setEditingWorkout(null);
+    setNewWorkout('');
+    setShowAddWorkout(false);
+  };
+
+  const deleteWorkout = (id: string) => {
+    if (confirm('Hapus workout ini?')) {
+      setWorkouts(workouts.filter(workout => workout.id !== id));
+    }
+  };
+
   const addMeal = () => {
     if (!newMeal.description.trim() || !newMeal.amount) return;
     
@@ -144,6 +173,40 @@ const BodyTracker: React.FC = () => {
     setShowAddMeal(false);
   };
 
+  const editMeal = (meal: CalorieEntry) => {
+    setEditingMeal(meal);
+    setNewMeal({
+      category: meal.category,
+      amount: meal.amount.toString(),
+      description: meal.description
+    });
+    setShowAddMeal(true);
+  };
+
+  const updateMeal = () => {
+    if (!editingMeal || !newMeal.description.trim() || !newMeal.amount) return;
+    
+    setCaloriesIn(caloriesIn.map(meal => 
+      meal.id === editingMeal.id 
+        ? { 
+            ...meal, 
+            category: newMeal.category,
+            amount: parseInt(newMeal.amount),
+            description: newMeal.description.trim()
+          }
+        : meal
+    ));
+    setEditingMeal(null);
+    setNewMeal({ category: 'Sarapan', amount: '', description: '' });
+    setShowAddMeal(false);
+  };
+
+  const deleteMeal = (id: string) => {
+    if (confirm('Hapus makanan ini?')) {
+      setCaloriesIn(caloriesIn.filter(meal => meal.id !== id));
+    }
+  };
+
   const addWeight = () => {
     if (!newWeight.weight) return;
     
@@ -159,6 +222,38 @@ const BodyTracker: React.FC = () => {
     setShowAddWeight(false);
   };
 
+  const editWeight = (weight: WeightEntry) => {
+    setEditingWeight(weight);
+    setNewWeight({
+      weight: weight.weight.toString(),
+      bodyFat: weight.bodyFat?.toString() || ''
+    });
+    setShowAddWeight(true);
+  };
+
+  const updateWeight = () => {
+    if (!editingWeight || !newWeight.weight) return;
+    
+    setWeightEntries(weightEntries.map(weight => 
+      weight.id === editingWeight.id 
+        ? { 
+            ...weight, 
+            weight: parseFloat(newWeight.weight),
+            bodyFat: newWeight.bodyFat ? parseFloat(newWeight.bodyFat) : undefined
+          }
+        : weight
+    ));
+    setEditingWeight(null);
+    setNewWeight({ weight: '', bodyFat: '' });
+    setShowAddWeight(false);
+  };
+
+  const deleteWeight = (id: string) => {
+    if (confirm('Hapus data berat ini?')) {
+      setWeightEntries(weightEntries.filter(weight => weight.id !== id));
+    }
+  };
+
   const updateGoal = () => {
     setFitnessGoal({
       ...fitnessGoal,
@@ -166,6 +261,18 @@ const BodyTracker: React.FC = () => {
       lastUpdate: new Date().toISOString().split('T')[0]
     });
     setShowEditGoal(false);
+  };
+
+  const cancelEdit = () => {
+    setEditingWorkout(null);
+    setEditingMeal(null);
+    setEditingWeight(null);
+    setNewWorkout('');
+    setNewMeal({ category: 'Sarapan', amount: '', description: '' });
+    setNewWeight({ weight: '', bodyFat: '' });
+    setShowAddWorkout(false);
+    setShowAddMeal(false);
+    setShowAddWeight(false);
   };
 
   return (
@@ -224,32 +331,54 @@ const BodyTracker: React.FC = () => {
               }`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => toggleWorkout(workout.id)}
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 hover-scale ${
-                    workout.completed
-                      ? 'bg-green-500 border-green-500 text-white'
-                      : 'border-gray-300 hover:border-green-500'
-                  }`}
-                >
-                  {workout.completed && <Check className="w-3 h-3" />}
-                </button>
-                <span className={`flex-1 text-sm ${workout.completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
-                  {workout.name}
-                </span>
-                <span className="text-xs text-gray-500">💪</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3 flex-1">
+                  <button
+                    onClick={() => toggleWorkout(workout.id)}
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 hover-scale ${
+                      workout.completed
+                        ? 'bg-green-500 border-green-500 text-white'
+                        : 'border-gray-300 hover:border-green-500'
+                    }`}
+                  >
+                    {workout.completed && <Check className="w-3 h-3" />}
+                  </button>
+                  <span className={`flex-1 text-sm ${workout.completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
+                    {workout.name}
+                  </span>
+                  <span className="text-xs text-gray-500">💪</span>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex items-center space-x-1 ml-3">
+                  <button
+                    onClick={() => editWorkout(workout)}
+                    className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200 hover-scale"
+                    title="Edit workout"
+                  >
+                    <Edit2 className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => deleteWorkout(workout.id)}
+                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 hover-scale"
+                    title="Delete workout"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Add Workout Modal */}
+        {/* Add/Edit Workout Modal */}
         {showAddWorkout && (
           <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
             <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn">
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Workout</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  {editingWorkout ? 'Edit Workout' : 'Add New Workout'}
+                </h3>
                 <input
                   type="text"
                   value={newWorkout}
@@ -259,11 +388,14 @@ const BodyTracker: React.FC = () => {
                   autoFocus
                 />
                 <div className="flex space-x-3">
-                  <button onClick={addWorkout} className="btn-primary flex-1">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Workout
+                  <button 
+                    onClick={editingWorkout ? updateWorkout : addWorkout} 
+                    className="btn-primary flex-1"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {editingWorkout ? 'Update' : 'Add'} Workout
                   </button>
-                  <button onClick={() => setShowAddWorkout(false)} className="btn-secondary">
+                  <button onClick={cancelEdit} className="btn-secondary">
                     Cancel
                   </button>
                 </div>
@@ -338,22 +470,42 @@ const BodyTracker: React.FC = () => {
           <div className="space-y-2">
             {caloriesIn.slice(0, 3).map((meal, index) => (
               <div key={meal.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                <div>
+                <div className="flex-1">
                   <span className="text-sm font-medium text-gray-900">{meal.category}</span>
                   <p className="text-xs text-gray-600">{meal.description}</p>
                 </div>
-                <span className="text-sm font-medium text-gray-900">{meal.amount} kcal</span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-900">{meal.amount} kcal</span>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={() => editMeal(meal)}
+                      className="p-1 text-blue-500 hover:bg-blue-50 rounded transition-all duration-200"
+                      title="Edit meal"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => deleteMeal(meal.id)}
+                      className="p-1 text-red-500 hover:bg-red-50 rounded transition-all duration-200"
+                      title="Delete meal"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Add Meal Modal */}
+        {/* Add/Edit Meal Modal */}
         {showAddMeal && (
           <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
             <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn">
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Meal</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  {editingMeal ? 'Edit Meal' : 'Add Meal'}
+                </h3>
                 <div className="space-y-3">
                   <select
                     value={newMeal.category}
@@ -381,11 +533,14 @@ const BodyTracker: React.FC = () => {
                   />
                 </div>
                 <div className="flex space-x-3 mt-4">
-                  <button onClick={addMeal} className="btn-primary flex-1">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Meal
+                  <button 
+                    onClick={editingMeal ? updateMeal : addMeal} 
+                    className="btn-primary flex-1"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {editingMeal ? 'Update' : 'Add'} Meal
                   </button>
-                  <button onClick={() => setShowAddMeal(false)} className="btn-secondary">
+                  <button onClick={cancelEdit} className="btn-secondary">
                     Cancel
                   </button>
                 </div>
@@ -444,24 +599,44 @@ const BodyTracker: React.FC = () => {
           <div className="space-y-2">
             {weightEntries.slice(0, 7).map((entry, index) => (
               <div key={entry.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                <div>
+                <div className="flex-1">
                   <span className="text-sm font-medium text-gray-900">{entry.weight} kg</span>
                   {entry.bodyFat && (
                     <span className="text-xs text-gray-600 ml-2">({entry.bodyFat}% fat)</span>
                   )}
                 </div>
-                <span className="text-xs text-gray-500">{new Date(entry.date).toLocaleDateString()}</span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-500">{new Date(entry.date).toLocaleDateString()}</span>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={() => editWeight(entry)}
+                      className="p-1 text-blue-500 hover:bg-blue-50 rounded transition-all duration-200"
+                      title="Edit weight"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => deleteWeight(entry.id)}
+                      className="p-1 text-red-500 hover:bg-red-50 rounded transition-all duration-200"
+                      title="Delete weight"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Add Weight Modal */}
+        {/* Add/Edit Weight Modal */}
         {showAddWeight && (
           <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center p-4 z-50 animate-fadeIn">
             <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-scaleIn">
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Weight Entry</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  {editingWeight ? 'Edit Weight Entry' : 'Add Weight Entry'}
+                </h3>
                 <div className="space-y-3">
                   <input
                     type="number"
@@ -482,11 +657,14 @@ const BodyTracker: React.FC = () => {
                   />
                 </div>
                 <div className="flex space-x-3 mt-4">
-                  <button onClick={addWeight} className="btn-primary flex-1">
+                  <button 
+                    onClick={editingWeight ? updateWeight : addWeight} 
+                    className="btn-primary flex-1"
+                  >
                     <Save className="w-4 h-4 mr-2" />
-                    Save Entry
+                    {editingWeight ? 'Update' : 'Save'} Entry
                   </button>
-                  <button onClick={() => setShowAddWeight(false)} className="btn-secondary">
+                  <button onClick={cancelEdit} className="btn-secondary">
                     Cancel
                   </button>
                 </div>
