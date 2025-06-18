@@ -816,9 +816,9 @@ const ChannelManager: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Bottom Section - Status & Actions */}
+                      {/* Bottom Section - Status & Actions HORIZONTAL */}
                       <div className="space-y-3 mt-4">
-                        {/* Status Dropdown */}
+                        {/* Status Dropdown - Full Width */}
                         <div className="relative">
                           <select
                             value={item.status}
@@ -833,31 +833,31 @@ const ChannelManager: React.FC = () => {
                           <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
                         </div>
                         
-                        {/* Action Icons */}
-                        <div className="flex items-center justify-center space-x-2 pt-2 border-t border-gray-100">
+                        {/* Action Buttons - HORIZONTAL LAYOUT */}
+                        <div className="flex items-center space-x-2 pt-2 border-t border-gray-100">
                           <button
                             onClick={() => openEditContentForm(item)}
-                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
-                            title="Edit ✏️"
+                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors text-xs"
+                            title="Edit"
                           >
-                            <Edit2 className="w-4 h-4" />
-                            <span className="text-xs">Edit</span>
+                            <Edit2 className="w-3 h-3" />
+                            <span>Edit</span>
                           </button>
                           <button
                             onClick={() => openContentDetail(item)}
-                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-md transition-colors"
-                            title="Preview 👁️"
+                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-md transition-colors text-xs"
+                            title="View"
                           >
-                            <Eye className="w-4 h-4" />
-                            <span className="text-xs">View</span>
+                            <Eye className="w-3 h-3" />
+                            <span>View</span>
                           </button>
                           <button
                             onClick={() => deleteContent(item.id)}
-                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                            title="Delete 🗑️"
+                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors text-xs"
+                            title="Delete"
                           >
-                            <Trash2 className="w-4 h-4" />
-                            <span className="text-xs">Delete</span>
+                            <Trash2 className="w-3 h-3" />
+                            <span>Delete</span>
                           </button>
                         </div>
                       </div>
