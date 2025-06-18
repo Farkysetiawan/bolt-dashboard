@@ -245,26 +245,44 @@ const ChannelManager: React.FC = () => {
   };
 
   const handleContentFormSubmit = async (contentData: ContentFormData) => {
-    if (!selectedChannel) return;
+    if (!selectedChannel || !user?.id) {
+      console.error('Missing required data:', { selectedChannel, userId: user?.id });
+      alert('Missing required data. Please try again.');
+      return;
+    }
 
     setSaving(true);
     try {
-      // Convert the form data to content item format
+      console.log('Submitting content data:', contentData);
+
+      // Map content type to database enum values
+      const typeMapping: { [key: string]: ContentItem['type'] } = {
+        'Video': 'video',
+        'Artikel': 'article', 
+        'Thread': 'article' // Thread mapped to article for now
+      };
+
+      const mappedType = typeMapping[contentData.contentType] || 'article';
+
+      // Prepare content item data
       const contentItem = {
-        title: contentData.title,
-        type: contentData.contentType.toLowerCase() as ContentItem['type'],
+        title: contentData.title.trim(),
+        type: mappedType,
         status: 'planned' as ContentItem['status'],
         progress: 0,
-        user_id: user?.id,
+        user_id: user.id,
         channel_id: selectedChannel.id,
-        // Store additional data in notes field as JSON
+        // Store additional data in notes field as JSON string
         notes: JSON.stringify({
           description: contentData.description,
           totalScene: contentData.totalScene,
           scenes: contentData.scenes,
-          useVoiceOver: contentData.useVoiceOver
+          useVoiceOver: contentData.useVoiceOver,
+          contentType: contentData.contentType // Keep original type for reference
         })
       };
+
+      console.log('Inserting content item:', contentItem);
 
       const { data, error } = await supabase
         .from('content_items')
@@ -272,15 +290,29 @@ const ChannelManager: React.FC = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
+      console.log('Content saved successfully:', data);
+      
+      // Update local state
       setChannelContent([data, ...channelContent]);
       setShowContentForm(false);
       
       alert('Content added successfully!');
     } catch (error) {
       console.error('Error adding content:', error);
-      alert('Failed to add content. Please try again.');
+      
+      // More specific error messages
+      if (error.message?.includes('violates check constraint')) {
+        alert('Invalid content type. Please check your selection and try again.');
+      } else if (error.message?.includes('violates foreign key constraint')) {
+        alert('Channel not found. Please refresh and try again.');
+      } else {
+        alert(`Failed to add content: ${error.message || 'Unknown error'}`);
+      }
     } finally {
       setSaving(false);
     }
