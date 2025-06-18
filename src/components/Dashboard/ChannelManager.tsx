@@ -723,7 +723,7 @@ const ChannelManager: React.FC = () => {
           </div>
         </div>
 
-        {/* Channel Content Section - Horizontal Scrollable */}
+        {/* Channel Content Section - Horizontal Scrollable with Vertical Cards */}
         <div className="card animate-fadeIn">
           <div className="card-header">
             <h3 className="card-title">Channel Content</h3>
@@ -739,7 +739,7 @@ const ChannelManager: React.FC = () => {
           {contentLoading ? (
             <div className="flex space-x-4 overflow-x-auto pb-2">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="min-w-[280px] h-48 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
+                <div key={i} className="min-w-[280px] h-80 bg-gray-100 rounded-lg animate-pulse flex-shrink-0"></div>
               ))}
             </div>
           ) : channelContent.length === 0 ? (
@@ -765,78 +765,99 @@ const ChannelManager: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    className="min-w-[280px] bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 hover-lift flex-shrink-0 flex flex-col justify-between stagger-item"
+                    className="min-w-[280px] h-80 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 hover-lift flex-shrink-0 flex flex-col stagger-item"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    {/* Card Content - Vertical Layout */}
-                    <div className="p-4 space-y-3 flex-1">
-                      {/* Baris Atas: Title & Description */}
-                      <div className="space-y-2">
-                        <h4 className="font-semibold text-gray-900 text-sm leading-tight" title={item.title}>
+                    {/* Header Section - Fixed Height */}
+                    <div className="p-4 border-b border-gray-100">
+                      <div className="flex items-center space-x-3 mb-3">
+                        {/* Channel Logo */}
+                        <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {selectedChannel.logo_url && isValidImageUrl(selectedChannel.logo_url) ? (
+                            <img
+                              src={selectedChannel.logo_url}
+                              alt={selectedChannel.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Play className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                        
+                        {/* Title */}
+                        <h4 className="font-semibold text-gray-900 text-sm leading-tight flex-1 min-w-0" title={item.title}>
                           {item.title}
                         </h4>
-                        {contentData?.description && (
-                          <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                            {contentData.description}
-                          </p>
-                        )}
                       </div>
                       
-                      {/* Baris Tengah: Scene Count & Voice Over Badge */}
-                      <div className="flex items-center space-x-2">
-                        {sceneCount > 0 && (
-                          <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
-                            {sceneCount} scene{sceneCount > 1 ? 's' : ''}
-                          </span>
-                        )}
-                        {hasVoiceOver && (
-                          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md">
-                            ✅ Voice Over
-                          </span>
-                        )}
-                      </div>
+                      {/* Description */}
+                      {contentData?.description && (
+                        <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                          {contentData.description}
+                        </p>
+                      )}
                     </div>
-                    
-                    {/* Baris Bawah: Status Dropdown & Action Icons */}
-                    <div className="p-4 pt-0">
-                      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+
+                    {/* Content Section - Flexible Height */}
+                    <div className="p-4 flex-1 flex flex-col justify-between">
+                      {/* Scene & Voice Over Badges */}
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          {sceneCount > 0 && (
+                            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+                              {sceneCount} scene{sceneCount > 1 ? 's' : ''}
+                            </span>
+                          )}
+                          {hasVoiceOver && (
+                            <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md">
+                              ✅ Voice Over
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Bottom Section - Status & Actions */}
+                      <div className="space-y-3 mt-4">
                         {/* Status Dropdown */}
-                        <div className="relative flex-1 mr-3">
+                        <div className="relative">
                           <select
                             value={item.status}
                             onChange={(e) => updateContentStatus(item.id, e.target.value as ContentItem['status'])}
-                            className={`w-full text-xs font-medium px-2 py-1.5 rounded-md border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${getStatusBadge(item.status)}`}
+                            className={`w-full text-xs font-medium px-3 py-2 rounded-md border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${getStatusBadge(item.status)}`}
                           >
                             <option value="planned">Planned</option>
                             <option value="watching">On Progress</option>
                             <option value="completed">Ready to Post</option>
                             <option value="published">Published</option>
                           </select>
-                          <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
+                          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
                         </div>
                         
                         {/* Action Icons */}
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center justify-center space-x-2 pt-2 border-t border-gray-100">
                           <button
                             onClick={() => openEditContentForm(item)}
-                            className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
+                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
                             title="Edit ✏️"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <Edit2 className="w-4 h-4" />
+                            <span className="text-xs">Edit</span>
                           </button>
                           <button
                             onClick={() => openContentDetail(item)}
-                            className="p-1.5 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-md transition-colors"
+                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-md transition-colors"
                             title="Preview 👁️"
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="w-4 h-4" />
+                            <span className="text-xs">View</span>
                           </button>
                           <button
                             onClick={() => deleteContent(item.id)}
-                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                            className="flex-1 flex items-center justify-center space-x-1 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
                             title="Delete 🗑️"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
+                            <span className="text-xs">Delete</span>
                           </button>
                         </div>
                       </div>
